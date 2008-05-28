@@ -1,12 +1,12 @@
 <?php
 /*
 Plugin Name: WP-reCAPTCHA
-Plugin URI: http://wordpress.org/extend/plugins/wp-recaptcha/
+Plugin URI: http://www.blaenkdenum.com/wp-recaptcha/
 Description: Integrates reCAPTCHA anti-spam solutions with wordpress
 Version: 2.8
 Author: Jorge Peña, Ben Maurer, and Mike Crawford
 Email: support@recaptcha.net
-Author URI: http://www.blaenkdenum.com/wp-recaptcha
+Author URI: http://www.blaenkdenum.com
 */
 
 require_once (dirname(__FILE__) . '/recaptchalib.php');
