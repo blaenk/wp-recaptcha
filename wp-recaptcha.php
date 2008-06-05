@@ -25,7 +25,7 @@ function re_css() {
    $path = '/wp-content/plugins/wp-recaptcha/recaptcha.css';
    
    if ($recaptcha_opt['re_wpmu'])
-      $path = '/mu-plugins/wp-recaptcha/recaptcha.css';
+      $path = '/wp-content/mu-plugins/recaptcha.css';
    
    echo '<link rel="stylesheet" type="text/css" href="' . get_bloginfo('siteurl') . $path . '" />';
 }
@@ -92,12 +92,31 @@ function display_recaptcha() {
          var RecaptchaOptions = { theme : '{$recaptcha_opt['re_theme_reg']}', lang : '{$recaptcha_opt['re_lang']}' , tabindex : 30 };
       </script>
 END;
+      
+      $comment_string = <<<COMMENT_FORM
+         <div id="recaptcha-submit-btn-area"></div> 
+         <script type='text/javascript'>
+            var sub = document.getElementById('submit');
+            sub.parentNode.removeChild(sub);
+            document.getElementById('recaptcha-submit-btn-area').appendChild (sub);
+            document.getElementById('submit').tabIndex = 6;
+            if ( typeof _recaptcha_wordpress_savedcomment != 'undefined') {
+               document.getElementById('comment').value = _recaptcha_wordpress_savedcomment;
+            }
+         document.getElementById('recaptcha_table').style.direction = 'ltr';
+         </script>
+         <noscript>
+          <style type='text/css'>#submit {display:none;}</style>
+          <input name="submit" type="submit" id="submit-alt" tabindex="6" value="Submit Comment"/> 
+         </noscript>
+COMMENT_FORM;
+
       if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on")
          $use_ssl = true;
       else
          $use_ssl = false;
       
-      echo $format . recaptcha_get_html($recaptcha_opt['pubkey'], $error, $use_ssl, $recaptcha_opt['re_xhtml']);
+      echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl) . $comment_string;
    }
 }
 
@@ -147,12 +166,12 @@ function check_recaptcha_new($errors) {
    return $errors;
 }
 
-function check_recaptcha_wpmu($errors) {
+function check_recaptcha_wpmu($result) {
    global $_POST, $recaptcha_opt;
    
    if (empty($_POST['recaptcha_response_field']) || $_POST['recaptcha_response_field'] == '') {
-      $errors->add('blank_captcha', 'Please complete the reCAPTCHA.');
-      return $errors;
+      $result['errors']->add('blank_captcha', 'Please complete the reCAPTCHA.');
+      return $result;
    }
    
 	$response = recaptcha_check_answer($recaptcha_opt['privkey'],
@@ -161,10 +180,12 @@ function check_recaptcha_wpmu($errors) {
                   $_POST['recaptcha_response_field'] );
 
 	if (!$response->is_valid)
-		if ($response->error == 'incorrect-captcha-sol')
-			$errors->add('captcha_wrong', 'That reCAPTCHA was incorrect.');
+		if ($response->error == 'incorrect-captcha-sol') {
+			$result['errors']->add('captcha_wrong', 'That reCAPTCHA was incorrect.');
+         echo "<div class=\"error\">Incorrect CAPTCHA</div>";
+      }
    
-   return $errors;
+   return $result;
 }
 
 if ($recaptcha_opt['re_registration']) {
