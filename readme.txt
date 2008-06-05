@@ -16,7 +16,7 @@ Integrates reCAPTCHA anti-spam methods with WordPress including comment, registr
 
 While the world is in the process of digitizing books, sometimes certain words cannot be read. reCAPTCHA uses a combination of these words, further distorts them, and then constructs a CAPTCHA image. After a ceratin percentage of users solve the 'uknown' word the same way it is assumed that it is the correct spelling of the word. This helps digitize books, giving users a ***reason*** to solve reCAPTCHA forms. Because the industry level scanners and OCR software which are used to digitize the books can't read the words with which the CAPTCHAs are constructed, it is safe to assume that in-house spam-bot OCR techniques will not be able to bypass the CAPTCHA either.
 
-reCAPTCHA has earned a very prestigious reputation among the various CAPTCHA systems available and is used by such sites as [Facebook](http://www.facebook.com), [Twitter](http://www.twitter.com), and a few U.S. Government Websites such as the [TV Converter Box Coupon Program Website](https://www.dtv2009.gov/ "TV Converter Box Coupon Program Website").
+reCAPTCHA has earned a very prestigious reputation among the various CAPTCHA systems available and is used by such sites as [Facebook](http://www.facebook.com), [Twitter](http://www.twitter.com), [StumbleUpon](http://www.stumbleupon.com), and a few U.S. Government Websites such as the [TV Converter Box Coupon Program Website](https://www.dtv2009.gov/ "TV Converter Box Coupon Program Website").
 
 For more information please view the [plugin page](http://www.blaenkdenum.com/wp-recaptcha "WP-reCAPTCHA - Blaenk Denum")..
 

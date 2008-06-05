@@ -95,7 +95,10 @@ END;
 }
 
 // Hook the display_recaptcha function into WordPress
-add_action('register_form', 'display_recaptcha');
+if (!$recaptcha_opt['re_wpmu'])
+   add_action('register_form', 'display_recaptcha');
+else
+   add_action('signup_extra_fields', 'display_recaptcha');
 
 // Check the captcha
 function check_recaptcha() {
@@ -136,13 +139,37 @@ function check_recaptcha_new($errors) {
    
    return $errors;
 }
+
+function check_recaptcha_wpmu($content) {
+   global $_POST, $recaptcha_opt;
    
+   if (empty($_POST['recaptcha_response_field']) || $_POST['recaptcha_response_field'] == '') {
+      $content['errors']->add('blank_captcha', 'Please complete the reCAPTCHA.');
+      return $content;
+   }
+   
+	$response = recaptcha_check_answer($recaptcha_opt['privkey'],
+                  $_SERVER['REMOTE_ADDR'],
+                  $_POST['recaptcha_challenge_field'],
+                  $_POST['recaptcha_response_field'] );
+
+	if (!$response->is_valid)
+		if ($response->error == 'incorrect-captcha-sol')
+			$content['errors']->add('captcha_wrong', 'That reCAPTCHA was incorrect.');
+   
+   return $errors;
+}
+
 if ($recaptcha_opt['re_registration']) {
-   // Hook the check_recaptcha function into WordPress
-   if (version_compare(get_bloginfo('version'), '2.5' ) >= 0)
-      add_filter('registration_errors', 'check_recaptcha_new');
-   else
-      add_filter('registration_errors', 'check_recaptcha');
+   if ($recaptcha_opt['re_wpmu'])
+      add_filter('wpmu_validate_user_signup', 'check_recaptcha_wpmu');
+   else {
+      // Hook the check_recaptcha function into WordPress
+      if (version_compare(get_bloginfo('version'), '2.5' ) >= 0)
+         add_filter('registration_errors', 'check_recaptcha_new');
+      else
+         add_filter('registration_errors', 'check_recaptcha');
+   }
 }
 /* =============================================================================
    End reCAPTCHA on Registration Form
@@ -167,6 +194,7 @@ $option_defaults = array (
          're_comments' => '1', // whether or not to show reCAPTCHA on the comment post
          're_registration' => '1', // whether or not to show reCAPTCHA on the registratoin page
          're_xhtml' => '0', // whether or not to be XHTML 1.0 Strict compliant
+         're_wpmu' => '0', // whether or not the user is in a forced WPMU environment
 );
 
 // install the defaults
@@ -423,6 +451,7 @@ function recaptcha_wp_options_subpanel() {
              're_comments' => '1',
              're_registration' => '1',
              're_xhtml' => '0',
+             're_wpmu' => '0',
 				 );
 
 	add_option('recaptcha', $optionarray_def, 'reCAPTCHA Options');
@@ -444,6 +473,7 @@ function recaptcha_wp_options_subpanel() {
          're_comments' => $_POST['re_comments'],
          're_registration' => $_POST['re_registration'],
          're_xhtml' => $_POST['re_xhtml'],
+         're_wpmu' => $_POST['re_wpmu'],
 		);
 		update_option('recaptcha', $optionarray_update);
 	}
@@ -505,7 +535,9 @@ function recaptcha_wp_options_subpanel() {
       </div>
       <br />
       <!-- Whether or not to be XHTML 1.0 Strict compliant -->
-      <input type="checkbox" name="re_xhtml" id="re_xhtml" value="1" <?php if($optionarray_def['re_xhtml'] == true){echo 'checked="checked"';} ?> /> <label for="re_xhtml">Be XHTML 1.0 Strict compliant. <strong>Note</strong>: Bad for users who don't have Javascript enabled in their browser (Majority do).</label>
+      <input type="checkbox" name="re_xhtml" id="re_xhtml" value="1" <?php if($optionarray_def['re_xhtml'] == true){echo 'checked="checked"';} ?> /> <label for="re_xhtml">Be XHTML 1.0 Strict compliant. <strong>Note</strong>: Bad for users who don't have Javascript enabled in their browser (Majority do).</label><br /><br />
+      <!-- Whether or not the plugin is in a WPMU environment -->
+      <input type="checkbox" name="re_wpmu" id="re_wpmu" value="1" <?php if ($optionarray_def['re_wpmu'] == true){echo 'checked="checked"';} ?> /> <label for="re_wpmu">Enable site-wide activation in a WPMU environment.</label>
       <hr />
       <!-- Show reCAPTCHA on the comment post -->
       <input type="checkbox" name="re_comments" id="re_comments" value="1" <?php if($optionarray_def['re_comments'] == true){echo 'checked="checked"';} ?> /> <label for="re_comments">Use reCAPTCHA for comment spam protection.</label>
