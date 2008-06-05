@@ -20,7 +20,14 @@ define ("RECAPTCHA_WP_HASH_SALT", "b7e0638d85f5d7f3694f68e944136d62");
    ============================================================================= */
 
 function re_css() {
-   echo '<link rel="stylesheet" type="text/css" href="' . get_bloginfo('siteurl') . '/wp-content/plugins/wp-recaptcha/recaptcha.css" />';
+   global $recaptcha_opt;
+   
+   $path = '/wp-content/plugins/wp-recaptcha/recaptcha.css';
+   
+   if ($recaptcha_opt['re_wpmu'])
+      $path = '/mu-plugins/wp-recaptcha/recaptcha.css';
+   
+   echo '<link rel="stylesheet" type="text/css" href="' . get_bloginfo('siteurl') . $path . '" />';
 }
 
 function registration_css() {
@@ -429,9 +436,15 @@ add_filter('preprocess_comment', 'recaptcha_wp_check_comment',0);
 add_filter('comment_post_redirect', 'recaptcha_wp_relative_redirect',0,2); // STUB
 
 function recaptcha_wp_add_options_to_admin() {
-    if (function_exists('add_options_page')) {
-		add_options_page('reCAPTCHA', 'reCAPTCHA', 8, plugin_basename(__FILE__), 'recaptcha_wp_options_subpanel');
-    }
+   if (function_exists('is_site_admin')) { // && $recaptcha_opt['re_wpmu'] ?
+      if (is_site_admin()) {
+         add_submenu_page('wpmu-admin.php', 'reCAPTCHA', 'reCAPTCHA', 'manage_options', __FILE__, 'recaptcha_wp_options_subpanel');
+         add_options_page('reCAPTCHA', 'reCAPTCHA', 'manage_options', __FILE__, 'recaptcha_wp_options_subpanel');
+      }
+   }
+   else {
+      add_options_page('reCAPTCHA', 'reCAPTCHA', 'manage_options', __FILE__, 'recaptcha_wp_options_subpanel');
+   }
 }
 
 function recaptcha_wp_options_subpanel() {
