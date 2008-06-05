@@ -147,12 +147,12 @@ function check_recaptcha_new($errors) {
    return $errors;
 }
 
-function check_recaptcha_wpmu($content) {
+function check_recaptcha_wpmu($errors) {
    global $_POST, $recaptcha_opt;
    
    if (empty($_POST['recaptcha_response_field']) || $_POST['recaptcha_response_field'] == '') {
-      $content['errors']->add('blank_captcha', 'Please complete the reCAPTCHA.');
-      return $content;
+      $errors->add('blank_captcha', 'Please complete the reCAPTCHA.');
+      return $errors;
    }
    
 	$response = recaptcha_check_answer($recaptcha_opt['privkey'],
@@ -162,7 +162,7 @@ function check_recaptcha_wpmu($content) {
 
 	if (!$response->is_valid)
 		if ($response->error == 'incorrect-captcha-sol')
-			$content['errors']->add('captcha_wrong', 'That reCAPTCHA was incorrect.');
+			$errors->add('captcha_wrong', 'That reCAPTCHA was incorrect.');
    
    return $errors;
 }
