@@ -3,7 +3,7 @@
 Plugin Name: WP-reCAPTCHA
 Plugin URI: http://www.blaenkdenum.com/wp-recaptcha/
 Description: Integrates reCAPTCHA anti-spam solutions with wordpress
-Version: 2.8.2
+Version: 2.8.3
 Author: Jorge Peña
 Email: jorgepblank@gmail.com
 Author URI: http://www.blaenkdenum.com
