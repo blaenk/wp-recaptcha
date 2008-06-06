@@ -619,7 +619,7 @@ function recaptcha_wp_options_subpanel() {
       </div>
       <br />
       <!-- Tab Index -->
-      <label for="re_tabindex">Tab Index:</label>
+      <label for="re_tabindex">Tab Index (<em>e.g. WP: <strong>5</strong>, WPMU: <strong>3</strong></em>):</label>
       <input name="re_tabindex" id="re_tabindex" size="5" value="<?php  echo $optionarray_def['re_tabindex']; ?>" />
       <br /><br />
       <!-- Don't show reCAPTCHA to admins -->
