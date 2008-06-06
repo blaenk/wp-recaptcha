@@ -13,12 +13,18 @@ Author URI: http://www.blaenkdenum.com
 
 $recaptcha_opt = get_option('recaptcha'); // get the options from the database
 
-if (!$recaptcha_opt['re_wpmu'])
-   require_once(dirname(__FILE__) . '/recaptchalib.php');
-else
-   require_once(dirname(__FILE__) . '/wp-recaptcha/recaptchalib.php');
+// WordPress MU settings
+// If this is not in WordPress MU, leave as 0
+// If this is in mu-plugins (forced) set it to 1
+// If this is in plugins (optional) set it to 2
+$wpmu = 0;
 
-#doesn't need to be secret, just shouldn't be used by any other code.
+if ($wpmu == 1)
+   require_once(dirname(__FILE__) . '/wp-recaptcha/recaptchalib.php');
+else
+   require_once(dirname(__FILE__) . '/recaptchalib.php');
+
+// doesn't need to be secret, just shouldn't be used by any other code.
 define ("RECAPTCHA_WP_HASH_SALT", "b7e0638d85f5d7f3694f68e944136d62");
 
 /* =============================================================================
@@ -30,7 +36,7 @@ function re_css() {
    
    $path = '/wp-content/plugins/wp-recaptcha/recaptcha.css';
    
-   if ($recaptcha_opt['re_wpmu'])
+   if ($wpmu == 1)
       $path = '/wp-content/mu-plugins/wp-recaptcha/recaptcha.css';
    
    echo '<link rel="stylesheet" type="text/css" href="' . get_bloginfo('siteurl') . $path . '" />';
@@ -100,7 +106,6 @@ function display_recaptcha($errors) {
 END;
       
       $comment_string = <<<COMMENT_FORM
-         <div id="recaptcha-submit-btn-area"></div> 
          <script type='text/javascript'>   
          document.getElementById('recaptcha_table').style.direction = 'ltr';
          </script>
@@ -111,7 +116,7 @@ COMMENT_FORM;
       else
          $use_ssl = false;
       
-      if ($recaptcha_opt['re_wpmu']) {
+      if ($wpmu == 1) {
          $error = $errors->get_error_message('captcha'); ?>
          <tr <?php echo($error ? 'class="error"' : '') ?>>
             <th valign="top"><?php _e('Verification:')?></th>
@@ -128,7 +133,7 @@ COMMENT_FORM;
 }
 
 // Hook the display_recaptcha function into WordPress
-if (!$recaptcha_opt['re_wpmu'])
+if ($wpmu != 1)
    add_action('register_form', 'display_recaptcha');
 else
    add_action('signup_extra_fields', 'display_recaptcha');
@@ -197,7 +202,7 @@ function check_recaptcha_wpmu($result) {
 }
 
 if ($recaptcha_opt['re_registration']) {
-   if ($recaptcha_opt['re_wpmu'])
+   if ($wpmu == 1)
       add_filter('wpmu_validate_user_signup', 'check_recaptcha_wpmu');
    else {
       // Hook the check_recaptcha function into WordPress
@@ -230,7 +235,6 @@ $option_defaults = array (
          're_comments' => '1', // whether or not to show reCAPTCHA on the comment post
          're_registration' => '1', // whether or not to show reCAPTCHA on the registratoin page
          're_xhtml' => '0', // whether or not to be XHTML 1.0 Strict compliant
-         're_wpmu' => '0', // whether or not the user is in a forced WPMU environment
 );
 
 // install the defaults
@@ -323,6 +327,7 @@ function recaptcha_wp_hash_comment($id)
 
 function recaptcha_wp_get_html ($recaptcha_error, $use_ssl=false) {
 	global $recaptcha_opt;
+   
 	return recaptcha_get_html($recaptcha_opt['pubkey'], $recaptcha_error, $use_ssl, $recaptcha_opt['re_xhtml']);
 }
 
@@ -462,10 +467,10 @@ function recaptcha_wp_blog_domain ()
 
 add_filter('wp_head', 'recaptcha_wp_saved_comment',0);
 add_filter('preprocess_comment', 'recaptcha_wp_check_comment',0);
-add_filter('comment_post_redirect', 'recaptcha_wp_relative_redirect',0,2); // STUB
+add_filter('comment_post_redirect', 'recaptcha_wp_relative_redirect',0,2);
 
 function recaptcha_wp_add_options_to_admin() {
-   if (function_exists('is_site_admin')) { // && $recaptcha_opt['re_wpmu'] ?
+   if (function_exists('is_site_admin')) {
       if (is_site_admin()) {
          add_submenu_page('wpmu-admin.php', 'reCAPTCHA', 'reCAPTCHA', 'manage_options', __FILE__, 'recaptcha_wp_options_subpanel');
          add_options_page('reCAPTCHA', 'reCAPTCHA', 'manage_options', __FILE__, 'recaptcha_wp_options_subpanel');
@@ -479,22 +484,21 @@ function recaptcha_wp_add_options_to_admin() {
 function recaptcha_wp_options_subpanel() {
 
 	$optionarray_def = array(
-				 'pubkey'	=> '',
-				 'privkey' 	=> '',
-             'use_mailhide' => '',
-             're_noadmins' => '',
-             'mh_noadmins' => '',
-             'mailhide_pub' => '',
-             'mailhide_priv' => '',
-             're_theme' => 'red',
-             're_theme_reg' => 'red',
-             're_lang' => 'en',
-             're_tabindex' => '5',
-             're_comments' => '1',
-             're_registration' => '1',
-             're_xhtml' => '0',
-             're_wpmu' => '0',
-				 );
+      'pubkey'	=> '',
+      'privkey' 	=> '',
+      'use_mailhide' => '',
+      're_noadmins' => '',
+      'mh_noadmins' => '',
+      'mailhide_pub' => '',
+      'mailhide_priv' => '',
+      're_theme' => 'red',
+      're_theme_reg' => 'red',
+      're_lang' => 'en',
+      're_tabindex' => '5',
+      're_comments' => '1',
+      're_registration' => '1',
+      're_xhtml' => '0',
+      );
 
 	add_option('recaptcha', $optionarray_def, 'reCAPTCHA Options');
 
@@ -515,7 +519,6 @@ function recaptcha_wp_options_subpanel() {
          're_comments' => $_POST['re_comments'],
          're_registration' => $_POST['re_registration'],
          're_xhtml' => $_POST['re_xhtml'],
-         're_wpmu' => $_POST['re_wpmu'],
 		);
 		update_option('recaptcha', $optionarray_update);
 	}
@@ -578,8 +581,6 @@ function recaptcha_wp_options_subpanel() {
       <br />
       <!-- Whether or not to be XHTML 1.0 Strict compliant -->
       <input type="checkbox" name="re_xhtml" id="re_xhtml" value="1" <?php if($optionarray_def['re_xhtml'] == true){echo 'checked="checked"';} ?> /> <label for="re_xhtml">Be XHTML 1.0 Strict compliant. <strong>Note</strong>: Bad for users who don't have Javascript enabled in their browser (Majority do).</label><br /><br />
-      <!-- Whether or not the plugin is in a WPMU environment -->
-      <?php if (is_site_admin()) { ?><input type="checkbox" name="re_wpmu" id="re_wpmu" value="1" <?php if ($optionarray_def['re_wpmu'] == true){echo 'checked="checked"';} ?> /> <label for="re_wpmu">Enable site-wide activation in a WPMU environment.</label><?php } ?>
       <hr />
       <!-- Show reCAPTCHA on the comment post -->
       <input type="checkbox" name="re_comments" id="re_comments" value="1" <?php if($optionarray_def['re_comments'] == true){echo 'checked="checked"';} ?> /> <label for="re_comments">Use reCAPTCHA for comment spam protection.</label>
@@ -601,6 +602,7 @@ function recaptcha_wp_options_subpanel() {
       <br /><br />
       <!-- Don't show reCAPTCHA to admins -->
       <input type="checkbox" name="re_noadmins" id="re_noadmins" value="1" <?php if($optionarray_def['re_noadmins'] == true){echo 'checked="checked"';} ?> /> <label for="re_noadmins">Admins don't have to do the CAPTCHA.</label>
+      <?php if ($wpmu == 1 || $wpmu == 0) { ?>
       <hr />
       <!-- Show reCAPTCHA on the registration page -->
       <input type="checkbox" name="re_registration" id="re_registration" value="1" <?php if($optionarray_def['re_registration'] == true){echo 'checked="checked"';} ?> /> <label for="re_registration">Use reCAPTCHA for registration spam protection.</label>
@@ -615,6 +617,7 @@ function recaptcha_wp_options_subpanel() {
          <option value="clean" <?php if($optionarray_def['re_theme_reg'] == 'clean'){echo 'selected="selected"';} ?>>Clean</option>
       </select>
       </div>
+      <?php } ?>
    </fieldset>
    </td>
    <td>
