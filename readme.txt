@@ -4,7 +4,7 @@ Donate link: http://www.blaenkdenum.com
 Tags: comments, registration, recaptcha, antispam, mailhide, captcha, wpmu
 Requires at least: 2.0.2
 Tested up to: 2.5.1
-Stable tag: 2.8.3
+Stable tag: 2.8.4
 
 Integrates reCAPTCHA anti-spam methods with WordPress including comment, registration, and email spam protection. WPMU Compatible.
 
@@ -31,14 +31,13 @@ To install in regular WordPress:
 1. Get the reCAPTCHA keys [here](http://recaptcha.net/api/getkey?domain=www.blaenkdenum.com&app=wordpress "reCAPTCHA API keys") and/or the MailHide keys [here](http://mailhide.recaptcha.net/apikey "MailHide keys")
 
 To install in WordPress MU (Optional Activation by Users):
-1. Edit the `wp-recaptcha.php` file on line **20** (*Read the comments*)
 1. Follow the instructions for regular WordPress above
 
 To install in WordPress MU (Forced Activation/Site-Wide):
 
 1. Upload the `wp-recaptcha` folder to the `/wp-content/mu-plugins` directory
 1. **Move** the `wp-recaptcha.php` file out of the `wp-recaptcha` folder so that it is in `/wp-content/mu-plugins`
-1. Edit the `wp-recaptcha.php` file on line **20** (*Read the comments*)
+1. Now you should have `/wp-content/mu-plugins/wp-recaptcha.php` and `/wp-content/mu-plugins/wp-recaptcha/`
 1. Go to the administrator menu and then go to **Site Admin > reCAPTCHA**
 1. Get the reCAPTCHA keys [here](http://recaptcha.net/api/getkey?domain=www.blaenkdenum.com&app=wordpress "reCAPTCHA API keys") and/or the MailHide keys [here](http://mailhide.recaptcha.net/apikey "MailHide keys")
 
