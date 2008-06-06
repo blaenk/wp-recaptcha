@@ -3,14 +3,20 @@
 Plugin Name: WP-reCAPTCHA
 Plugin URI: http://www.blaenkdenum.com/wp-recaptcha/
 Description: Integrates reCAPTCHA anti-spam solutions with wordpress
-Version: 2.8.1
-Author: Jorge Peña, Ben Maurer, and Mike Crawford
-Email: support@recaptcha.net
+Version: 2.8.2
+Author: Jorge Peña
+Email: jorgepblank@gmail.com
 Author URI: http://www.blaenkdenum.com
 */
 
-require_once (dirname(__FILE__) . '/recaptchalib.php');
+// Plugin was initially created by Ben Maurer and Mike Crawford
+
 $recaptcha_opt = get_option('recaptcha'); // get the options from the database
+
+if (!$recaptcha_opt['re_wpmu'])
+   require_once(dirname(__FILE__) . '/recaptchalib.php');
+else
+   require_once(dirname(__FILE__) . '/wp-recaptcha/recaptchalib.php');
 
 #doesn't need to be secret, just shouldn't be used by any other code.
 define ("RECAPTCHA_WP_HASH_SALT", "b7e0638d85f5d7f3694f68e944136d62");
@@ -25,7 +31,7 @@ function re_css() {
    $path = '/wp-content/plugins/wp-recaptcha/recaptcha.css';
    
    if ($recaptcha_opt['re_wpmu'])
-      $path = '/wp-content/mu-plugins/recaptcha.css';
+      $path = '/wp-content/mu-plugins/wp-recaptcha/recaptcha.css';
    
    echo '<link rel="stylesheet" type="text/css" href="' . get_bloginfo('siteurl') . $path . '" />';
 }
@@ -83,7 +89,7 @@ register_deactivation_hook(__FILE__, 'delete_preferences');
    ============================================================================= */
    
 // Display the reCAPTCHA on the registration form
-function display_recaptcha() {
+function display_recaptcha($errors) {
 	global $recaptcha_opt;
    
    if ($recaptcha_opt['re_registration']) {
@@ -95,20 +101,9 @@ END;
       
       $comment_string = <<<COMMENT_FORM
          <div id="recaptcha-submit-btn-area"></div> 
-         <script type='text/javascript'>
-            var sub = document.getElementById('submit');
-            sub.parentNode.removeChild(sub);
-            document.getElementById('recaptcha-submit-btn-area').appendChild (sub);
-            document.getElementById('submit').tabIndex = 6;
-            if ( typeof _recaptcha_wordpress_savedcomment != 'undefined') {
-               document.getElementById('comment').value = _recaptcha_wordpress_savedcomment;
-            }
+         <script type='text/javascript'>   
          document.getElementById('recaptcha_table').style.direction = 'ltr';
          </script>
-         <noscript>
-          <style type='text/css'>#submit {display:none;}</style>
-          <input name="submit" type="submit" id="submit-alt" tabindex="6" value="Submit Comment"/> 
-         </noscript>
 COMMENT_FORM;
 
       if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on")
@@ -116,7 +111,19 @@ COMMENT_FORM;
       else
          $use_ssl = false;
       
-      echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl) . $comment_string;
+      if ($recaptcha_opt['re_wpmu']) {
+         $error = $errors->get_error_message('captcha'); ?>
+         <tr <?php echo($error ? 'class="error"' : '') ?>>
+            <th valign="top"><?php _e('Verification:')?></th>
+               <td>
+                  <!-- recaptcha -->
+                  <?php echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl); ?>
+            </td>
+         </tr>
+      <? }
+      
+      else
+         echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl);
    }
 }
 
@@ -166,6 +173,7 @@ function check_recaptcha_new($errors) {
    return $errors;
 }
 
+// Check the recaptcha on WordPress MU
 function check_recaptcha_wpmu($result) {
    global $_POST, $recaptcha_opt;
    
@@ -571,7 +579,7 @@ function recaptcha_wp_options_subpanel() {
       <!-- Whether or not to be XHTML 1.0 Strict compliant -->
       <input type="checkbox" name="re_xhtml" id="re_xhtml" value="1" <?php if($optionarray_def['re_xhtml'] == true){echo 'checked="checked"';} ?> /> <label for="re_xhtml">Be XHTML 1.0 Strict compliant. <strong>Note</strong>: Bad for users who don't have Javascript enabled in their browser (Majority do).</label><br /><br />
       <!-- Whether or not the plugin is in a WPMU environment -->
-      <input type="checkbox" name="re_wpmu" id="re_wpmu" value="1" <?php if ($optionarray_def['re_wpmu'] == true){echo 'checked="checked"';} ?> /> <label for="re_wpmu">Enable site-wide activation in a WPMU environment.</label>
+      <?php if (is_site_admin()) { ?><input type="checkbox" name="re_wpmu" id="re_wpmu" value="1" <?php if ($optionarray_def['re_wpmu'] == true){echo 'checked="checked"';} ?> /> <label for="re_wpmu">Enable site-wide activation in a WPMU environment.</label><?php } ?>
       <hr />
       <!-- Show reCAPTCHA on the comment post -->
       <input type="checkbox" name="re_comments" id="re_comments" value="1" <?php if($optionarray_def['re_comments'] == true){echo 'checked="checked"';} ?> /> <label for="re_comments">Use reCAPTCHA for comment spam protection.</label>
