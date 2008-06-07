@@ -3,9 +3,9 @@
 Plugin Name: WP-reCAPTCHA
 Plugin URI: http://www.blaenkdenum.com/wp-recaptcha/
 Description: Integrates reCAPTCHA anti-spam solutions with wordpress
-Version: 2.8.4
+Version: 2.8.5
 Author: Jorge Peña
-Email: jorgepblank@gmail.com
+Email: support@recaptcha.net
 Author URI: http://www.blaenkdenum.com
 */
 
@@ -368,23 +368,42 @@ function recaptcha_comment_form() {
             var RecaptchaOptions = { theme : '{$recaptcha_opt['re_theme']}', lang : '{$recaptcha_opt['re_lang']}' , tabindex : {$recaptcha_opt['re_tabindex']} };
          </script>
 OPTS;
-      $comment_string = <<<COMMENT_FORM
-         <div id="recaptcha-submit-btn-area"></div> 
-         <script type='text/javascript'>
-            var sub = document.getElementById('submit');
-            sub.parentNode.removeChild(sub);
-            document.getElementById('recaptcha-submit-btn-area').appendChild (sub);
-            document.getElementById('submit').tabIndex = 6;
-            if ( typeof _recaptcha_wordpress_savedcomment != 'undefined') {
-               document.getElementById('comment').value = _recaptcha_wordpress_savedcomment;
-            }
-         document.getElementById('recaptcha_table').style.direction = 'ltr';
-         </script>
-         <noscript>
-          <style type='text/css'>#submit {display:none;}</style>
-          <input name="submit" type="submit" id="submit-alt" tabindex="6" value="Submit Comment"/> 
-         </noscript>
+
+      if ($recaptcha_opt['re_xhtml']) {
+         $comment_string = <<<COMMENT_FORM
+            <div id="recaptcha-submit-btn-area"></div>
+            <script type='text/javascript'>
+               var sub = document.getElementById('submit');
+               sub.parentNode.removeChild(sub);
+               document.getElementById('recaptcha-submit-btn-area').appendChild (sub);
+               document.getElementById('submit').tabIndex = 6;
+               if ( typeof _recaptcha_wordpress_savedcomment != 'undefined') {
+                  document.getElementById('comment').value = _recaptcha_wordpress_savedcomment;
+               }
+            document.getElementById('recaptcha_table').style.direction = 'ltr';
+            </script>
 COMMENT_FORM;
+      }
+      
+      else {
+         $comment_string = <<<COMMENT_FORM
+            <div id="recaptcha-submit-btn-area"></div> 
+            <script type='text/javascript'>
+               var sub = document.getElementById('submit');
+               sub.parentNode.removeChild(sub);
+               document.getElementById('recaptcha-submit-btn-area').appendChild (sub);
+               document.getElementById('submit').tabIndex = 6;
+               if ( typeof _recaptcha_wordpress_savedcomment != 'undefined') {
+                  document.getElementById('comment').value = _recaptcha_wordpress_savedcomment;
+               }
+            document.getElementById('recaptcha_table').style.direction = 'ltr';
+            </script>
+            <noscript>
+             <style type='text/css'>#submit {display:none;}</style>
+             <input name="submit" type="submit" id="submit-alt" tabindex="6" value="Submit Comment"/> 
+            </noscript>
+COMMENT_FORM;
+      }
 
       if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on")
          $use_ssl = true;
