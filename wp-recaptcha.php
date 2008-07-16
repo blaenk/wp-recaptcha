@@ -11,6 +11,14 @@ Author URI: http://www.blaenkdenum.com
 
 // Plugin was initially created by Ben Maurer and Mike Crawford
 
+// Bypass levels
+//    0 - No one can bypass
+//    1 - Registered Users
+//    2 - Edit Posts
+//    3 - Publish Posts
+//    4 - Moderate Comments
+//    5 - Administer Site
+
 // WordPress MU settings - DON'T EDIT
 //    0 - Regular WordPress installation
 //    1 - WordPress MU Forced Activated
@@ -136,7 +144,7 @@ COMMENT_FORM;
                   <?php echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl); ?>
             </td>
          </tr>
-      <? }
+      <?php }
       
       else
          echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl);
@@ -238,8 +246,8 @@ $option_defaults = array (
    'pubkey'	=> '', // the public key for reCAPTCHA
    'privkey'	=> '', // the private key for reCAPTCHA
    'use_mailhide' => '0', // whether or not to use mailhide
-   're_noadmins' => '0', // display reCAPTCHA for admins?
-   'mh_noadmins' => '0', // hide emails from admins?
+   're_bypasslevel' => '3', // who doesn't have to do the reCAPTCHA (users who can publish posts don't have to)
+   'mh_bypasslevel' => '3', // who can see emails in true form (users who can publish posts can see emails)
    'mailhide_pub' => '', // mailhide public key
    'mailhide_priv' => '', // mailhide private key
    're_theme' => 'red', // the default theme for reCAPTCHA on the comment post
@@ -268,7 +276,26 @@ function mh_insert_email($content = '') {
    global $recaptcha_opt;
    
    // we're not hiding emails from admins
-   if ($recaptcha_opt['mh_noadmins'] && current_user_can('level_10'))
+   $perm = '';
+   switch ($recaptcha_opt['mh_bypasslevel']) {
+      case 1:
+         $perm = 'read';
+         break;
+      case 2:
+         $perm = 'edit_posts';
+         break;
+      case 3:
+         $perm = 'publish_posts';
+         break;
+      case 4:
+         $perm = 'moderate_comments';
+         break;
+      case 5:
+         $perm = 'manage_options';
+         break;
+   }
+   
+   if (($recaptcha_opt['mh_bypasslevel'] && current_user_can($perm)) || !$recaptcha_opt['re_comments'])
       return $content;
    
    // Regular Expressions thanks to diabolic from EFNet #regex
@@ -353,8 +380,27 @@ function recaptcha_wp_get_html ($recaptcha_error, $use_ssl=false) {
 function recaptcha_comment_form() {
    global $user_ID, $recaptcha_opt;
 
+   $perm = '';
+   switch ($recaptcha_opt['re_bypasslevel']) {
+      case 1:
+         $perm = 'read';
+         break;
+      case 2:
+         $perm = 'edit_posts';
+         break;
+      case 3:
+         $perm = 'publish_posts';
+         break;
+      case 4:
+         $perm = 'moderate_comments';
+         break;
+      case 5:
+         $perm = 'manage_options';
+         break;
+   }
+   
    // don't show reCAPTCHA to admins
-   if (($recaptcha_opt['re_noadmins'] && current_user_can('level_10')) || !$recaptcha_opt['re_comments'])
+   if (($recaptcha_opt['re_bypasslevel'] && current_user_can($perm)) || !$recaptcha_opt['re_comments'])
       return;
    
    else {
@@ -431,9 +477,30 @@ $recaptcha_saved_error = '';
 function recaptcha_wp_check_comment($comment_data) {
 	global $user_ID, $recaptcha_opt;
 	global $recaptcha_saved_error;
-   if ((current_user_can('level_10') && $recaptcha_opt['re_noadmins']) || !$recaptcha_opt['re_comments'])
+   
+   $perm = '';
+   switch ($recaptcha_opt['re_bypasslevel']) {
+      case 1:
+         $perm = 'read';
+         break;
+      case 2:
+         $perm = 'edit_posts';
+         break;
+      case 3:
+         $perm = 'publish_posts';
+         break;
+      case 4:
+         $perm = 'moderate_comments';
+         break;
+      case 5:
+         $perm = 'manage_options';
+         break;
+   }
+   
+   // don't show reCAPTCHA to admins
+   if (($recaptcha_opt['re_bypasslevel'] && current_user_can($perm)) || !$recaptcha_opt['re_comments'])
       return $comment_data;
-
+   
 	if (recaptcha_wp_show_captcha_for_comment()) {
 		if ( $comment_data['comment_type'] == '' ) { // Do not check trackbacks/pingbacks
 			$challenge = $_POST['recaptcha_challenge_field'];
@@ -522,8 +589,8 @@ function recaptcha_wp_options_subpanel() {
       'pubkey'	=> '',
       'privkey' 	=> '',
       'use_mailhide' => '',
-      're_noadmins' => '',
-      'mh_noadmins' => '',
+      're_bypasslevel' => '3',
+      'mh_bypasslevel' => '3',
       'mailhide_pub' => '',
       'mailhide_priv' => '',
       're_theme' => 'red',
@@ -544,8 +611,7 @@ function recaptcha_wp_options_subpanel() {
 			'pubkey'	=> $_POST['recaptcha_opt_pubkey'],
 			'privkey'	=> $_POST['recaptcha_opt_privkey'],
          'use_mailhide' => $_POST['use_mailhide'],
-         're_noadmins' => $_POST['re_noadmins'],
-         'mh_noadmins' => $_POST['mh_noadmins'],
+         're_bypasslevel' => $_POST['re_bypasslevel'],
          'mailhide_pub' => $_POST['mailhide_pub'],
          'mailhide_priv' => $_POST['mailhide_priv'],
          're_theme' => $_POST['re_theme'],
@@ -577,6 +643,7 @@ function recaptcha_wp_options_subpanel() {
 <!-- ############################## BEGIN: ADMIN OPTIONS ################### -->
 <div class="wrap">
 	<h2>reCAPTCHA Options</h2>
+	<h3>About reCAPTCHA</h3>
 	<p>reCAPTCHA asks commenters to read two words from a book. One of these words proves
 	   that they are a human, not a computer. The other word is a word that a computer couldn't read.
 	   Because the user is known to be a human, the reading of that word is probably correct. So you don't
@@ -585,47 +652,50 @@ function recaptcha_wp_options_subpanel() {
    <p><strong>NOTE</strong>: If you are using some form of Cache plugin you will probably need to
       flush/clear your cache for changes to take effect.</p>
    
-	<form class="recaptcha-form" name="form1" method="post" action="<?php echo $_SERVER['PHP_SELF'] . '?page=' . plugin_basename(__FILE__); ?>&updated=true">
+	<form name="form1" method="post" action="<?php echo $_SERVER['PHP_SELF'] . '?page=' . plugin_basename(__FILE__); ?>&updated=true">
 
 
 	<!-- ****************** Operands ****************** -->
-   <table class="recaptcha-options">
-   <tr>
-   <td>
-	<fieldset class="options">
-		<legend>reCAPTCHA Key</legend>
-		<p>reCAPTCHA requires an API key, consisting of a "public" and a "private" key. You can sign up for a <a href="<?php echo recaptcha_get_signup_url (recaptcha_wp_blog_domain (), 'wordpress');?>" target="0">free reCAPTCHA key</a>.</p>
-      <!-- reCAPTCHA public key -->
-		<label class="which-key" for="recaptcha_opt_pubkey">Public Key:</label>
-		<br />
-		<input name="recaptcha_opt_pubkey" id="recaptcha_opt_pubkey" size="40" value="<?php  echo $optionarray_def['pubkey']; ?>" />
-      <!-- reCAPTCHA private key -->
-		<label class="which-key" for="recaptcha_opt_privkey">Private Key:</label>
-		<br />
-		<input name="recaptcha_opt_privkey" id="recaptcha_opt_privkey" size="40" value="<?php  echo $optionarray_def['privkey']; ?>" />
-      <br /><br />
-      <!-- The language selection -->
-      <div class="lang-select">
-      <label for="re_lang">Language:</label>
-      <select name="re_lang" id="re_lang">
-         <option value="en" <?php if($optionarray_def['re_lang'] == 'en'){echo 'selected="selected"';} ?>>English</option>
-         <option value="nl" <?php if($optionarray_def['re_lang'] == 'nl'){echo 'selected="selected"';} ?>>Dutch</option>
-         <option value="fr" <?php if($optionarray_def['re_lang'] == 'fr'){echo 'selected="selected"';} ?>>French</option>
-         <option value="de" <?php if($optionarray_def['re_lang'] == 'de'){echo 'selected="selected"';} ?>>German</option>
-         <option value="pt" <?php if($optionarray_def['re_lang'] == 'pt'){echo 'selected="selected"';} ?>>Portuguese</option>
-         <option value="ru" <?php if($optionarray_def['re_lang'] == 'ru'){echo 'selected="selected"';} ?>>Russian</option>
-         <option value="es" <?php if($optionarray_def['re_lang'] == 'es'){echo 'selected="selected"';} ?>>Spanish</option>
-         <option value="tr" <?php if($optionarray_def['re_lang'] == 'tr'){echo 'selected="selected"';} ?>>Turkish</option>
-      </select>
-      </label>
-      </div>
-      <br />
-      <!-- Whether or not to be XHTML 1.0 Strict compliant -->
-      <input type="checkbox" name="re_xhtml" id="re_xhtml" value="1" <?php if($optionarray_def['re_xhtml'] == true){echo 'checked="checked"';} ?> /> <label for="re_xhtml">Be XHTML 1.0 Strict compliant. <strong>Note</strong>: Bad for users who don't have Javascript enabled in their browser (Majority do).</label><br /><br />
-      <hr />
+   <table class="form-table">
+   <tr valign="top">
+		<th scope="row">reCAPTCHA Keys</th>
+		<td>
+			<p>reCAPTCHA requires an API key, consisting of a "public" and a "private" key. You can sign up for a <a href="<?php echo recaptcha_get_signup_url (recaptcha_wp_blog_domain (), 'wordpress');?>" target="0">free reCAPTCHA key</a>.</p>
+	      <!-- reCAPTCHA public key -->
+			<p><label class="which-key" for="recaptcha_opt_pubkey">Public Key:</label>
+			<input name="recaptcha_opt_pubkey" id="recaptcha_opt_pubkey" size="40" value="<?php  echo $optionarray_def['pubkey']; ?>" /></p>
+	      <!-- reCAPTCHA private key -->
+			<p><label class="which-key" for="recaptcha_opt_privkey">Private Key:</label>
+			<input name="recaptcha_opt_privkey" id="recaptcha_opt_privkey" size="40" value="<?php  echo $optionarray_def['privkey']; ?>" /></p>
+	    </td>
+    </tr>
+   <tr valign="top">
+		<th scope="row">General Settings</th>
+		<td>
+			<!-- The language selection -->
+	      <div class="lang-select">
+	      <label for="re_lang">Language:</label>
+	      <select name="re_lang" id="re_lang">
+	         <option value="en" <?php if($optionarray_def['re_lang'] == 'en'){echo 'selected="selected"';} ?>>English</option>
+	         <option value="nl" <?php if($optionarray_def['re_lang'] == 'nl'){echo 'selected="selected"';} ?>>Dutch</option>
+	         <option value="fr" <?php if($optionarray_def['re_lang'] == 'fr'){echo 'selected="selected"';} ?>>French</option>
+	         <option value="de" <?php if($optionarray_def['re_lang'] == 'de'){echo 'selected="selected"';} ?>>German</option>
+	         <option value="pt" <?php if($optionarray_def['re_lang'] == 'pt'){echo 'selected="selected"';} ?>>Portuguese</option>
+	         <option value="ru" <?php if($optionarray_def['re_lang'] == 'ru'){echo 'selected="selected"';} ?>>Russian</option>
+	         <option value="es" <?php if($optionarray_def['re_lang'] == 'es'){echo 'selected="selected"';} ?>>Spanish</option>
+	         <option value="tr" <?php if($optionarray_def['re_lang'] == 'tr'){echo 'selected="selected"';} ?>>Turkish</option>
+	      </select>
+	      </label>
+	    	</div>
+	    	<!-- Whether or not to be XHTML 1.0 Strict compliant -->
+			<p><input type="checkbox" name="re_xhtml" id="re_xhtml" value="1" <?php if($optionarray_def['re_xhtml'] == true){echo 'checked="checked"';} ?> /> <label for="re_xhtml">Be XHTML 1.0 Strict compliant. <strong>Note</strong>: Bad for users who don't have Javascript enabled in their browser (Majority do).</label></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<th scope="row">Comment Spam Options</th>
+		<td>
       <!-- Show reCAPTCHA on the comment post -->
       <input type="checkbox" name="re_comments" id="re_comments" value="1" <?php if($optionarray_def['re_comments'] == true){echo 'checked="checked"';} ?> /> <label for="re_comments">Use reCAPTCHA for comment spam protection.</label>
-      <br /><br />
       <!-- The theme selection -->
       <div class="theme-select">
       <label for="re_theme">Theme:</label>
@@ -636,55 +706,73 @@ function recaptcha_wp_options_subpanel() {
          <option value="clean" <?php if($optionarray_def['re_theme'] == 'clean'){echo 'selected="selected"';} ?>>Clean</option>
       </select>
       </div>
-      <br />
       <!-- Tab Index -->
-      <label for="re_tabindex">Tab Index (<em>e.g. WP: <strong>5</strong>, WPMU: <strong>3</strong></em>):</label>
-      <input name="re_tabindex" id="re_tabindex" size="5" value="<?php  echo $optionarray_def['re_tabindex']; ?>" />
-      <br /><br />
+      <p><label for="re_tabindex">Tab Index (<em>e.g. WP: <strong>5</strong>, WPMU: <strong>3</strong></em>):</label>
+      <input name="re_tabindex" id="re_tabindex" size="5" value="<?php  echo $optionarray_def['re_tabindex']; ?>" /></p>
       <!-- Don't show reCAPTCHA to admins -->
-      <input type="checkbox" name="re_noadmins" id="re_noadmins" value="1" <?php if($optionarray_def['re_noadmins'] == true){echo 'checked="checked"';} ?> /> <label for="re_noadmins">Admins don't have to do the CAPTCHA.</label>
-      <?php global $wpmu; if ($wpmu == 1 || $wpmu == 0) { ?>
-      <hr />
-      <!-- Show reCAPTCHA on the registration page -->
-      <input type="checkbox" name="re_registration" id="re_registration" value="1" <?php if($optionarray_def['re_registration'] == true){echo 'checked="checked"';} ?> /> <label for="re_registration">Use reCAPTCHA for registration spam protection.</label>
-      <br /><br />
-      <!-- The theme selection -->
       <div class="theme-select">
-      <label for="re_theme_reg">Theme:</label>
-      <select name="re_theme_reg" id="re_theme_reg">
-         <option value="red" <?php if($optionarray_def['re_theme_reg'] == 'red'){echo 'selected="selected"';} ?>>Red</option>
-         <option value="white" <?php if($optionarray_def['re_theme_reg'] == 'white'){echo 'selected="selected"';} ?>>White</option>
-         <option value="blackglass" <?php if($optionarray_def['re_theme_reg'] == 'blackglass'){echo 'selected="selected"';} ?>>Black Glass</option>
-         <option value="clean" <?php if($optionarray_def['re_theme_reg'] == 'clean'){echo 'selected="selected"';} ?>>Clean</option>
+      <label for="re_bypasslevel">Who can bypass the reCAPTCHA form? Users who are/can:</label>
+      <select name="re_bypasslevel" id="re_bypasslevel">
+         <option value="0" <?php if ($optionarray_def['re_bypasslevel'] == '0'){echo 'selected="selected"';} ?>>No one</option>
+         <option value="1" <?php if ($optionarray_def['re_bypasslevel'] == '1'){echo 'selected="selected"';} ?>>Registered Users</option>
+         <option value="2" <?php if ($optionarray_def['re_bypasslevel'] == '2'){echo 'selected="selected"';} ?>>Edit Posts</option>
+         <option value="3" <?php if ($optionarray_def['re_bypasslevel'] == '3'){echo 'selected="selected"';} ?>>Publish Posts</option>
+         <option value="4" <?php if ($optionarray_def['re_bypasslevel'] == '4'){echo 'selected="selected"';} ?>>Moderate Comments</option>
+         <option value="5" <?php if ($optionarray_def['re_bypasslevel'] == '5'){echo 'selected="selected"';} ?>>Administer Site</option>
       </select>
       </div>
-      <?php } ?>
-   </fieldset>
-   </td>
-   <td>
-   <fieldset class="options">
-      <legend>MailHide Options</legend>
+      <?php global $wpmu; if ($wpmu == 1 || $wpmu == 0) { ?>
+		</td>
+	</tr>
+	<tr valign="top">
+		<th scope="row">Registration Spam Options</th>
+		<td>
+			<!-- Show reCAPTCHA on the registration page -->
+			<p><input type="checkbox" name="re_registration" id="re_registration" value="1" <?php if($optionarray_def['re_registration'] == true){echo 'checked="checked"';} ?> /> <label for="re_registration">Use reCAPTCHA for registration spam protection.</label></p>
+	      <!-- The theme selection -->
+	      <div class="theme-select">
+	      <label for="re_theme_reg">Theme:</label>
+	      <select name="re_theme_reg" id="re_theme_reg">
+	         <option value="red" <?php if($optionarray_def['re_theme_reg'] == 'red'){echo 'selected="selected"';} ?>>Red</option>
+	         <option value="white" <?php if($optionarray_def['re_theme_reg'] == 'white'){echo 'selected="selected"';} ?>>White</option>
+	         <option value="blackglass" <?php if($optionarray_def['re_theme_reg'] == 'blackglass'){echo 'selected="selected"';} ?>>Black Glass</option>
+	         <option value="clean" <?php if($optionarray_def['re_theme_reg'] == 'clean'){echo 'selected="selected"';} ?>>Clean</option>
+	      </select>
+	      </div>
+	      <?php } ?>
+		</td>
+	</tr>
+	</table>
+	<table class="form-table">
+	<tr valign="top">
+	<th scope="row">MailHide Options</th>
+	<td>
       <p>MailHide hides email addresses like so: supp<a href="http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=" onclick="window.open('http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;" title="Reveal this e-mail address">...</a>@recaptcha.net. MailHide also requires a public and private key which you can generate using the <a href="http://mailhide.recaptcha.net/apikey">key generation service</a>.</p>
       <!-- MailHide Enabler -->
-      <input type="checkbox" name="use_mailhide" id="use_mailhide" value="1" <?php if($optionarray_def['use_mailhide'] == true){echo 'checked="checked"';} ?> /> <label for="use_mailhide">Enable MailHide</label><br /><br />
+      <p><input type="checkbox" name="use_mailhide" id="use_mailhide" value="1" <?php if($optionarray_def['use_mailhide'] == true){echo 'checked="checked"';} ?> /> <label for="use_mailhide">Enable MailHide</label></p>
       
       <!-- Public -->
-      <label class="which-key" for="mailhide_pub">Public Key:</label>
-		<br />
-		<input name="mailhide_pub" id="mailhide_pub" size="40" value="<?php  echo $optionarray_def['mailhide_pub']; ?>" />
-      
+      <p><label class="which-key" for="mailhide_pub">Public Key:</label>
+		<input name="mailhide_pub" id="mailhide_pub" size="40" value="<?php  echo $optionarray_def['mailhide_pub']; ?>" /> </p>      
       <!-- Private -->
-		<label class="which-key" for="mailhide_priv">Private Key:</label>
-		<br />
-		<input name="mailhide_priv" id="mailhide_priv" size="40" value="<?php  echo $optionarray_def['mailhide_priv']; ?>" />
-      
+		<p><label class="which-key" for="mailhide_priv">Private Key:</label>
+		<input name="mailhide_priv" id="mailhide_priv" size="40" value="<?php  echo $optionarray_def['mailhide_priv']; ?>" /></p>  
       <!-- MailHide CSS -->
-      <p>You can style the hidden emails with the <strong>emailrecaptcha</strong> CSS class in the <em>recaptcha.css</em> stylesheet in recaptcha's plugin folder.</p>
+      <p>You can style the hidden emails with the <strong>emailrecaptcha</strong> CSS class in the <strong>recaptcha.css</strong> stylesheet in recaptcha's plugin folder.</p>
       <p>You can bypass email hiding by enclosing the email with <strong>[nohide][/nohide]</strong> tags.</p>
       
       <!-- Don't hide emails from admins -->
-      <input type="checkbox" name="mh_noadmins" id="mh_noadmins" value="1" <?php if($optionarray_def['mh_noadmins'] == true){echo 'checked="checked"';} ?> /> <label for="mh_noadmins">Don't hide emails from admins.</label>
-	</fieldset>
+      <div class="theme-select">
+      <label for="mh_bypasslevel">Who can see emails in their true form? Users who are/can:</label>
+      <select name="mh_bypasslevel" id="mh_bypasslevel">
+         <option value="0" <?php if ($optionarray_def['mh_bypasslevel'] == '0'){echo 'selected="selected"';} ?>>No one</option>
+         <option value="1" <?php if ($optionarray_def['mh_bypasslevel'] == '1'){echo 'selected="selected"';} ?>>Registered Users</option>
+         <option value="2" <?php if ($optionarray_def['mh_bypasslevel'] == '2'){echo 'selected="selected"';} ?>>Edit Posts</option>
+         <option value="3" <?php if ($optionarray_def['mh_bypasslevel'] == '3'){echo 'selected="selected"';} ?>>Publish Posts</option>
+         <option value="4" <?php if ($optionarray_def['mh_bypasslevel'] == '4'){echo 'selected="selected"';} ?>>Moderate Comments</option>
+         <option value="5" <?php if ($optionarray_def['mh_bypasslevel'] == '5'){echo 'selected="selected"';} ?>>Administer Site</option>
+      </select>
+      </div>
    </td>
    </tr>
    </table>
