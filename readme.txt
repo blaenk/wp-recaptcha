@@ -54,7 +54,7 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 **Version 2.8.6**
 * Administration interface is now integrated with 2.5's look and feel. Thanks to [Jeremy Clarke](http://simianuprising.com/ "Jeremy Clarke").
 * Users can now have more control over who sees the reCAPTCHA form and who can see emails in their true form (If MailHide is enabled). Thanks to [Jeremy Clarke](http://simianuprising.com/ "Jeremy Clarke").
-* Fixed a very stupid (**One character deal**) fatal error on most Windows Servers which don't support short tags. I'm speaking of the so called 'Unexpected $end' error.
+* Fixed a very stupid (**One character deal**) fatal error on most Windows Servers which don't support short tags (short_open_tag). I'm speaking of the so called 'Unexpected $end' error.
 
 == Frequently Asked Questions ==
 
