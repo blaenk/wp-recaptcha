@@ -3,8 +3,8 @@ Contributors: BlaenkDenum
 Donate link: http://www.blaenkdenum.com
 Tags: comments, registration, recaptcha, antispam, mailhide, captcha, wpmu
 Requires at least: 2.1
-Tested up to: 2.5.1
-Stable tag: 2.8.5
+Tested up to: 2.6
+Stable tag: 2.8.6
 
 Integrates reCAPTCHA anti-spam methods with WordPress including comment, registration, and email spam protection. WPMU Compatible.
 
@@ -49,6 +49,13 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 * If turn on XHTML 1.0 Compliance you and your users will need to have Javascript enabled to see and complete the reCAPTCHA form
 * Your theme must have a `do_action('comment_form', $post->ID);` call right before the end of your form (*Right before the closing form tag*). Most themes do.
 
+== ChangeLog ==
+
+**Version 2.8.6**
+* Administration interface is now integrated with 2.5's look and feel. Thanks to [Jeremy Clarke](http://simianuprising.com/ "Jeremy Clarke").
+* Users can now have more control over who sees the reCAPTCHA form and who can see emails in their true form (If MailHide is enabled). Thanks to [Jeremy Clarke](http://simianuprising.com/ "Jeremy Clarke").
+* Fixed a very stupid (**One character deal**) fatal error on most Windows Servers which don't support short tags. I'm speaking of the so called 'Unexpected $end' error.
+
 == Frequently Asked Questions ==
 
 = Aren't you increasing the time users spend solving CAPTCHAs by requiring them to type two words instead of one? =
@@ -63,4 +70,5 @@ CAPTCHAs offer great protection against abuse from automated programs. While it 
 
 == Screenshots ==
 
-1. This is the administration options page for the WP-reCAPTCHA plugin.
+1. The reCAPTCHA Settings
+2. The MailHide Settings
