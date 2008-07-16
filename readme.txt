@@ -4,7 +4,7 @@ Donate link: http://www.blaenkdenum.com
 Tags: comments, registration, recaptcha, antispam, mailhide, captcha, wpmu
 Requires at least: 2.1
 Tested up to: 2.6
-Stable tag: 2.8.6
+Stable tag: 2.8.7
 
 Integrates reCAPTCHA anti-spam methods with WordPress including comment, registration, and email spam protection. WPMU Compatible.
 
