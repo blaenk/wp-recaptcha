@@ -44,12 +44,15 @@ define ("RECAPTCHA_WP_HASH_SALT", "b7e0638d85f5d7f3694f68e944136d62");
 function re_css() {
    global $recaptcha_opt, $wpmu;
    
-   $path = '/wp-content/plugins/wp-recaptcha/recaptcha.css';
+   if (!defined('WP_CONTENT_URL'))
+      defined('WP_CONTENT_URL', get_option('siteurl') . '/wp-content');
+   
+   $path = WP_CONTENT_URL . '/plugins/wp-recaptcha/recaptcha.css';
    
    if ($wpmu == 1)
-		$path = '/wp-content/mu-plugins/wp-recaptcha/recaptcha.css';
+		$path = WP_CONTENT_URL . '/mu-plugins/wp-recaptcha/recaptcha.css';
    
-   echo '<link rel="stylesheet" type="text/css" href="' . get_bloginfo('wpurl') . $path . '" />';
+   echo '<link rel="stylesheet" type="text/css" href="' . $path . '" />';
 }
 
 function registration_css() {
