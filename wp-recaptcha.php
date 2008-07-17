@@ -45,7 +45,7 @@ function re_css() {
    global $recaptcha_opt, $wpmu;
    
    if (!defined('WP_CONTENT_URL'))
-      defined('WP_CONTENT_URL', get_option('siteurl') . '/wp-content');
+      define('WP_CONTENT_URL', get_option('siteurl') . '/wp-content');
    
    $path = WP_CONTENT_URL . '/plugins/wp-recaptcha/recaptcha.css';
    
