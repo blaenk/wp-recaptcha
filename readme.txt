@@ -4,7 +4,7 @@ Donate link: http://www.blaenkdenum.com
 Tags: comments, registration, recaptcha, antispam, mailhide, captcha, wpmu
 Requires at least: 2.1
 Tested up to: 2.6
-Stable tag: 2.9
+Stable tag: 2.9.1
 
 Integrates reCAPTCHA anti-spam methods with WordPress including comment, registration, and email spam protection. WPMU Compatible.
 
@@ -51,6 +51,8 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 
 == ChangeLog ==
 
+= Version 2.9.1 =
+* Forgot that if you can see emails in their true form, then you shouldn't have to see the [nohide][/nohide] tags either. Fixed.
 = Version 2.8.6 =
 * Administration interface is now integrated with 2.5's look and feel. Thanks to [Jeremy Clarke](http://simianuprising.com/ "Jeremy Clarke").
 * Users can now have more control over who sees the reCAPTCHA form and who can see emails in their true form (If MailHide is enabled). Thanks to [Jeremy Clarke](http://simianuprising.com/ "Jeremy Clarke").

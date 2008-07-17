@@ -3,7 +3,7 @@
 Plugin Name: WP-reCAPTCHA
 Plugin URI: http://www.blaenkdenum.com/wp-recaptcha/
 Description: Integrates reCAPTCHA anti-spam solutions with wordpress
-Version: 2.9
+Version: 2.9.1
 Author: Jorge Peña
 Email: support@recaptcha.net
 Author URI: http://www.blaenkdenum.com
@@ -279,8 +279,11 @@ function mh_insert_email($content = '') {
       $needed_capability = $recaptcha_opt['mh_bypasslevel'];
         
 	// skip the MailHide display if the minimum capability is met
-	if (($needed_capability && current_user_can($needed_capability)) || !$recaptcha_opt['re_comments'])
+	if (($needed_capability && current_user_can($needed_capability)) || !$recaptcha_opt['re_comments']) {
+      // remove the nohides
+      $content = preg_replace('/\[\/?nohide\]/i','',$content);
 		return $content;
+   }
 
    // Regular Expressions thanks to diabolic from EFNet #regex
    
@@ -300,6 +303,17 @@ function mh_insert_email($content = '') {
 // replace the hyperlinked emails i.e. <a href="haha@lol.com">this</a> or <a href="mailto:haha@lol.com">that</a>
 function mh_replace_hyperlink($matches) {
    global $recaptcha_opt;
+   
+   // set the minimum capability needed to skip the MailHide if there is one
+   if ($recaptcha_opt['mh_bypass'] AND $recaptcha_opt['mh_bypasslevel'])
+      $needed_capability = $recaptcha_opt['mh_bypasslevel'];
+        
+	// skip the MailHide display if the minimum capability is met
+	if (($needed_capability && current_user_can($needed_capability)) || !$recaptcha_opt['re_comments']) {
+      // remove the nohides
+      $content = preg_replace('/\[\/?nohide\]/i','',$content);
+		return $content;
+   }
    
    // get the url, the part inside the href. this is the email of course
    $url = recaptcha_mailhide_url($recaptcha_opt['mailhide_pub'], $recaptcha_opt['mailhide_priv'], $matches[1]);
