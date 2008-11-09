@@ -266,6 +266,8 @@ $option_defaults = array (
    're_comments' => '1', // whether or not to show reCAPTCHA on the comment post
    're_registration' => '1', // whether or not to show reCAPTCHA on the registratoin page
    're_xhtml' => '0', // whether or not to be XHTML 1.0 Strict compliant
+   'mh_replace_link' => '', // name the link something else
+   'mh_replace_title' => '', // title of the link
 );
 
 // install the defaults
@@ -341,8 +343,35 @@ function mh_replace_hyperlink($matches) {
 function mh_replace($matches) {
    global $recaptcha_opt;
    
-   // fine plain text emails and hide them
-   $html = recaptcha_mailhide_html($recaptcha_opt['mailhide_pub'], $recaptcha_opt['mailhide_priv'], $matches[1]);
+   if ($recaptcha_opt['mh_replace_link'] == "" && $recaptcha_opt['mh_replace_title'] == "") {
+      // fine plain text emails and hide them
+      $html = recaptcha_mailhide_html($recaptcha_opt['mailhide_pub'], $recaptcha_opt['mailhide_priv'], $matches[1]);
+   }
+   
+   else {
+      // replace both things
+      if ($recaptcha_opt['mh_replace_link'] != "" && $recaptcha_opt['mh_replace_title'] != "") {
+         $url = recaptcha_mailhide_url($recaptcha_opt['mailhide_pub'], $recaptcha_opt['mailhide_priv'], $matches[1]);
+         $html = "<a href='" . htmlentities($url, ENT_QUOTES) .
+      		"' onclick=\"window.open('" . htmlentities($url, ENT_QUOTES) . "', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;\" title=\"" . $recaptcha_opt['mh_replace_title'] . "\">" . $recaptcha_opt['mh_replace_link'] . "</a>";
+      }
+      
+      // only replace the link
+      else if ($recaptcha_opt['mh_replace_link'] != "" && $recaptcha_opt['mh_replace_title'] == "") {
+         $url = recaptcha_mailhide_url($recaptcha_opt['mailhide_pub'], $recaptcha_opt['mailhide_priv'], $matches[1]);
+         $html = "<a href='" . htmlentities($url, ENT_QUOTES) .
+      		"' onclick=\"window.open('" . htmlentities($url, ENT_QUOTES) . "', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;\" title=\"Reveal this e-mail address\">" . $recaptcha_opt['mh_replace_link'] . "</a>";
+      }
+      
+      // only replace the title
+      else if ($recaptcha_opt['mh_replace_link'] == "" && $recaptcha_opt['mh_replace_title'] != "") {
+         $url = recaptcha_mailhide_url($recaptcha_opt['mailhide_pub'], $recaptcha_opt['mailhide_priv'], $matches[1]);
+         $emailparts = _recaptcha_mailhide_email_parts ($matches[1]);
+      	
+      	$html = htmlentities($emailparts[0], ENT_QUOTES) . "<a href='" . htmlentities($url, ENT_QUOTES) .
+      		"' onclick=\"window.open('" . htmlentities($url, ENT_QUOTES) . "', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;\" title=\"" . $recaptcha_opt['mh_replace_title'] . "\">...</a>@" . htmlentities($emailparts[1], ENT_QUOTES);
+      }
+   }
    
    // style it
    $html = '<span class="mh-plaintext">' . $html . "</span>";
@@ -577,6 +606,8 @@ function recaptcha_wp_options_subpanel() {
 		're_comments' => '1',
 		're_registration' => '1',
 		're_xhtml' => '0',
+      'mh_replace_link' => '',
+      'mh_replace_title' => '',
 		);
 
 	if ($wpmu != 1)
@@ -601,6 +632,8 @@ function recaptcha_wp_options_subpanel() {
 		're_comments' => $_POST['re_comments'],
 		're_registration' => $_POST['re_registration'],
 		're_xhtml' => $_POST['re_xhtml'],
+      'mh_replace_link' => $_POST['mh_replace_link'],
+      'mh_replace_title' => $_POST['mh_replace_title'],
 		);
 	// save updated options
 	if ($wpmu == 1)
@@ -759,31 +792,50 @@ function recaptcha_dropdown_capabilities($select_name, $checked_value="") {
 	<h3>About MailHide</h3>
 	<p><a href="http://mailhide.recaptcha.net/" title="mailhide email obfuscation">MailHide</a> uses reCAPTCHA to protect email adresses displayed on your blog from being harvested for spam.</p>
 	<p>Activating MailHide will make all post and comment text be filtered to shorten email addresses with a captcha'd link, hiding them from spambots looking for adresses. For example supp<a href="http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=" onclick="window.open('http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;" title="Reveal this e-mail address">...</a>@recaptcha.net.</p>
-	<p>MailHide also requires a public and private key which you can generate using the <a href="http://mailhide.recaptcha.net/apikey">key generation service</a>.</p>
+	<p>MailHide also requires a public and private key which you can generate using the <a href="http://mailhide.recaptcha.net/apikey">key generation service</a>.</p>   
 	<table class="form-table">
 	<tr valign="top">
-	<th scope="row">MailHide Options</th>
+	<th scope="row">MailHide Keys</th>
 	<td>
-
 		<!-- MailHide Enabler -->
 		<big><input type="checkbox" name="use_mailhide" id="use_mailhide" value="1" <?php if($optionarray_def['use_mailhide'] == true){echo 'checked="checked"';} ?> /> <label for="use_mailhide">Enable MailHide email obfuscation</label></big>
 		<br />
 		<!-- Public Key -->
 		<p class="re-keys">
 			<label class="which-key" for="mailhide_pub">Public Key:</label>
-			<input name="mailhide_pub" id="mailhide_pub" size="40" value="<?php  echo $optionarray_def['mailhide_pub']; ?>" />
+			<input name="mailhide_pub" id="mailhide_pub" size="40" value="<?php echo $optionarray_def['mailhide_pub']; ?>" />
 			<br />
 			<!-- Private Key -->
 			<label class="which-key" for="mailhide_priv">Private Key:</label>
-			<input name="mailhide_priv" id="mailhide_priv" size="40" value="<?php  echo $optionarray_def['mailhide_priv']; ?>" />
+			<input name="mailhide_priv" id="mailhide_priv" size="40" value="<?php echo $optionarray_def['mailhide_priv']; ?>" />
 		</p>
-		
+   </td>
+   </tr>
+   <tr valign="top">
+   <th scope="row">Visibility Options</th>
+   <td>
 		<!-- Don't show mailhide to users who can... -->
 		<div class="theme-select">
 			<input type="checkbox" id="mh_bypass" name="mh_bypass" <?php if($optionarray_def['mh_bypass'] == true){echo 'checked="checked"';} ?>/>
 			<label for="mh_bypass">Show full email adresses to <strong>registered</strong> users who can:</label>
 			<?php recaptcha_dropdown_capabilities('mh_bypasslevel', $optionarray_def['mh_bypasslevel']); // <select> of capabilities ?>
 		</div>
+      <!-- Email Replacement Text -->
+      <p class="re-keys">
+         <p>The following allows you to show the replaced links differently. Usually, you get something like this, supp<a href="http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=" onclick="window.open('http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;" title="Reveal this e-mail address">...</a>@recaptcha.net , where the email is broken up into two pieces and then a link with dots is placed in the middle. The <strong>Email Replacement Text</strong> value lets you choose what to name the link and then the <strong>Reveal Link Title</strong> value determines to text that is shown when the link is hovered over.</p>
+         <p>For example, if the <strong>Email Replacement Text</strong> option is set to <strong>HIDDEN EMAIL</strong> and the <strong>Reveal Link Title</strong> option is set to <strong>Click here to reveal this address</strong>, then ALL emails will be hidden like this: <a href="http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=" onclick="window.open('http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;" title="Click here to reveal this address">HIDDEN EMAIL</a></p>
+         <p>If you want to maintain the default method of hiding emails then leave both boxes blank.</p>
+         <label class="whch-key" for="mh_replace_link">EMail Replacement Text:</label>
+         <input name="mh_replace_link" id="mh_replace_link" size="40" value="<?php echo $optionarray_def['mh_replace_link']; ?>" />
+         <br />
+         <label class="which-key" for="mh_replace_title">Reveal Link Title:</label>
+         <input name="mh_replace_title" id="mh_replace_title" size="40" value="<?php echo $optionarray_def['mh_replace_title']; ?>" />
+      </p>
+   </td>
+   </tr>
+   <tr valign="top">
+   <th scope="row">Other Information</th>
+   <td>
 		<!-- MailHide CSS -->
 		<p>CSS: You can style the hidden emails with the <strong>.emailrecaptcha</strong> CSS class in the <strong>recaptcha.css</strong> stylesheet in recaptcha's plugin folder or in your own stylesheet.</p>
 		<p> You can bypass email hiding for an address by enclosing it within <strong>[nohide][/nohide]</strong>.</p>
@@ -869,10 +921,12 @@ if ($recaptcha_opt['use_mailhide'] &&
 		
 		$path = plugin_basename(__FILE__);
 		$top = 0;
+      
 		if ($wp_version <= 2.5)
-		$top = 12.7;
+         $top = 12.7;
 		else
-		$top = 7;
+         $top = 7;
+         
 		echo "
 		<div id='recaptcha-warning' class='updated fade-ff0000'><p><strong>MailHide is not active</strong> You must <a href='options-general.php?page=" . $path . "'>enter your MailHide API keys</a> for it to work</p></div>
 		<style type='text/css'>
