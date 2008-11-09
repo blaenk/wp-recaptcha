@@ -140,13 +140,9 @@ COMMENT_FORM;
 		
 		if ($wpmu == 1) {
    		$error = $errors->get_error_message('captcha'); ?>
-   		<tr <?php echo($error ? 'class="error"' : '') ?>>
-   				<th valign="top"><?php _e('Verification:')?></th>
-   				<td>
-   						<!-- recaptcha -->
-   						<?php echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl); ?>
-   				</td>
-   		</tr>
+   		<label for="verification">Verification:</label>
+         <?php echo($error ? '<p class="error">'.$error.'</p>' : '') ?>
+         <?php echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl); ?>
    		<?php }
 		
 		else
