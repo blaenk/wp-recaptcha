@@ -3,7 +3,7 @@
 Plugin Name: WP-reCAPTCHA
 Plugin URI: http://www.blaenkdenum.com/wp-recaptcha/
 Description: Integrates reCAPTCHA anti-spam solutions with wordpress
-Version: 2.9.1
+Version: 2.9.2
 Author: Jorge Peña
 Email: support@recaptcha.net
 Author URI: http://www.blaenkdenum.com
@@ -11,6 +11,8 @@ Author URI: http://www.blaenkdenum.com
 
 // Plugin was initially created by Ben Maurer and Mike Crawford
 // Permissions/2.5 transition help from Jeremy Clarke @ http://globalvoicesonline.org
+
+// WORDPRESS MU DETECTION
 
 // WordPress MU settings - DON'T EDIT
 //    0 - Regular WordPress installation
@@ -29,6 +31,8 @@ if ($wpmu == 1)
 else
    $recaptcha_opt = get_option('recaptcha'); // get the options from the database
 
+// END WORDPRESS MU DETECTION
+   
 if ($wpmu == 1)
    require_once(dirname(__FILE__) . '/wp-recaptcha/recaptchalib.php');
 else
@@ -62,11 +66,11 @@ function registration_css() {
 		$width = 0;
 		
 		if ($recaptcha_opt['re_theme_reg'] == 'red' ||
-		 $recaptcha_opt['re_theme_reg'] == 'white' ||
-		 $recaptcha_opt['re_theme_reg'] == 'blackglass')
-		$width = 358;
+          $recaptcha_opt['re_theme_reg'] == 'white' ||
+          $recaptcha_opt['re_theme_reg'] == 'blackglass')
+          $width = 358;
 		else if ($recaptcha_opt['re_theme_reg'] == 'clean')
-		$width = 485;
+         $width = 485;
 		
 		echo <<<REGISTRATION
 		<style>
@@ -81,7 +85,9 @@ function registration_css() {
 		#nav {
 				text-align: center;
 		}
-		
+		form .submit {
+            margin-top: 10px;
+      }
 		</style>
 REGISTRATION;
    }
@@ -128,23 +134,23 @@ END;
 COMMENT_FORM;
 
 		if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on")
-		$use_ssl = true;
+         $use_ssl = true;
 		else
-		$use_ssl = false;
+         $use_ssl = false;
 		
 		if ($wpmu == 1) {
-		$error = $errors->get_error_message('captcha'); ?>
-		<tr <?php echo($error ? 'class="error"' : '') ?>>
-				<th valign="top"><?php _e('Verification:')?></th>
-				<td>
-						<!-- recaptcha -->
-						<?php echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl); ?>
-				</td>
-		</tr>
-		<?php }
+   		$error = $errors->get_error_message('captcha'); ?>
+   		<tr <?php echo($error ? 'class="error"' : '') ?>>
+   				<th valign="top"><?php _e('Verification:')?></th>
+   				<td>
+   						<!-- recaptcha -->
+   						<?php echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl); ?>
+   				</td>
+   		</tr>
+   		<?php }
 		
 		else
-		echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl);
+         echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl);
    }
 }
 
@@ -198,9 +204,11 @@ function check_recaptcha_new($errors) {
 function check_recaptcha_wpmu($result) {
    global $_POST, $recaptcha_opt;
    
-   if (isset($_POST['blog_id']))
+   // It's blogname in 2.6, blog_id prior to that
+   if (isset($_POST['blog_id']) || isset($_POST['blogname']))
 		return $result;
    
+   // no text entered
    if (empty($_POST['recaptcha_response_field']) || $_POST['recaptcha_response_field'] == '') {
 		$result['errors']->add('blank_captcha', 'Please complete the reCAPTCHA.');
 		return $result;
@@ -211,10 +219,11 @@ function check_recaptcha_wpmu($result) {
       $_POST['recaptcha_challenge_field'],
       $_POST['recaptcha_response_field'] );
 
+   // incorrect CAPTCHA
 	if (!$response->is_valid)
 		if ($response->error == 'incorrect-captcha-sol') {
 			$result['errors']->add('captcha_wrong', 'That reCAPTCHA was incorrect.');
-		echo "<div class=\"error\">Incorrect CAPTCHA</div>";
+         echo "<div class=\"error\">Incorrect CAPTCHA</div>";
 		}
    
    return $result;
@@ -223,12 +232,13 @@ function check_recaptcha_wpmu($result) {
 if ($recaptcha_opt['re_registration']) {
    if ($wpmu == 1)
 		add_filter('wpmu_validate_user_signup', 'check_recaptcha_wpmu');
-   else {
+   
+   else if ($wpmu == 0) {
 		// Hook the check_recaptcha function into WordPress
 		if (version_compare(get_bloginfo('version'), '2.5' ) >= 0)
-		add_filter('registration_errors', 'check_recaptcha_new');
+         add_filter('registration_errors', 'check_recaptcha_new');
 		else
-		add_filter('registration_errors', 'check_recaptcha');
+         add_filter('registration_errors', 'check_recaptcha');
    }
 }
 /* =============================================================================
@@ -435,9 +445,9 @@ COMMENT_FORM;
 		}
 
 		if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on")
-		$use_ssl = true;
+         $use_ssl = true;
 		else
-		$use_ssl = false;
+         $use_ssl = false;
 		
 		echo $recaptcha_js_opts .  recaptcha_wp_get_html($_GET['rerror'], $use_ssl) . $comment_string;
    }

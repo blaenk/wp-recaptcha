@@ -22,6 +22,7 @@
    font-weight: bolder;
    text-decoration: none;
    border: 0;
+   background-color: transparent !important;
 }
 
 /* This is for hyperlinked emails i.e. <a href="mailto:ohnoes@pwnies.com">TEXT</a> - TEXT*/
