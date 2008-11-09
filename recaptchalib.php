@@ -37,7 +37,8 @@
  */
 define("RECAPTCHA_API_SERVER", "http://api.recaptcha.net");
 define("RECAPTCHA_API_SECURE_SERVER", "https://api-secure.recaptcha.net");
-define("RECAPTCHA_VERIFY_SERVER", "api-verify.recaptcha.net");
+// define("RECAPTCHA_VERIFY_SERVER", "api-verify.recaptcha.net");
+define("RECAPTCHA_VERIFY_SERVER", gethostbyname('api-verify.recaptcha.net'));
 
 /**
  * Encodes the given data into a query string format
