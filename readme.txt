@@ -53,6 +53,7 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 
 = Version 2.9.2 =
 * 'Beautified' the options page.
+* Added two options to allow users to enter their own custom error messages. Also good for foreign language support.
 * Fixed a conflict bug with the OpenID plugin where the reCAPTCHA form would show under the OpenID section in the registration form.
 * Added two new options which allow one to choose the text to be shown for all hidden Emails and/or the title of the link.
 * Fixed a 'Could not open socket' error in recaptchalib.php. [Bug ID 26](http://code.google.com/p/recaptcha/issues/detail?id=26 "recaptchalib.php: Could not open socket (Fix included)")

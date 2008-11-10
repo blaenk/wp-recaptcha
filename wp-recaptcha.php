@@ -145,14 +145,16 @@ COMMENT_FORM;
          <?php echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl); ?>
    		<?php }
 		
-		else
+		else {
+         echo '<hr style="clear: both; margin-bottom: 1.5em; border: 0; border-top: 1px solid #999; height: 1px;" />';
          echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl);
+      }
    }
 }
 
 // Hook the display_recaptcha function into WordPress
 if ($wpmu != 1)
-   add_action('register_form', 'display_recaptcha', -1);
+   add_action('register_form', 'display_recaptcha');
 else
    add_action('signup_extra_fields', 'display_recaptcha');
 
@@ -161,7 +163,7 @@ function check_recaptcha() {
 	global $recaptcha_opt, $errors;
 	
    if (empty($_POST['recaptcha_response_field']))
-		$errors['blank_captcha'] = 'Please complete the reCAPTCHA.';
+		$errors['blank_captcha'] = $recaptcha_opt['error_blank'];
    
    else {
    	$response = recaptcha_check_answer($recaptcha_opt['privkey'],
@@ -171,7 +173,7 @@ function check_recaptcha() {
 
    	if (!$response->is_valid)
    		if ($response->error == 'incorrect-captcha-sol')
-   				$errors['captcha_wrong'] = 'That reCAPTCHA was incorrect.';
+   				$errors['captcha_wrong'] = $recaptcha_opt['error_incorrect'];
    }
 }
 
@@ -180,7 +182,7 @@ function check_recaptcha_new($errors) {
 	global $recaptcha_opt;
 	
    if (empty($_POST['recaptcha_response_field']) || $_POST['recaptcha_response_field'] == '') {
-		$errors->add('blank_captcha', 'Please complete the reCAPTCHA.');
+		$errors->add('blank_captcha', $recaptcha_opt['error_blank']);
 		return $errors;
    }
    
@@ -191,7 +193,7 @@ function check_recaptcha_new($errors) {
 
 	if (!$response->is_valid)
 		if ($response->error == 'incorrect-captcha-sol')
-			$errors->add('captcha_wrong', 'That reCAPTCHA was incorrect.');
+			$errors->add('captcha_wrong', $recaptcha_opt['error_incorrect']);
    
    return $errors;
 }
@@ -206,7 +208,7 @@ function check_recaptcha_wpmu($result) {
    
    // no text entered
    if (empty($_POST['recaptcha_response_field']) || $_POST['recaptcha_response_field'] == '') {
-		$result['errors']->add('blank_captcha', 'Please complete the reCAPTCHA.');
+		$result['errors']->add('blank_captcha', $recaptcha_opt['error_blank']);
 		return $result;
    }
    
@@ -218,8 +220,8 @@ function check_recaptcha_wpmu($result) {
    // incorrect CAPTCHA
 	if (!$response->is_valid)
 		if ($response->error == 'incorrect-captcha-sol') {
-			$result['errors']->add('captcha_wrong', 'That reCAPTCHA was incorrect.');
-         echo "<div class=\"error\">Incorrect CAPTCHA</div>";
+			$result['errors']->add('captcha_wrong', $recaptcha_opt['error_incorrect']);
+         echo "<div class=\"error\">". $recaptcha_opt['error_incorrect'] . "</div>";
 		}
    
    return $result;
@@ -264,6 +266,8 @@ $option_defaults = array (
    're_xhtml' => '0', // whether or not to be XHTML 1.0 Strict compliant
    'mh_replace_link' => '', // name the link something else
    'mh_replace_title' => '', // title of the link
+   'error_blank' => '<strong>ERROR</strong>: Please fill in the reCAPTCHA form.', // the message to display when the user enters no CAPTCHA response
+   'error_incorrect' => '<strong>ERROR</strong>: That reCAPTCHA response was incorrect.', // the message to display when the user enters the incorrect CAPTCHA response
 );
 
 // install the defaults
@@ -424,7 +428,7 @@ function recaptcha_comment_form() {
    else {
 		// Did the user fail to match the CAPTCHA? If so, let them know
 		if ($_GET['rerror'] == 'incorrect-captcha-sol')
-		echo "<p class=\"recaptcha-error\">Incorrect CAPTCHA. Please try again.</p>";
+		echo "<p class=\"recaptcha-error\">" . $recaptcha_opt['error_incorrect'] . "</p>";
    
 		//modify the comment form for the reCAPTCHA widget
 		$recaptcha_js_opts = <<<OPTS
@@ -604,6 +608,8 @@ function recaptcha_wp_options_subpanel() {
 		're_xhtml' => '0',
       'mh_replace_link' => '',
       'mh_replace_title' => '',
+      'error_blank' => '<strong>ERROR</strong>: Please fill in the reCAPTCHA form.',
+      'error_incorrect' => '<strong>ERROR</strong>: That reCAPTCHA response was incorrect.',
 		);
 
 	if ($wpmu != 1)
@@ -630,6 +636,8 @@ function recaptcha_wp_options_subpanel() {
 		're_xhtml' => $_POST['re_xhtml'],
       'mh_replace_link' => $_POST['mh_replace_link'],
       'mh_replace_title' => $_POST['mh_replace_title'],
+      'error_blank' => $_POST['error_blank'],
+      'error_incorrect' => $_POST['error_incorrect'],
 		);
 	// save updated options
 	if ($wpmu == 1)
@@ -758,6 +766,23 @@ function recaptcha_dropdown_capabilities($select_name, $checked_value="") {
 			<?php } ?>
 		</td>
 	</tr>
+   <tr valign="top">
+      <th scope="row">Error Messages</th>
+         <td>
+            <p>The following are the messages to display when the user does not enter a CAPTCHA response or enters the incorrect CAPTCHA response.</p>
+            <!-- Error Messages -->
+            <p class="re-keys">
+               <!-- Blank -->
+      			<label class="which-key" for="error_blank">No response entered:</label>
+      			<input name="error_blank" id="error_blank" size="80" value="<?php echo $optionarray_def['error_blank']; ?>" />
+      			<br />
+      			<!-- Incorrect -->
+      			<label class="which-key" for="error_incorrect">Incorrect response entered:</label>
+      			<input name="error_incorrect" id="error_incorrect" size="80" value="<?php echo $optionarray_def['error_incorrect']; ?>" />
+      		</p>
+         </td>
+      </th>
+   </tr>
 	 <tr valign="top">
 			<th scope="row">General Settings</th>
 			<td>
