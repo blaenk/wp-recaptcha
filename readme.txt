@@ -46,11 +46,17 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 
 * You need the reCAPTCHA keys [here](http://recaptcha.net/api/getkey?domain=www.blaenkdenum.com&app=wordpress "reCAPTCHA API keys") and/or the MailHide keys [here](http://mailhide.recaptcha.net/apikey "MailHide keys")
 * If you plan on using MailHide, you will need to have the [mcrypt](http://php.net/mcrypt "mcrypt") PHP module loaded (*Most servers do*)
-* If turn on XHTML 1.0 Compliance you and your users will need to have Javascript enabled to see and complete the reCAPTCHA form
+* If you turn on XHTML 1.0 Compliance you and your users will need to have Javascript enabled to see and complete the reCAPTCHA form
 * Your theme must have a `do_action('comment_form', $post->ID);` call right before the end of your form (*Right before the closing form tag*). Most themes do.
 
 == ChangeLog ==
 
+= Version 2.9.2 =
+* 'Beautified' the options page.
+* Fixed a conflict bug with the OpenID plugin where the reCAPTCHA form would show under the OpenID section in the registration form.
+* Added two new options which allow one to choose the text to be shown for all hidden Emails and/or the title of the link.
+* Fixed a 'Could not open socket' error in recaptchalib.php. [Bug ID 26](http://code.google.com/p/recaptcha/issues/detail?id=26 "recaptchalib.php: Could not open socket (Fix included)")
+* Fixed a WPMU issue where blog registrations weren't possible due to a redirection to the first step in the registration process. Thanks to [Edward](http://yisheng.wordpress.com/2008/08/14/wp-recaptcha-for-wpmu-26/ "Edward").
 = Version 2.9.1 =
 * Forgot that if you can see emails in their true form, then you shouldn't have to see the [nohide][/nohide] tags either. Fixed.
 = Version 2.8.6 =
@@ -60,6 +66,13 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 * Accomodated for the fact that in +2.6 the wp-content folder can be anywhere.
 
 == Frequently Asked Questions ==
+
+= HELP, I'm still getting spam! =
+There are three common issues that make reCAPTCHA appear to be broken:
+
+1. **Moderation Emails**: reCAPTCHA marks comments as spam, so even though the comments don't actually get posted, you will be notified of what is supposedly new spam. It is recommended to turn off moderation emails with reCAPTCHA.
+1. **Akismet Spam Queue**: Again, because reCAPTCHA marks comments with a wrongly entered CAPTCHA as spam, they are added to the spam queue. These comments however weren't posted to the blog so reCAPTCHA is still doing it's job. It is recommended to either ignore the Spam Queue and clear it regularly or disable Akismet completely. reCAPTCHA takes care of all of the spam created by bots, which is the usual type of spam. The only other type of spam that would get through is human spam, where humans are hired to manually solve CAPTCHAs. If you still get spam while only having reCAPTCHA enabled, you could be a victim of the latter practice. If this is the case, then turning on Akismet will most likely solve your problem. Again, just because it shows up in the Spam Queue does NOT mean that spam is being posted to your blog, it's more of a 'comments that have been caught as spam by reCAPTCHA' queue.
+1. **Trackbacks and Pingbacks**: reCAPTCHA can't do anything about pingbacks and trackbacks. You can disable pingbacks and trackbacks in Options > Discussion > Allow notifications from other Weblogs (Pingbacks and trackbacks).
 
 = Aren't you increasing the time users spend solving CAPTCHAs by requiring them to type two words instead of one? =
 Actually, no. Most CAPTCHAs on the Web ask users to enter strings of random characters, which are slower to type than English words. reCAPTCHA requires no more time to solve than most other CAPTCHAs.

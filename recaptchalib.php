@@ -37,24 +37,21 @@
  */
 define("RECAPTCHA_API_SERVER", "http://api.recaptcha.net");
 define("RECAPTCHA_API_SECURE_SERVER", "https://api-secure.recaptcha.net");
-// define("RECAPTCHA_VERIFY_SERVER", "api-verify.recaptcha.net");
 
 /**
  * Encodes the given data into a query string format
  * @param $data - array of string elements to be encoded
  * @return string - encoded request
  */
-function _recaptcha_qsencode ($data) {
+function _recaptcha_qsencode($data) {
   $req = "";
-  foreach ( $data as $key => $value )
-    $req .= $key . '=' . urlencode( stripslashes($value) ) . '&';
+  foreach ($data as $key => $value)
+    $req .= $key . '=' . urlencode(stripslashes($value)) . '&';
 
   // Cut the last '&'
   $req=substr($req,0,strlen($req)-1);
   return $req;
 }
-
-
 
 /**
  * Submits an HTTP POST to a reCAPTCHA server
@@ -76,14 +73,15 @@ function _recaptcha_http_post($host, $path, $data, $port = 80) {
   $http_request .= $req;
 
   $response = '';
-  if( false == ( $fs = @fsockopen($host, $port, $errno, $errstr, 10) ) ) {
-          die ('Could not open socket');
+  if(false == ($fs = @fsockopen($host, $port, $errno, $errstr, 10))) {
+     die('Could not open socket');
   }
 
   fwrite($fs, $http_request);
 
-  while ( !feof($fs) )
-          $response .= fgets($fs, 1160); // One TCP-IP packet
+  while (!feof($fs))
+     $response .= fgets($fs, 1160); // One TCP-IP packet
+     
   fclose($fs);
   $response = explode("\r\n\r\n", $response, 2);
 
@@ -102,7 +100,7 @@ function _recaptcha_http_post($host, $path, $data, $port = 80) {
 
  * @return string - The HTML to be embedded in the user's form.
  */
-function recaptcha_get_html ($pubkey, $error = null, $use_ssl = false, $xhtml_compliant = false)
+function recaptcha_get_html($pubkey, $error = null, $use_ssl = false, $xhtml_compliant = false)
 {
 	if ($pubkey == null || $pubkey == '') {
 		die ("To use reCAPTCHA you must get an API key from <a href='http://recaptcha.net/api/getkey'>http://recaptcha.net/api/getkey</a>");
@@ -150,7 +148,6 @@ class ReCaptchaResponse {
    var $error;
 }
 
-
 /**
   * Calls an HTTP POST function to verify if the user's guess was correct
   * @param string $privkey
@@ -160,7 +157,7 @@ class ReCaptchaResponse {
   * @param array $extra_params an array of extra variables to post to the server
   * @return ReCaptchaResponse
   */
-function recaptcha_check_answer ($privkey, $remoteip, $challenge, $response, $extra_params = array())
+function recaptcha_check_answer($privkey, $remoteip, $challenge, $response, $extra_params = array())
 {
 	if ($privkey == null || $privkey == '') {
 		die ("To use reCAPTCHA you must get an API key from <a href='http://recaptcha.net/api/getkey'>http://recaptcha.net/api/getkey</a>");
@@ -191,11 +188,11 @@ function recaptcha_check_answer ($privkey, $remoteip, $challenge, $response, $ex
    $recaptcha_response = new ReCaptchaResponse();
 
    if (trim ($answers [0]) == 'true') {
-          $recaptcha_response->is_valid = true;
+      $recaptcha_response->is_valid = true;
    }
    else {
-          $recaptcha_response->is_valid = false;
-          $recaptcha_response->error = $answers [1];
+      $recaptcha_response->is_valid = false;
+      $recaptcha_response->error = $answers [1];
    }
    return $recaptcha_response;
 }
@@ -207,7 +204,7 @@ function recaptcha_check_answer ($privkey, $remoteip, $challenge, $response, $ex
  * @param string $domain The domain where the page is hosted
  * @param string $appname The name of your application
  */
-function recaptcha_get_signup_url ($domain = null, $appname = null) {
+function recaptcha_get_signup_url($domain = null, $appname = null) {
 	return "http://recaptcha.net/api/getkey?" .  _recaptcha_qsencode (array ('domain' => $domain, 'app' => $appname));
 }
 
@@ -223,14 +220,14 @@ function _recaptcha_aes_encrypt($val,$ky) {
 	if (! function_exists ("mcrypt_encrypt")) {
 		die ("To use reCAPTCHA Mailhide, you need to have the mcrypt php module installed.");
 	}
-	$mode=MCRYPT_MODE_CBC;   
-	$enc=MCRYPT_RIJNDAEL_128;
-	$val=_recaptcha_aes_pad($val);
+	$mode = MCRYPT_MODE_CBC;   
+	$enc = MCRYPT_RIJNDAEL_128;
+	$val = _recaptcha_aes_pad($val);
 	return mcrypt_encrypt($enc, $ky, $val, $mode, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
 }
 
 
-function _recaptcha_mailhide_urlbase64 ($x) {
+function _recaptcha_mailhide_urlbase64($x) {
 	return strtr(base64_encode ($x), '+/', '-_');
 }
 
@@ -253,7 +250,7 @@ function recaptcha_mailhide_url($pubkey, $privkey, $email) {
  * eg, given johndoe@example,com return ["john", "example.com"].
  * the email is then displayed as john...@example.com
  */
-function _recaptcha_mailhide_email_parts ($email) {
+function _recaptcha_mailhide_email_parts($email) {
 	$arr = preg_split("/@/", $email );
 
 	if (strlen ($arr[0]) <= 4) {

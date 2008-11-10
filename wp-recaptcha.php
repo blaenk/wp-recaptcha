@@ -152,7 +152,7 @@ COMMENT_FORM;
 
 // Hook the display_recaptcha function into WordPress
 if ($wpmu != 1)
-   add_action('register_form', 'display_recaptcha');
+   add_action('register_form', 'display_recaptcha', -1);
 else
    add_action('signup_extra_fields', 'display_recaptcha');
 
@@ -683,10 +683,8 @@ function recaptcha_dropdown_capabilities($select_name, $checked_value="") {
 	<h3>About reCAPTCHA</h3>
 	<p>reCAPTCHA is a free, accessible CAPTCHA service that helps to digitize books while blocking spam on your blog.</p>
 	
-	<p>reCAPTCHA asks commenters to retype two words scanned from a book to prove that they are a human. This verifies that they are not a spambot while also correcting the automatic scans of old books. So you get less spam, and the world gets accurately digitized books. Everybody wins! For details, visit
-	   the <a href="http://recaptcha.net/">reCAPTCHA website</a>.</p>
-   <p><strong>NOTE</strong>: If you are using some form of Cache plugin you will probably need to
-		flush/clear your cache for changes to take effect.</p>
+	<p>reCAPTCHA asks commenters to retype two words scanned from a book to prove that they are a human. This verifies that they are not a spambot while also correcting the automatic scans of old books. So you get less spam, and the world gets accurately digitized books. Everybody wins! For details, visit the <a href="http://recaptcha.net/">reCAPTCHA website</a>.</p>
+   <p><strong>NOTE</strong>: If you are using some form of Cache plugin you will probably need to flush/clear your cache for changes to take effect.</p>
    
 	<form name="form1" method="post" action="<?php echo $_SERVER['PHP_SELF'] . '?page=' . plugin_basename(__FILE__); ?>&updated=true">
 		<div class="submit">
@@ -712,7 +710,7 @@ function recaptcha_dropdown_capabilities($select_name, $checked_value="") {
 	    </td>
     </tr>
   	<tr valign="top">
-		<th scope="row">Comment Spam Options</th>
+		<th scope="row">Comment Options</th>
 		<td>
 			<!-- Show reCAPTCHA on the comment post -->
 			<big><input type="checkbox" name="re_comments" id="re_comments" value="1" <?php if($optionarray_def['re_comments'] == true){echo 'checked="checked"';} ?> /> <label for="re_comments">Enable reCAPTCHA for comments.</label></big>
@@ -742,7 +740,7 @@ function recaptcha_dropdown_capabilities($select_name, $checked_value="") {
 		</td>
 	</tr>
 	<tr valign="top">
-		<th scope="row">Registration Spam Options</th>
+		<th scope="row">Registration Options</th>
 		<td>
 			<!-- Show reCAPTCHA on the registration page -->
 			<big><input type="checkbox" name="re_registration" id="re_registration" value="1" <?php if($optionarray_def['re_registration'] == true){echo 'checked="checked"';} ?> /> <label for="re_registration">Enable reCAPTCHA on registration form.</label></big>
@@ -787,8 +785,8 @@ function recaptcha_dropdown_capabilities($select_name, $checked_value="") {
 	
 	<h3>About MailHide</h3>
 	<p><a href="http://mailhide.recaptcha.net/" title="mailhide email obfuscation">MailHide</a> uses reCAPTCHA to protect email adresses displayed on your blog from being harvested for spam.</p>
-	<p>Activating MailHide will make all post and comment text be filtered to shorten email addresses with a captcha'd link, hiding them from spambots looking for adresses. For example supp<a href="http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=" onclick="window.open('http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;" title="Reveal this e-mail address">...</a>@recaptcha.net.</p>
-	<p>MailHide also requires a public and private key which you can generate using the <a href="http://mailhide.recaptcha.net/apikey">key generation service</a>.</p>   
+	<p>Activating MailHide will automatically hide all emails in posts and comments from spam bots. For example, support@recaptcha.net would become supp<a href="http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=" onclick="window.open('http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;" title="Reveal this e-mail address">...</a>@recaptcha.net. There are also options below for choosing the text to show for hidden emails.</p>
+	<p>MailHide also requires a public and private key which you can generate using the <a href="http://mailhide.recaptcha.net/apikey">key generation service</a>.</p>
 	<table class="form-table">
 	<tr valign="top">
 	<th scope="row">MailHide Keys</th>
@@ -818,7 +816,7 @@ function recaptcha_dropdown_capabilities($select_name, $checked_value="") {
 		</div>
       <!-- Email Replacement Text -->
       <p class="re-keys">
-         <p>The following allows you to show the replaced links differently. Usually, you get something like this, supp<a href="http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=" onclick="window.open('http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;" title="Reveal this e-mail address">...</a>@recaptcha.net , where the email is broken up into two pieces and then a link with dots is placed in the middle. The <strong>Email Replacement Text</strong> value lets you choose what to name the link and then the <strong>Reveal Link Title</strong> value determines to text that is shown when the link is hovered over.</p>
+         <p>The following allows you to show the replaced links differently. Usually, you get something like this, supp<a href="http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=" onclick="window.open('http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;" title="Reveal this e-mail address">...</a>@recaptcha.net , where the email is broken up into two pieces and then a link with dots is placed in the middle. The <strong>Email Replacement Text</strong> value lets you choose what to name the link and then the <strong>Reveal Link Title</strong> value determines the text that is shown when the link is hovered over.</p>
          <p>For example, if the <strong>Email Replacement Text</strong> option is set to <strong>HIDDEN EMAIL</strong> and the <strong>Reveal Link Title</strong> option is set to <strong>Click here to reveal this address</strong>, then ALL emails will be hidden like this: <a href="http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=" onclick="window.open('http://mailhide.recaptcha.net/d?k=01a8k2oW96qNZ4JhiFx5zDRg==&amp;c=yifPREOOvfzA0o3dbnnwP8fy91UD8RL4SspHDIKHVRE=', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;" title="Click here to reveal this address">HIDDEN EMAIL</a></p>
          <p>If you want to maintain the default method of hiding emails then leave both boxes blank.</p>
          <label class="whch-key" for="mh_replace_link">EMail Replacement Text:</label>
@@ -833,8 +831,8 @@ function recaptcha_dropdown_capabilities($select_name, $checked_value="") {
    <th scope="row">Other Information</th>
    <td>
 		<!-- MailHide CSS -->
-		<p>CSS: You can style the hidden emails with the <strong>.emailrecaptcha</strong> CSS class in the <strong>recaptcha.css</strong> stylesheet in recaptcha's plugin folder or in your own stylesheet.</p>
-		<p> You can bypass email hiding for an address by enclosing it within <strong>[nohide][/nohide]</strong>.</p>
+		<p>CSS: You can style the hidden emails and much more in the <strong>recaptcha.css</strong> stylesheet in wp-recaptcha's plugin folder.</p>
+		<p>You can bypass email hiding for an address by enclosing it within <strong>[nohide][/nohide]</strong>, ex. [nohide]some@email.com[/nohide].</p>
 	</td>
 	</tr>
 	</table>
@@ -909,9 +907,7 @@ if (($recaptcha_opt['use_mailhide'] && !extension_loaded('mcrypt')) && !isset($_
 }
 
 // If MailHide is enabled but no keys have been entered
-if ($recaptcha_opt['use_mailhide'] &&
-    !($recaptcha_opt['mailhide_pub'] && $recaptcha_opt['mailhide_pub']) &&
-    !isset($_POST['submit'])) {
+if ($recaptcha_opt['use_mailhide'] && !($recaptcha_opt['mailhide_pub'] && $recaptcha_opt['mailhide_pub']) && !isset($_POST['submit'])) {
 	function mailhide_warning() {
 		global $wpmu;
 		
