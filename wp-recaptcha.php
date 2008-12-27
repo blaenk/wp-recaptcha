@@ -3,7 +3,7 @@
 Plugin Name: WP-reCAPTCHA
 Plugin URI: http://www.blaenkdenum.com/wp-recaptcha/
 Description: Integrates reCAPTCHA anti-spam solutions with wordpress
-Version: 2.9.2
+Version: 2.9.3
 Author: Jorge Peña
 Email: support@recaptcha.net
 Author URI: http://www.blaenkdenum.com
@@ -554,17 +554,23 @@ function recaptcha_wp_relative_redirect($location, $comment) {
  * @return boolean $approved
  */
 function recaptcha_wp_saved_comment() {
-	if (!is_single() && !is_page())
-		return;
+   if (!is_single() && !is_page())
+      return;
 
-	if ($_GET['rcommentid'] && $_GET['rchash'] == recaptcha_wp_hash_comment ($_GET['rcommentid'])) {
-		$comment = get_comment($_GET['rcommentid']);
-		echo "<script type='text/javascript'>
-		var _recaptcha_wordpress_savedcomment =  '" . preg_replace('/([\<\>\/\(\)\+\;\'\"])/e', '\'%\'.dechex(ord(\'$1\'))', $comment->comment_content) ."';
-			_recaptcha_wordpress_savedcomment = unescape(_recaptcha_wordpress_savedcomment);
-				</script>";
-		wp_delete_comment($comment->comment_ID);
-	}
+   if ($_GET['rcommentid'] && $_GET['rchash'] == recaptcha_wp_hash_comment ($_GET['rcommentid'])) {
+      $comment = get_comment($_GET['rcommentid']);
+
+      $com = preg_replace('/([\\/\(\)\+\;\'\"])/e','\'%\'.dechex(ord(\'$1\'))', $comment->comment_content);
+      $com = preg_replace('/\\r\\n/m', '\\\n', $com);
+
+      echo "
+      var _recaptcha_wordpress_savedcomment =  '" . $com  ."';
+
+      _recaptcha_wordpress_savedcomment = unescape(_recaptcha_wordpress_savedcomment);
+      ";
+
+      wp_delete_comment($comment->comment_ID);
+   }
 }
 
 function recaptcha_wp_blog_domain () {
