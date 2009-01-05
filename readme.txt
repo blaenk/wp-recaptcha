@@ -4,7 +4,7 @@ Donate link: http://www.blaenkdenum.com
 Tags: comments, registration, recaptcha, antispam, mailhide, captcha, wpmu
 Requires at least: 2.1
 Tested up to: 2.7
-Stable tag: 2.9.3
+Stable tag: 2.9.4
 
 Integrates reCAPTCHA anti-spam methods with WordPress including comment, registration, and email spam protection. WPMU Compatible.
 
@@ -51,6 +51,8 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 
 == ChangeLog ==
 
+= Version 2.9.4 =
+* Fixed a bug where the comment would not be saved if the CAPTCHA wasn't entered correctly. Thanks to Justin Heideman.
 = Version 2.9.3 =
 * Fixed the `recaptcha_wp_saved_comment` function. Thanks to Tomi M.
 = Version 2.9.2 =
@@ -76,6 +78,7 @@ There are three common issues that make reCAPTCHA appear to be broken:
 1. **Moderation Emails**: reCAPTCHA marks comments as spam, so even though the comments don't actually get posted, you will be notified of what is supposedly new spam. It is recommended to turn off moderation emails with reCAPTCHA.
 1. **Akismet Spam Queue**: Again, because reCAPTCHA marks comments with a wrongly entered CAPTCHA as spam, they are added to the spam queue. These comments however weren't posted to the blog so reCAPTCHA is still doing it's job. It is recommended to either ignore the Spam Queue and clear it regularly or disable Akismet completely. reCAPTCHA takes care of all of the spam created by bots, which is the usual type of spam. The only other type of spam that would get through is human spam, where humans are hired to manually solve CAPTCHAs. If you still get spam while only having reCAPTCHA enabled, you could be a victim of the latter practice. If this is the case, then turning on Akismet will most likely solve your problem. Again, just because it shows up in the Spam Queue does NOT mean that spam is being posted to your blog, it's more of a 'comments that have been caught as spam by reCAPTCHA' queue.
 1. **Trackbacks and Pingbacks**: reCAPTCHA can't do anything about pingbacks and trackbacks. You can disable pingbacks and trackbacks in Options > Discussion > Allow notifications from other Weblogs (Pingbacks and trackbacks).
+1. **Why am I getting “Warning: pack() [function.pack]: Type H: illegal hex digit”?**: You have the keys in the wrong place. Remember, the reCAPTCHA keys are different from the MailHide keys. And the Public keys are different from the Private keys as well. You can’t mix them around. Go through your keys and make sure you have them each in the correct box.
 
 = Aren't you increasing the time users spend solving CAPTCHAs by requiring them to type two words instead of one? =
 Actually, no. Most CAPTCHAs on the Web ask users to enter strings of random characters, which are slower to type than English words. reCAPTCHA requires no more time to solve than most other CAPTCHAs.
