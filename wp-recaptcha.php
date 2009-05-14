@@ -3,7 +3,7 @@
 Plugin Name: WP-reCAPTCHA
 Plugin URI: http://www.blaenkdenum.com/wp-recaptcha/
 Description: Integrates reCAPTCHA anti-spam solutions with wordpress
-Version: 2.9.4
+Version: 2.9.5
 Author: Jorge Peña
 Email: support@recaptcha.net
 Author URI: http://www.blaenkdenum.com
@@ -70,10 +70,10 @@ function registration_css() {
           $recaptcha_opt['re_theme_reg'] == 'blackglass')
           $width = 358;
 		else if ($recaptcha_opt['re_theme_reg'] == 'clean')
-         $width = 485;
+          $width = 485;
 		
 		echo <<<REGISTRATION
-		<style>
+		<style type="text/css">
 		#login {
 				width: {$width}px !important;
 		}
@@ -202,27 +202,32 @@ function check_recaptcha_new($errors) {
 function check_recaptcha_wpmu($result) {
    global $_POST, $recaptcha_opt;
    
-   // It's blogname in 2.6, blog_id prior to that
-   if (isset($_POST['blog_id']) || isset($_POST['blogname']))
-		return $result;
-   
-   // no text entered
-   if (empty($_POST['recaptcha_response_field']) || $_POST['recaptcha_response_field'] == '') {
-		$result['errors']->add('blank_captcha', $recaptcha_opt['error_blank']);
-		return $result;
-   }
-   
-	$response = recaptcha_check_answer($recaptcha_opt['privkey'],
-      $_SERVER['REMOTE_ADDR'],
-      $_POST['recaptcha_challenge_field'],
-      $_POST['recaptcha_response_field'] );
+   // must make a check here, otherwise the wp-admin/user-new.php script will keep trying to call
+   // this function despite not having called do_action('signup_extra_fields'), so the recaptcha
+   // field was never shown. this way it won't validate if it's called in the admin interface
+   if (!is_admin()) {
+         // It's blogname in 2.6, blog_id prior to that
+      if (isset($_POST['blog_id']) || isset($_POST['blogname']))
+      	return $result;
 
-   // incorrect CAPTCHA
-	if (!$response->is_valid)
-		if ($response->error == 'incorrect-captcha-sol') {
-			$result['errors']->add('captcha_wrong', $recaptcha_opt['error_incorrect']);
-         echo "<div class=\"error\">". $recaptcha_opt['error_incorrect'] . "</div>";
-		}
+      // no text entered
+      if (empty($_POST['recaptcha_response_field']) || $_POST['recaptcha_response_field'] == '') {
+      	$result['errors']->add('blank_captcha', $recaptcha_opt['error_blank']);
+      	return $result;
+      }
+
+      $response = recaptcha_check_answer($recaptcha_opt['privkey'],
+         $_SERVER['REMOTE_ADDR'],
+         $_POST['recaptcha_challenge_field'],
+         $_POST['recaptcha_response_field'] );
+
+      // incorrect CAPTCHA
+      if (!$response->is_valid)
+      	if ($response->error == 'incorrect-captcha-sol') {
+      		$result['errors']->add('captcha_wrong', $recaptcha_opt['error_incorrect']);
+            echo "<div class=\"error\">". $recaptcha_opt['error_incorrect'] . "</div>";
+      	}
+   }
    
    return $result;
 }
@@ -439,7 +444,7 @@ OPTS;
 
 		if ($recaptcha_opt['re_xhtml']) {
 		$comment_string = <<<COMMENT_FORM
-				<div id="recaptcha-submit-btn-area"></div>
+				<div id="recaptcha-submit-btn-area"><br /></div>
 				<script type='text/javascript'>
 				var sub = document.getElementById('submit');
 				sub.parentNode.removeChild(sub);
@@ -702,7 +707,7 @@ function recaptcha_dropdown_capabilities($select_name, $checked_value="") {
 	<p>reCAPTCHA asks commenters to retype two words scanned from a book to prove that they are a human. This verifies that they are not a spambot while also correcting the automatic scans of old books. So you get less spam, and the world gets accurately digitized books. Everybody wins! For details, visit the <a href="http://recaptcha.net/">reCAPTCHA website</a>.</p>
    <p><strong>NOTE</strong>: If you are using some form of Cache plugin you will probably need to flush/clear your cache for changes to take effect.</p>
    
-	<form name="form1" method="post" action="<?php echo $_SERVER['PHP_SELF'] . '?page=' . plugin_basename(__FILE__); ?>&updated=true">
+	<form name="form1" method="post" action="<?php echo $_SERVER['REDIRECT_SCRIPT_URI'] . '?page=' . plugin_basename(__FILE__); ?>&updated=true">
 		<div class="submit">
 			<input type="submit" name="submit" value="<?php _e('Update Options') ?> &raquo;" />
 		</div>
