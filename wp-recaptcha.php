@@ -640,16 +640,16 @@ function recaptcha_wp_options_subpanel() {
 	/* Check form submission and update options if no error occurred */
 	if (isset($_POST['submit'])) {
 		$optionarray_update = array (
-		'pubkey'	=> $_POST['recaptcha_opt_pubkey'],
-		'privkey'	=> $_POST['recaptcha_opt_privkey'],
+		'pubkey'	=> trim($_POST['recaptcha_opt_pubkey']),
+		'privkey'	=> trim($_POST['recaptcha_opt_privkey']),
 		'use_mailhide_posts' => $_POST['use_mailhide_posts'],
 		'use_mailhide_comments' => $_POST['use_mailhide_comments'],
 		'use_mailhide_rss' => $_POST['use_mailhide_rss'],
 		'use_mailhide_rss_comments' => $_POST['use_mailhide_rss_comments'],
 		're_bypass' => $_POST['re_bypass'],
 		're_bypasslevel' => $_POST['re_bypasslevel'],
-		'mailhide_pub' => $_POST['mailhide_pub'],
-		'mailhide_priv' => $_POST['mailhide_priv'],
+		'mailhide_pub' => trim($_POST['mailhide_pub']),
+		'mailhide_priv' => trim($_POST['mailhide_priv']),
 		'mh_bypass' => $_POST['mh_bypass'],
 		'mh_bypasslevel' => $_POST['mh_bypasslevel'],
 		're_theme' => $_POST['re_theme'],
