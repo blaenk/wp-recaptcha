@@ -254,7 +254,10 @@ if ($recaptcha_opt['re_registration']) {
 $option_defaults = array (
    'pubkey'	=> '', // the public key for reCAPTCHA
    'privkey'	=> '', // the private key for reCAPTCHA
-   'use_mailhide' => '0', // whether or not to use mailhide
+   'use_mailhide_posts' => '0', // mailhide for posts/pages
+   'use_mailhide_comments' => '0', // use mailhide for comments
+   'use_mailhide_rss' => '0', // use mailhide for the rss feed of the posts/pages
+   'use_mailhide_rss_comments' => '0', // use mailhide for the rss comments
    're_bypass' => '', // whether to sometimes skip reCAPTCHAs for registered users
    're_bypasslevel' => '', // who doesn't have to do the reCAPTCHA (should be a valid WordPress capability slug)
    'mh_bypass' => '', // whether to sometimes skip the MailHide filter for registered users
@@ -348,7 +351,7 @@ function mh_replace($matches) {
    global $recaptcha_opt;
    
    if ($recaptcha_opt['mh_replace_link'] == "" && $recaptcha_opt['mh_replace_title'] == "") {
-      // fine plain text emails and hide them
+      // find plain text emails and hide them
       $html = recaptcha_mailhide_html($recaptcha_opt['mailhide_pub'], $recaptcha_opt['mailhide_priv'], $matches[1]);
    }
    
@@ -384,11 +387,15 @@ function mh_replace($matches) {
 }
 
 // add the filters only if mcrypt is loaded
-if ($recaptcha_opt['use_mailhide'] && extension_loaded('mcrypt')) {
-   add_filter('the_content', 'mh_insert_email'); // For posts/pages
-   add_filter('get_comment_text', 'mh_insert_email'); // For comments
-   add_filter('the_content_rss', 'mh_insert_email'); // For RSS
-   add_filter('comment_text_rss', 'mh_insert_email'); // For RSS Comments
+if (extension_loaded('mcrypt')) {
+   if ($recaptcha_opt['use_mailhide_posts'])
+      add_filter('the_content', 'mh_insert_email');
+   if ($recaptcha_opt['use_mailhide_comments'])
+      add_filter('get_comment_text', 'mh_insert_email');
+   if ($recaptcha_opt['use_mailhide_rss'])
+      add_filter('the_content_rss', 'mh_insert_email');
+   if ($recaptcha_opt['use_mailhide_rss_comments'])
+      add_filter('comment_text_rss', 'mh_insert_email');
 }
 
 /* =============================================================================
@@ -606,7 +613,10 @@ function recaptcha_wp_options_subpanel() {
 	$optionarray_def = array(
 		'pubkey'	=> '',
 		'privkey' 	=> '',
-		'use_mailhide' => '',
+		'use_mailhide_posts' => '',
+		'use_mailhide_comments' => '',
+		'use_mailhide_rss' => '',
+		'use_mailhide_rss_comments' => '',
 		're_bypasslevel' => '3',
 		'mh_bypasslevel' => '3',
 		'mailhide_pub' => '',
@@ -632,7 +642,10 @@ function recaptcha_wp_options_subpanel() {
 		$optionarray_update = array (
 		'pubkey'	=> $_POST['recaptcha_opt_pubkey'],
 		'privkey'	=> $_POST['recaptcha_opt_privkey'],
-		'use_mailhide' => $_POST['use_mailhide'],
+		'use_mailhide_posts' => $_POST['use_mailhide_posts'],
+		'use_mailhide_comments' => $_POST['use_mailhide_comments'],
+		'use_mailhide_rss' => $_POST['use_mailhide_rss'],
+		'use_mailhide_rss_comments' => $_POST['use_mailhide_rss_comments'],
 		're_bypass' => $_POST['re_bypass'],
 		're_bypasslevel' => $_POST['re_bypasslevel'],
 		'mailhide_pub' => $_POST['mailhide_pub'],
@@ -829,8 +842,11 @@ function recaptcha_dropdown_capabilities($select_name, $checked_value="") {
 	<th scope="row">MailHide Keys</th>
 	<td>
 		<!-- MailHide Enabler -->
-		<big><input type="checkbox" name="use_mailhide" id="use_mailhide" value="1" <?php if($optionarray_def['use_mailhide'] == true){echo 'checked="checked"';} ?> /> <label for="use_mailhide">Enable MailHide email obfuscation</label></big>
-		<br />
+		<big>Enable MailHide email obfuscation for:</big><br />
+		   <input type="checkbox" name="use_mailhide_posts" id="use_mailhide_posts" value="1" <?php if($optionarray_def['use_mailhide_posts'] == true){echo 'checked="checked"';} ?> /><label for="use_mailhide_posts">Posts/Pages</label><br />
+		   <input type="checkbox" name="use_mailhide_comments" id="use_mailhide_comments" value="1" <?php if($optionarray_def['use_mailhide_comments'] == true){echo 'checked="checked"';} ?> /><label for="use_mailhide_comments">Comments</label><br />
+		   <input type="checkbox" name="use_mailhide_rss" id="use_mailhide_rss" value="1" <?php if($optionarray_def['use_mailhide_rss'] == true){echo 'checked="checked"';} ?> /><label for="use_mailhide_rss">RSS Feed of Posts/Pages</label><br />
+		   <input type="checkbox" name="use_mailhide_rss_comments" id="use_mailhide_rss_comments" value="1" <?php if($optionarray_def['use_mailhide_rss_comments'] == true){echo 'checked="checked"';} ?> /><label for="use_mailhide_rss_comments">RSS Feed of Comments</label><br />
 		<!-- Public Key -->
 		<p class="re-keys">
 			<label class="which-key" for="mailhide_pub">Public Key:</label>
@@ -917,8 +933,10 @@ if ( !($recaptcha_opt ['pubkey'] && $recaptcha_opt['privkey'] ) && !isset($_POST
    return;
 }
 
+$mailhide_enabled = ($recaptcha_opt['use_mailhide_posts'] || $recaptcha_opt['use_mailhide_comments'] || $recaptcha_opt['use_mailhide_rss'] || $recaptcha_opt['use_mailhide_rss_comments']);
+
 // If the mcrypt PHP module isn't loaded then display an alert
-if (($recaptcha_opt['use_mailhide'] && !extension_loaded('mcrypt')) && !isset($_POST['submit'])) {
+if (($mailhide_enabled && !extension_loaded('mcrypt')) && !isset($_POST['submit'])) {
    function mcrypt_warning() {
 		global $wpmu;
 		
@@ -944,7 +962,7 @@ if (($recaptcha_opt['use_mailhide'] && !extension_loaded('mcrypt')) && !isset($_
 }
 
 // If MailHide is enabled but no keys have been entered
-if ($recaptcha_opt['use_mailhide'] && !($recaptcha_opt['mailhide_pub'] && $recaptcha_opt['mailhide_pub']) && !isset($_POST['submit'])) {
+if ($mailhide_enabled && !($recaptcha_opt['mailhide_pub'] && $recaptcha_opt['mailhide_pub']) && !isset($_POST['submit'])) {
 	function mailhide_warning() {
 		global $wpmu;
 		

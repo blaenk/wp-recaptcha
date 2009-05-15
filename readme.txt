@@ -52,6 +52,7 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 == ChangeLog ==
 
 = Version 2.9.5 =
+* Added flexibility to the enabling of MailHide. Can now separately choose to enable/disable MailHide for posts/pages, comments, RSS feed of posts/pages, and RSS feed of comments
 * Fixed an ['endless redirection' bug](http://wordpress.org/support/topic/245154?replies=1 endless redirection in wp-reCAPTCHA options form) thanks to Edilton Siqueira
 * Fixed a bug in WPMU where wp-admin/user-new.php kept trying to validate the user registration with reCAPTCHA information despite not having shown the reCAPTCHA form, thanks to [Daniel Collis-Puro](http://blogs.law.harvard.edu/ Weblogs at Harvard Law School) for letting me know
 * Added a line break after the reCAPTCHA form to add some padding space between it and the submit button. Due to [popular demand](http://www.chriscredendino.com/2009/03/08/adding-space-between-recaptcha-and-the-comment-submit-button-on-wordpress/ Adding space between reCAPTCHA and the comment Submit Button on WordPress)
