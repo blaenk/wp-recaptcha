@@ -95,7 +95,6 @@ REGISTRATION;
 
 add_action('wp_head', 're_css'); // include the stylesheet in typical pages to style hidden emails
 add_action('admin_head', 're_css'); // include stylesheet to style options page
-add_action('login_head', 're_css'); // include stylesheet to style reCAPTCHA on registration page
 add_action('login_head', 'registration_css'); // include the login div styling, embedded
 
 /* =============================================================================
@@ -292,7 +291,7 @@ function mh_insert_email($content = '') {
    global $recaptcha_opt;
   
    // set the minimum capability needed to skip the MailHide if there is one
-   if ($recaptcha_opt['mh_bypass'] AND $recaptcha_opt['mh_bypasslevel'])
+   if ($recaptcha_opt['mh_bypass'] && $recaptcha_opt['mh_bypasslevel'])
       $needed_capability = $recaptcha_opt['mh_bypasslevel'];
         
 	// skip the MailHide display if the minimum capability is met
@@ -308,7 +307,7 @@ function mh_insert_email($content = '') {
    $regex = '%(?<!\\[nohide\\])<a[^>]*href="(?:mailto:)?([^@"]+@[^@"]+)"[^>]*>(.+?)<\\/a>(?!\\[/nohide\\])%i';
    $content = preg_replace_callback($regex, "mh_replace_hyperlink", $content);
    
-   // match emails
+   // match emails \b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b
    $regex = '%\\b([\\w.+-]+@[a-z\\d.-]+\\.[a-z]{2,6})\\b(?!\\s*\\[\\/nohide\\]|(?:(?!<a[^>]*>).)*<\\/a>)%iU';
    $content = preg_replace_callback($regex, "mh_replace", $content);
    
@@ -322,7 +321,7 @@ function mh_replace_hyperlink($matches) {
    global $recaptcha_opt;
    
    // set the minimum capability needed to skip the MailHide if there is one
-   if ($recaptcha_opt['mh_bypass'] AND $recaptcha_opt['mh_bypasslevel'])
+   if ($recaptcha_opt['mh_bypass'] && $recaptcha_opt['mh_bypasslevel'])
       $needed_capability = $recaptcha_opt['mh_bypasslevel'];
         
 	// skip the MailHide display if the minimum capability is met
@@ -423,7 +422,7 @@ function recaptcha_comment_form() {
    global $user_ID, $recaptcha_opt;
 
    // set the minimum capability needed to skip the captcha if there is one
-   if ($recaptcha_opt['re_bypass'] AND $recaptcha_opt['re_bypasslevel'])
+   if ($recaptcha_opt['re_bypass'] && $recaptcha_opt['re_bypasslevel'])
       $needed_capability = $recaptcha_opt['re_bypasslevel'];
 
 	// skip the reCAPTCHA display if the minimum capability is met
@@ -506,7 +505,7 @@ function recaptcha_wp_check_comment($comment_data) {
 	global $recaptcha_saved_error;
    	
    // set the minimum capability needed to skip the captcha if there is one
-   if ($recaptcha_opt['re_bypass'] AND $recaptcha_opt['re_bypasslevel'])
+   if ($recaptcha_opt['re_bypass'] && $recaptcha_opt['re_bypasslevel'])
       $needed_capability = $recaptcha_opt['re_bypasslevel'];
         
 	// skip the filtering if the minimum capability is met
