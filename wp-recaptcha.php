@@ -307,11 +307,11 @@ function mh_insert_email($content = '') {
    // Regular Expressions thanks to diabolic from EFNet #regex
    
    // match hyperlinks with emails
-   $regex = '%(?<!\\[nohide\\])<a[^>]*href="(?:mailto:)?([^@"]+@[^@"]+)"[^>]*>(.+?)<\\/a>(?!\\[/nohide\\])%i';
+   $regex = '%(?<!\[nohide\])<a[^>]*href="((?:mailto:)?([^@"]+@[^@"]+))"[^>]*>(.+?)<\/a>(?!\[/nohide\])%i';
    $content = preg_replace_callback($regex, "mh_replace_hyperlink", $content);
    
-   // match emails \b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b
-   $regex = '%\\b([\\w.+-]+@[a-z\\d.-]+\\.[a-z]{2,6})\\b(?!\\s*\\[\\/nohide\\]|(?:(?!<a[^>]*>).)*<\\/a>)%iU';
+   // match emails
+   $regex = '%\b([\w.+-]+@[a-z\d.-]+\.[a-z]{2,6})\b(?!\s*\[\/nohide\]|(?:(?!<a[^>]*>).)*<\/a>)%i';
    $content = preg_replace_callback($regex, "mh_replace", $content);
    
    // remove the nohides
@@ -335,10 +335,10 @@ function mh_replace_hyperlink($matches) {
    }
    
    // get the url, the part inside the href. this is the email of course
-   $url = recaptcha_mailhide_url($recaptcha_opt['mailhide_pub'], $recaptcha_opt['mailhide_priv'], $matches[1]);
+   $url = recaptcha_mailhide_url($recaptcha_opt['mailhide_pub'], $recaptcha_opt['mailhide_priv'], $matches[2]);
    
    // construct a new hyperlink with the url hidden but the link text the same
-   $html = "<a href='" . $url . "' onclick=\"window.open('" . htmlentities ($url, ENT_QUOTES) . "', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;\">" . $matches[2] . "</a>";
+   $html = "<a href='" . $url . "' onclick=\"window.open('" . htmlentities ($url, ENT_QUOTES) . "', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;\">" . $matches[3] . "</a>";
    
    // style it
    $html = '<span class="mh-hyperlinked">' . $html . "</span>";
@@ -350,9 +350,11 @@ function mh_replace_hyperlink($matches) {
 function mh_replace($matches) {
    global $recaptcha_opt;
    
+   # var_dump($matches);
+   
    if ($recaptcha_opt['mh_replace_link'] == "" && $recaptcha_opt['mh_replace_title'] == "") {
       // find plain text emails and hide them
-      $html = recaptcha_mailhide_html($recaptcha_opt['mailhide_pub'], $recaptcha_opt['mailhide_priv'], $matches[1]);
+      $html = recaptcha_mailhide_html($recaptcha_opt['mailhide_pub'], $recaptcha_opt['mailhide_priv'], $matches[0]);
    }
    
    else {
@@ -376,7 +378,7 @@ function mh_replace($matches) {
          $emailparts = _recaptcha_mailhide_email_parts ($matches[1]);
       	
       	$html = htmlentities($emailparts[0], ENT_QUOTES) . "<a href='" . htmlentities($url, ENT_QUOTES) .
-      		"' onclick=\"window.open('" . htmlentities($url, ENT_QUOTES) . "', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;\" title=\"" . $recaptcha_opt['mh_replace_title'] . "\">...</a>@" . htmlentities($emailparts[1], ENT_QUOTES);
+      		"' onclick=\"window.open('" . htmlentities($url, ENT_QUOTES) . "', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;\" title=\"" . $recaptcha_opt['mh_replace_title'] . "\">...</a>@" . htmlentities($emailparts[0], ENT_QUOTES);
       }
    }
    
