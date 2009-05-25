@@ -20,7 +20,7 @@ reCAPTCHA has earned a very prestigious reputation among the various CAPTCHA sys
 
 This plugin is [WordPress MU](http://mu.wordpress.org/) compatible.
 
-For more information please view the [plugin page](http://www.blaenkdenum.com/wp-recaptcha "WP-reCAPTCHA - Blaenk Denum")..
+For more information please view the [plugin page](http://www.blaenkdenum.com/wp-recaptcha/ "WP-reCAPTCHA - Blaenk Denum")..
 
 == Installation ==
 
@@ -53,10 +53,10 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 
 = Version 2.9.5 =
 * Added flexibility to the enabling of MailHide. Can now separately choose to enable/disable MailHide for posts/pages, comments, RSS feed of posts/pages, and RSS feed of comments
-* Fixed an ['endless redirection' bug](http://wordpress.org/support/topic/245154?replies=1 endless redirection in wp-reCAPTCHA options form) thanks to Edilton Siqueira
-* Fixed a bug in WPMU where wp-admin/user-new.php kept trying to validate the user registration with reCAPTCHA information despite not having shown the reCAPTCHA form, thanks to [Daniel Collis-Puro](http://blogs.law.harvard.edu/ Weblogs at Harvard Law School) for letting me know
-* Added a line break after the reCAPTCHA form to add some padding space between it and the submit button. Due to [popular demand](http://www.chriscredendino.com/2009/03/08/adding-space-between-recaptcha-and-the-comment-submit-button-on-wordpress/ Adding space between reCAPTCHA and the comment Submit Button on WordPress)
-* Fixed a validation problem where a style attribute was missing. Thanks to [nv1962](http://wordpress.org/support/profile/304093 nv1962's profile)
+* Fixed an ['endless redirection' bug](http://wordpress.org/support/topic/245154?replies=1 "endless redirection in wp-reCAPTCHA options form") thanks to Edilton Siqueira
+* Fixed a bug in WPMU where wp-admin/user-new.php kept trying to validate the user registration with reCAPTCHA information despite not having shown the reCAPTCHA form, thanks to [Daniel Collis-Puro](http://blogs.law.harvard.edu/ "Weblogs at Harvard Law School") for letting me know
+* Added a line break after the reCAPTCHA form to add some padding space between it and the submit button. Due to [popular demand](http://www.chriscredendino.com/2009/03/08/adding-space-between-recaptcha-and-the-comment-submit-button-on-wordpress/ "Adding space between reCAPTCHA and the comment Submit Button on WordPress")
+* Fixed a validation problem where a style attribute was missing. Thanks to [nv1962](http://wordpress.org/support/profile/304093 "nv1962's profile")
 * Public and Private keys are now trimmed since they are usually pasted from the recaptcha site, to avoid any careless errors
 * Fixed the regular expressions for matching the emails, email@provider.co.uk type emails now work
 = Version 2.9.4 =
