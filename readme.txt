@@ -51,6 +51,9 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 
 == ChangeLog ==
 
+= Version 2.9.6 =
+* Fixed a careless bug affecting custom hidden emails
+* Fixed broken links in readme.txt
 = Version 2.9.5 =
 * Added flexibility to the enabling of MailHide. Can now separately choose to enable/disable MailHide for posts/pages, comments, RSS feed of posts/pages, and RSS feed of comments
 * Fixed an ['endless redirection' bug](http://wordpress.org/support/topic/245154?replies=1 "endless redirection in wp-reCAPTCHA options form") thanks to Edilton Siqueira
