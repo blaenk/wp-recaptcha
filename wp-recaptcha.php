@@ -36,7 +36,7 @@ else
 // END WORDPRESS MU DETECTION
    
 if ($wpmu == 1)
-   require_once(WP_CONTENT_DIR . '/wp-plugins/wp-recaptcha/recaptchalib.php');
+   require_once(WP_CONTENT_DIR . '/mu-plugins/wp-recaptcha/recaptchalib.php');
 else
    require_once(WP_CONTENT_DIR . '/plugins/recaptchalib.php');
 
