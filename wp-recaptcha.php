@@ -21,7 +21,7 @@ Author URI: http://www.blaenkdenum.com
 
 $wpmu = 0;
 
-if(is_dir(WP_CONTENT_DIR . 'mu-plugins')){
+if(is_dir(WP_CONTENT_DIR . '/mu-plugins')){
 	if (is_file(WP_CONTENT_DIR . '/mu-plugins/wp-recaptcha.php')) // forced activated
 	   $wpmu = 1;
 	else if (is_file(WP_CONTENT_DIR . '/plugins/wp-recaptcha.php')) // optionally activated
