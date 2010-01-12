@@ -40,6 +40,10 @@ if (!class_exists('recaptcha')) {
                 $this->wordpress_mu = false;
             }
         }
+        
+        public function is_wordpress_mu() {
+            return $wordpress_mu;
+        }
 		
 		// retrieve the options
 		function retrieve_options() {
@@ -437,6 +441,7 @@ COMMENT_FORM;
             }
         }
         
+        // store the xhtml in a separate file and use include on it
         function settings_page() {
             ?>
             

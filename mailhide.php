@@ -48,19 +48,4 @@ function insert_email() {
     return $content;
 }
 
-// in main file:
-
-// create the actual instance
-if (class_exists("recaptcha")) {
-	$recaptcha = new recaptcha();
-}
-
-// register the actions and filters using the created instance
-if (isset($recaptcha)) {
-	//Actions
-	add_action('hook', array(&recaptcha, 'func_name'), priority_level);
-	
-	//Filters
-}
-
 ?>
