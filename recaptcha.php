@@ -1,7 +1,5 @@
 <?php
 
-define ("RECAPTCHA_WP_HASH_SALT", "b7e0638d85f5d7f3694f68e944136d62");
-
 if (!class_exists('reCAPTCHA')) {
     class reCAPTCHA {
         // member variables
@@ -53,7 +51,7 @@ if (!class_exists('reCAPTCHA')) {
         function retrieve_options() {
             if ($this->wordpress_mu)
                 $this->options = get_site_option('recaptcha_options');
-                
+
             else
                 $this->options = get_option('recaptcha_options');
         }
