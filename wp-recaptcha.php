@@ -24,43 +24,57 @@ if (isset($recaptcha)) {
 	// Actions
 	
 	// styling
-	add_action('wp_head', array(&recaptcha, 'register_stylesheets')); // make unnecessary: instead, inform of classes for styling
-    add_action('admin_head', array(&recaptcha, 'register_stylesheets')); // make unnecessary: shouldn't require styling in the options page
-    add_action('login_head', array(&recaptcha, 'register_stylesheets')); // make unnecessary: instead use jQuery and add to the footer?
+	add_action('wp_head', array(&$recaptcha, 'register_stylesheets')); // make unnecessary: instead, inform of classes for styling
+    add_action('admin_head', array(&$recaptcha, 'register_stylesheets')); // make unnecessary: shouldn't require styling in the options page
+    add_action('login_head', array(&$recaptcha, 'register_stylesheets')); // make unnecessary: instead use jQuery and add to the footer?
     
     // options
     register_activation_hook(__FILE__, 'register_default_options'); // this way it only happens once, when the plugin is activated
     
     // recaptcha form display
     if ($recaptcha->is_wordpress_mu())
-        add_action('signup_extra_fields', array(&recaptcha, 'show_recaptcha_form'));
+        add_action('signup_extra_fields', array(&$recaptcha, 'show_recaptcha_form'));
     else
-        add_action('register_form', array(&recaptcha, 'show_recaptcha_form'));
+        add_action('register_form', array(&$recaptcha, 'show_recaptcha_form'));
     
-    add_action('comment_form', array(&recaptcha, 'recaptcha_comment_form'));
+    add_action('comment_form', array(&$recaptcha, 'recaptcha_comment_form'));
     
     // recaptcha comment processing (look into doing all of this with AJAX, optionally)
-    add_action('wp_head', array(&recaptcha, 'saved_comment'));
-    add_action('preprocess_comment', array(&recaptcha, 'check_comment'));
-    add_action('comment_post_redirect', array(&recaptcha, 'relative_redirect'));
+    add_action('wp_head', array(&$recaptcha, 'saved_comment'));
+    add_action('preprocess_comment', array(&$recaptcha, 'check_comment'));
+    add_action('comment_post_redirect', array(&$recaptcha, 'relative_redirect'));
     
     // administration (menus, pages, notifications, etc.)
     $plugin = plugin_basename(__FILE__);
-    add_filter("plugin_action_links_$plugin", array(&recaptcha, 'settings_link'));
+    add_filter("plugin_action_links_$plugin", array(&$recaptcha, 'settings_link'));
     
     // add the options page
     if ($recaptcha->is_wordpress_mu() && is_site_admin())
-        add_submenu_page('wpmu-admin.php', 'WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, array(&recaptcha, 'settings_page'));
+        add_submenu_page('wpmu-admin.php', 'WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, array(&$recaptcha, 'settings_page'));
     
-    add_options_page('WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, array(&recaptcha, 'settings_page'));
+    add_options_page('WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, array(&$recaptcha, 'settings_page'));
     
     // Filters
     
 	// recaptcha validation
 	if ($recaptcha->is_wordpress_mu())
-	    add_filter('wpmu_validate_user_signup', array(&recaptcha, 'validate_response_wpmu'));
+	    add_filter('wpmu_validate_user_signup', array(&$recaptcha, 'validate_response_wpmu'));
 	else
-	    add_filter('registration_errors', array(&recaptcha, 'validate_response'));
+	    add_filter('registration_errors', array(&$recaptcha, 'validate_response'));
+}
+
+function is_wordpress_mu() {
+    // is it wordpress mu?
+    if (is_dir(WP_CONTENT_DIR . '/mu-plugins')) {
+        // is it site-wide?
+    	if (is_file(WP_CONTENT_DIR . '/mu-plugins/wp-recaptcha.php')) // forced activated
+    	   return true;
+    }
+    
+    // otherwise it's just regular wordpress
+    else {
+        return false;
+    }
 }
 
 function register_default_options() {
@@ -91,7 +105,7 @@ function register_default_options() {
     $option_defaults['incorrect_response_error'] = '<strong>ERROR</strong>: That reCAPTCHA response was incorrect.'; // message for incorrect CAPTCHA response
     
     // add the option based on what environment we're in
-    if ($this->wordpress_mu)
+    if (is_wordpress_mu())
         add_site_option('recaptcha_options', $option_defaults);
     else
         add_option('recaptcha_options', $option_defaults);

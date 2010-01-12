@@ -1,0 +1,18 @@
+<div class="wrap">
+   <h2>reCAPTCHA Options</h2>
+   <h3>About reCAPTCHA</h3>
+   <p>reCAPTCHA is a free, accessible CAPTCH service that helps to digitize books while blocking spam on your blog.</p>
+   
+   <form method="post" action="self">
+      <?php settings_fields('recaptcha_options_group'); ?>
+
+      <table class="form-table">
+         <tr valign="top">
+            <th scope="row">reCAPTCHA Keys</th>
+            <td><input type="text" name="public_key" value="<?php echo options['public_key']; ?>" /></td>
+         </tr>
+      </table>
+
+      <p class="submit"><input type="submit" class="button-primary" value="<?php _e('Save Changes') ?> &raquo;" /></p>
+   </form>
+</div>

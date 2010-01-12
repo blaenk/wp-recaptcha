@@ -59,7 +59,7 @@ if (!class_exists('recaptcha')) {
 		    if ($this->wordpress_mu)
 		        require_once(WP_CONTENT_DIR . '/mu-plugins/wp-recaptcha/recaptchalib.php');
 		    else
-		        require_once(WP_CONTENT_DIR . '/plugins/recaptchalib.php');
+		        require_once(WP_CONTENT_DIR . '/plugins/wp-recaptcha/recaptchalib.php');
 		}
 		
 		// register the settings
@@ -138,7 +138,7 @@ COMMENT_FORM;
         		if ($this->wordpress_mu) {
                     $error = $errors->get_error_message('captcha');
                     echo '<label for="verification">Verification:</label>';
-                    echo ($error ? '<p class="error">'.$error.'</p>' : '')
+                    echo ($error ? '<p class="error">'.$error.'</p>' : '');
                     echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl);
                 }
                 
@@ -389,22 +389,8 @@ COMMENT_FORM;
         
         // store the xhtml in a separate file and use include on it
         function settings_page() {
-            ?>
-            
-            <form method="post" action="self">
-                <?php settings_fields('recaptcha_options'); ?>
-                
-                <table class="form-table">
-                    <tr valign="top">
-                        <th scope="row">Public Key</th>
-                        <td><input type="text" name="private_key" value="<?php echo get_option('private_key'); ?>" /></td>
-                    </tr>
-                </table>
-                
-                <p class="submit"><input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" /></p>
-            </form>
-            
-            <?php
+            $options = $this->options;
+            include("settings.html");
         }
         
         function options_subpanel() {
@@ -441,6 +427,7 @@ COMMENT_FORM;
                     update_site_option('recaptcha', $options_update);
                 else
                     update_option('recaptcha', $options_update);
+            }
         }
         
         function recaptcha_dropdown_capabilities($select_name, $checked_value="") {
@@ -465,7 +452,7 @@ COMMENT_FORM;
         	}
         	
         	echo "</select> \n";
-         }
+        }
 	} // end class declaration
 } // end of class exists clause
 
