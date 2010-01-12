@@ -17,13 +17,16 @@ if (!class_exists('recaptcha')) {
 		    $this->determine_environment();
 		    
 		    // get the site options (get_site_option for sitewide WPMU options)
-		    $this->retrieve_options();
+		    // $this->retrieve_options();
+		    
+		    // register the options
+		    $this->register_options();
 		    
 		    // require the recaptcha library
 		    $this->require_library();
 		}
 		
-		// determine whether it's WordPress regular, WordPress MU site-wide or regular
+		// determine whether it's WordPress regular or WordPress MU sitewide
 		function determine_environment() {
 		    // is it wordpress mu?
 		    if (is_dir(WP_CONTENT_DIR . '/mu-plugins')) {
@@ -55,42 +58,54 @@ if (!class_exists('recaptcha')) {
 		        require_once(WP_CONTENT_DIR . '/plugins/recaptchalib.php');
 		}
 		
-		// plugin options
-		function register_defaults() {
-		    $option_defaults = array();
+		// register the settings
+		function register_options() {
+		    register_setting('recaptcha_options', 'public_key');
+		    register_setting('recaptcha_options', 'private_key');
 		    
+		    register_setting('recaptcha_options', 'show_in_comments');
+		    register_setting('recaptcha_options', 'show_in_registration');
+		    
+		    register_setting('recaptcha_options', 'bypass_for_registered_users');
+		    register_setting('recaptcha_options', 'minimum_bypass_level');
+		    
+		    register_setting('recaptcha_options', 'comments_theme');
+		    register_setting('recaptcha_options', 'language');
+		    register_setting('recaptcha_options', 'xhtml_compliance');
+		    register_setting('recaptcha_options', 'tab_index');
+		    
+		    register_setting('recaptcha_options', 'no_response_error');
+		    register_setting('recaptcha_options', 'incorrect_response_error');
+		}
+		
+		// plugin options (probably not needed)
+		function register_defaults() {
 		    // keys
-		    $option_defaults['public_key'] = ''; // the public key for reCAPTCHA
-		    $option_defaults['private_key'] = ''; // the private key for reCAPTCHA
+		    add_option('public_key', ''); // the public key for reCAPTCHA
+		    add_option('private_key', ''); // the private key for reCAPTCHA
 		    
 		    // placement
-		    $option_defaults['show_in_comments'] = true; // whether or not to show reCAPTCHA on the comment post
-		    $option_defaults['show_in_registration'] = true; // whether or not to show reCAPTCHA on the registration page
+		    add_option('show_in_comments', true); // whether or not to show reCAPTCHA on the comment post
+		    add_option('show_in_registration', true); // whether or not to show reCAPTCHA on the registration page
 		    
 		    // bypass levels
-		    $option_defaults['bypass_for_registered_users'] = true; // whether to skip reCAPTCHAs for registered users
-		    $option_defaults['minimum_bypass_level'] = ''; // who doesn't have to do the reCAPTCHA (should be a valid WordPress capability slug)
+		    add_option('bypass_for_registered_users', true); // whether to skip reCAPTCHAs for registered users
+		    add_option('minimum_bypass_level', ''); // who doesn't have to do the reCAPTCHA (WP capability slug)
 		    
 		    // styling
-		    $option_defaults['comments_theme'] = 'red'; // the default theme for reCAPTCHA on the comment post
-		    $option_defaults['registration_theme'] = 'red'; // the default theme for reCAPTCHA on the registration form
-		    $option_defaults['language'] = 'en'; // the default language for reCAPTCHA
-		    $option_defaults['xhtml_compliance'] = false; // whether or not to be XHTML 1.0 Strict compliant
-		    $option_defaults['tab_index'] = 5; // the default tabindex for reCAPTCHA
+		    add_option('comments_theme', 'red'); // the default theme for reCAPTCHA on the comment post
+		    add_option('registration_theme', 'red'); // the default theme for reCAPTCHA on the registration form
+		    add_option('language', 'en'); // the default language for reCAPTCHA
+		    add_option('xhtml_compliance', false); // whether or not to be XHTML 1.0 Strict Compliant
+		    add_option('tab_index', 5); // the default tab-index for reCAPTCHA
 		    
 		    // error handling
-		    $option_defaults['no_response_error'] = '<strong>ERROR</strong>: Please fill in the reCAPTCHA form.'; // message for no CAPTCHA response
-		    $option_defaults['incorrect_response_error'] = '<strong>ERROR</strong>: That reCAPTCHA response was incorrect.'; // message for incorrect CAPTCHA response
-            
-            // install the defaults
-            if ($this->wordpress_mu) {
-                // todo: update_ or add_ ? update works for adding and updating
-                update_option('recaptcha', $option_defaults);
-            }
+		    add_option('no_response_error', '<strong>ERROR</strong>: Please fill in the reCAPTCHA form.'); // message for no CAPTCHA response
+		    add_option('incorrect_response_error', '<strong>ERROR</strong>: That reCAPTCHA response was incorrect.'); // message for incorrect CAPTCHA response
 		}
 		
 		function delete_options() {
-		    if ($this->wordpress_mu) {
+		    if (!$this->wordpress_mu) {
                 delete_option('recaptcha');
             }
 		}
@@ -115,6 +130,7 @@ if (!class_exists('recaptcha')) {
 
         	// every theme is 358 pixels wide except for the
         	// clean theme, so we have to programmatically handle that
+        	// todo: perhaps do this with jquery?
         	if ($this->options['registration_theme'] == 'clean')
         	    $width = 485;
         	else
@@ -271,7 +287,7 @@ COMMENT_FORM;
             else {
                 // Did the user fail to match the CAPTCHA? If so, let them know
                 if ($_GET['rerror'] == 'incorrect-captcha-sol')
-        	        echo "<p class=\"recaptcha-error\">" . $this->options['incorrect_response_error'] . "</p>";
+        	        echo '<p class="recaptcha-error">' . $this->options['incorrect_response_error'] . "</p>";
 
         		//modify the comment form for the reCAPTCHA widget
         		$recaptcha_js_opts = <<<OPTS
@@ -419,6 +435,25 @@ COMMENT_FORM;
             else {
                 add_options_page('reCAPTCHA', 'reCAPTCHA', 'manage_options', __FILE__, 'recaptcha_wp_options_subpanel');
             }
+        }
+        
+        function settings_page() {
+            ?>
+            
+            <form method="post" action="self">
+                <?php settings_fields('recaptcha_options'); ?>
+                
+                <table class="form-table">
+                    <tr valign="top">
+                        <th scope="row">Public Key</th>
+                        <td><input type="text" name="private_key" value="<?php echo get_option('private_key'); ?>" /></td>
+                    </tr>
+                </table>
+                
+                <p class="submit"><input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" /></p>
+            </form>
+            
+            <?php
         }
         
         function options_subpanel() {
