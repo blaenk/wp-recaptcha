@@ -34,7 +34,7 @@ if (!class_exists('reCAPTCHA')) {
             add_action('login_head', array(&$this, 'register_stylesheets')); // make unnecessary: instead use jQuery and add to the footer?
 
             // options
-            register_activation_hook($this->environment_prefix() . '/wp-recaptcha.php', array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
+            register_activation_hook($this->path_to_plugin(), array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
             add_action('admin_init', array(&$this, 'register_settings_group'));
 
             // recaptcha form display
@@ -51,7 +51,7 @@ if (!class_exists('reCAPTCHA')) {
             add_action('comment_post_redirect', array(&$this, 'relative_redirect'));
 
             // administration (menus, pages, notifications, etc.)
-            $plugin = plugin_basename($this->environment_prefix() . '/wp-recaptcha.php');
+            $plugin = plugin_basename($this->path_to_plugin());
             add_filter("plugin_action_links_$plugin", array(&$this, 'show_settings_link'));
 
             add_action('admin_menu', array(&$this, 'add_settings_page'));
@@ -65,13 +65,6 @@ if (!class_exists('reCAPTCHA')) {
                 add_filter('wpmu_validate_user_signup', array(&$this, 'validate_response_wpmu'));
             else
                 add_filter('registration_errors', array(&$this, 'validate_response'));
-        }
-
-        function environment_prefix() {
-            if ($this->wordpress_mu)
-                return WP_CONTENT_DIR . '/mu-plugins/wp-recaptcha';
-            else
-                return WP_CONTENT_DIR . '/plugins/wp-recaptcha';
         }
         
         // determine whether it's WordPress regular or WordPress MU sitewide
@@ -89,8 +82,23 @@ if (!class_exists('reCAPTCHA')) {
             }
         }
         
-        public function is_wordpress_mu() {
-            return $wordpress_mu;
+        // some utility methods for path-finding
+        function plugins_directory() {
+            if ($this->wordpress_mu)
+                return WP_CONTENT_DIR . '/mu-plugins';
+            else
+                return WP_CONTENT_DIR . '/plugins';
+        }
+        
+        function path_to_plugin_directory() {
+            return $this->plugins_directory() . '/wp-recaptcha/';
+        }
+        
+        function path_to_plugin() {
+            if ($this->wordpress_mu)
+                return $this->plugins_directory() . '/wp-recaptcha.php';
+            else
+                return $this->path_to_plugin_directory() . '/wp-recaptcha.php';
         }
         
         // set the default options
@@ -139,7 +147,7 @@ if (!class_exists('reCAPTCHA')) {
         
         // require the recaptcha library
         function require_library() {
-            require_once($this->environment_prefix() . '/recaptchalib.php');
+            require_once($this->path_to_plugin_directory() . '/recaptchalib.php');
         }
         
         // register the settings
@@ -148,7 +156,7 @@ if (!class_exists('reCAPTCHA')) {
         }
         
         function register_stylesheets() {
-            $path = $this->environment_prefix() . '/recaptcha.css';
+            $path = $this->path_to_plugin_directory() . '/recaptcha.css';
                 
             echo '<link rel="stylesheet" type="text/css" href="' . $path . '" />';
         }
