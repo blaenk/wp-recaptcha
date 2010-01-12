@@ -19,6 +19,52 @@ if (!class_exists('reCAPTCHA')) {
             
             // require the recaptcha library
             $this->require_library();
+            
+            // register the hooks
+            $this->register_actions();
+            $this->register_filters();
+        }
+        
+        function register_actions() {
+            // Actions
+
+            // styling
+            add_action('wp_head', array(&$this, 'register_stylesheets')); // make unnecessary: instead, inform of classes for styling
+            add_action('admin_head', array(&$this, 'register_stylesheets')); // make unnecessary: shouldn't require styling in the options page
+            add_action('login_head', array(&$this, 'register_stylesheets')); // make unnecessary: instead use jQuery and add to the footer?
+
+            // options
+            register_activation_hook(__FILE__, array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
+            add_action('admin_init', array(&$this, 'register_settings_group'));
+
+            // recaptcha form display
+            if ($this->wordpress_mu)
+                add_action('signup_extra_fields', array(&$this, 'show_recaptcha_form'));
+            else
+                add_action('register_form', array(&$this, 'show_recaptcha_form'));
+
+            add_action('comment_form', array(&$this, 'recaptcha_comment_form'));
+
+            // recaptcha comment processing (look into doing all of this with AJAX, optionally)
+            add_action('wp_head', array(&$this, 'saved_comment'));
+            add_action('preprocess_comment', array(&$this, 'check_comment'));
+            add_action('comment_post_redirect', array(&$this, 'relative_redirect'));
+
+            // administration (menus, pages, notifications, etc.)
+            $plugin = plugin_basename($this->environment_prefix() . '/wp-recaptcha.php');
+            add_filter("plugin_action_links_$plugin", array(&$this, 'show_settings_link'));
+
+            add_action('admin_menu', array(&$this, 'add_settings_page'));
+        }
+        
+        function register_filters() {
+            // Filters
+
+            // recaptcha validation
+            if ($this->wordpress_mu)
+                add_filter('wpmu_validate_user_signup', array(&$this, 'validate_response_wpmu'));
+            else
+                add_filter('registration_errors', array(&$this, 'validate_response'));
         }
 
         function environment_prefix() {
@@ -47,6 +93,41 @@ if (!class_exists('reCAPTCHA')) {
             return $wordpress_mu;
         }
         
+        // set the default options
+        function register_default_options() {
+            // store the options in an array, to ensure that the options will be stored in a single database entry
+            $option_defaults = array();
+
+            // keys
+            $option_defaults['public_key'] = ''; // the public key for reCAPTCHA
+            $option_defaults['private_key'] = ''; // the private key for reCAPTCHA
+
+            // placement
+            $option_defaults['show_in_comments'] = true; // whether or not to show reCAPTCHA on the comment post
+            $option_defaults['show_in_registration'] = true; // whether or not to show reCAPTCHA on the registration page
+
+            // bypass levels
+            $option_defaults['bypass_for_registered_users'] = true; // whether to skip reCAPTCHAs for registered users
+            $option_defaults['minimum_bypass_level'] = ''; // who doesn't have to do the reCAPTCHA (should be a valid WordPress capability slug)
+
+            // styling
+            $option_defaults['comments_theme'] = 'red'; // the default theme for reCAPTCHA on the comment post
+            $option_defaults['registration_theme'] = 'red'; // the default theme for reCAPTCHA on the registration form
+            $option_defaults['language'] = 'en'; // the default language for reCAPTCHA
+            $option_defaults['xhtml_compliance'] = false; // whether or not to be XHTML 1.0 Strict compliant
+            $option_defaults['tab_index'] = 5; // the default tabindex for reCAPTCHA
+
+            // error handling
+            $option_defaults['no_response_error'] = '<strong>ERROR</strong>: Please fill in the reCAPTCHA form.'; // message for no CAPTCHA response
+            $option_defaults['incorrect_response_error'] = '<strong>ERROR</strong>: That reCAPTCHA response was incorrect.'; // message for incorrect CAPTCHA response
+
+            // add the option based on what environment we're in
+            if (is_wordpress_mu())
+                add_site_option('recaptcha_options', $option_defaults);
+            else
+                add_option('recaptcha_options', $option_defaults);
+        }
+        
         // retrieve the options (call as needed for refresh)
         function retrieve_options() {
             if ($this->wordpress_mu)
@@ -63,7 +144,7 @@ if (!class_exists('reCAPTCHA')) {
         
         // register the settings
         function register_settings_group() {
-            register_setting('recaptcha_options_group', 'recaptcha_options');
+            register_setting('recaptcha_options_group', 'recaptcha_options', array(&$this, 'validate_options'));
         }
         
         function register_stylesheets() {
@@ -144,6 +225,13 @@ COMMENT_FORM;
                     echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl);
               }
            }
+        }
+        
+        function validate_options($input) {
+            $validated['public_key'] = $input['public_key'];
+            $validated['private_key'] = $input ['private_key'];
+            $validated['show_in_comments'] = ($input['show_in_comments'] == 1 ? 1 : 0);
+            return $validated;
         }
         
         // recaptcha validation
@@ -377,18 +465,19 @@ COMMENT_FORM;
         }
         
         // add a settings link to the plugin in the plugin list
-        function settings_link($links) {
-            $settings_link = '<a href="options-general.php?page=wp-recaptcha/wp-recaptcha.php">Settings</a>';
+        function show_settings_link($links) {
+            $settings_link = '<a href="options-general.php?page=wp-recaptcha/recaptcha.php" title="Go to the Settings for this Plugin">Settings</a>';
             array_unshift($links, $settings_link);
             return $links;
         }
         
+        // add the settings page
         function add_settings_page() {
             // add the options page
             if ($this->wordpress_mu && is_site_admin())
-                add_submenu_page('wpmu-admin.php', 'WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, 'show_settings_page');
-            
-            add_options_page('WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, 'show_settings_page');
+                add_submenu_page('wpmu-admin.php', 'WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, array(&$this, 'show_settings_page'));
+
+            add_options_page('WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, array(&$this, 'show_settings_page'));
         }
         
         // store the xhtml in a separate file and use include on it

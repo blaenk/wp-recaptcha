@@ -1,22 +1,28 @@
 <div class="wrap">
    <h2>reCAPTCHA Options</h2>
    <h3>About reCAPTCHA</h3>
-   <p>reCAPTCHA is a free, accessible CAPTCH service that helps to digitize books while blocking spam on your blog.</p>
+   <p>reCAPTCHA is a free, accessible CAPTCHA service that helps to digitize books while blocking spam on your blog.</p>
    
-   <form method="post" action="self">
+   <form method="post" action="options.php">
       <?php settings_fields('recaptcha_options_group'); ?>
 
       <table class="form-table">
          <tr valign="top">
             <th scope="row">Public Key</th>
-            <td><input type="text" name="public_key" value="<?php echo $options['public_key']; ?>" /></td>
+            <td><input type="text" name="recaptcha_options[public_key]" value="<?php echo $options['public_key']; ?>" /></td>
          </tr>
          <tr valign="top">
             <th scope="row">Private Key</th>
-            <td><input type="text" name="private_key" value="<?php echo $options['private_key']; ?>" /></td>
+            <td><input type="text" name="recaptcha_options[private_key]" value="<?php echo $options['private_key']; ?>" /></td>
+         </tr>
+         <tr valign="top">
+            <th scope="row">Enable reCAPTCHA for Comments</th>
+            <td><input type="checkbox" name="recaptcha_options[show_in_comments]" value="1" <?php checked('1', $options['show_in_comments']); ?> /></td>
          </tr>
       </table>
 
       <p class="submit"><input type="submit" class="button-primary" value="<?php _e('Save Changes') ?> &raquo;" /></p>
    </form>
+   
+   <?php do_settings_sections('recaptcha_options_page'); ?>
 </div>

@@ -12,7 +12,7 @@ $mailhide_option_defaults = array (
    'use_in_rss_comments' => false, // use mailhide for the rss comments
 
    // bypass levels
-   'bypass_for_Registered_users' => '', // whether to sometimes skip the MailHide filter for registered users
+   'bypass_for_registered_users' => '', // whether to sometimes skip the MailHide filter for registered users
    'minimum_bypass_level' => '', // who can see full emails normally (should be a valid WordPress capability slug)
 
    // styling
