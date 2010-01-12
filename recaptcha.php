@@ -34,7 +34,7 @@ if (!class_exists('reCAPTCHA')) {
             add_action('login_head', array(&$this, 'register_stylesheets')); // make unnecessary: instead use jQuery and add to the footer?
 
             // options
-            register_activation_hook(__FILE__, array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
+            register_activation_hook($this->environment_prefix() . '/wp-recaptcha.php', array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
             add_action('admin_init', array(&$this, 'register_settings_group'));
 
             // recaptcha form display
@@ -122,7 +122,7 @@ if (!class_exists('reCAPTCHA')) {
             $option_defaults['incorrect_response_error'] = '<strong>ERROR</strong>: That reCAPTCHA response was incorrect.'; // message for incorrect CAPTCHA response
 
             // add the option based on what environment we're in
-            if (is_wordpress_mu())
+            if ($this->wordpress_mu)
                 add_site_option('recaptcha_options', $option_defaults);
             else
                 add_option('recaptcha_options', $option_defaults);
