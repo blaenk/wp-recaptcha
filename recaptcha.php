@@ -238,7 +238,24 @@ COMMENT_FORM;
         function validate_options($input) {
             $validated['public_key'] = $input['public_key'];
             $validated['private_key'] = $input ['private_key'];
+            
             $validated['show_in_comments'] = ($input['show_in_comments'] == 1 ? 1 : 0);
+            $validated['bypass_for_registered_users'] = ($input['bypass_for_registered_users'] == 1 ? 1: 0);
+            
+            $capability_choices = array (
+                'All registered users' => 'read',
+                'Edit posts' => 'edit_posts',
+                'Publish Posts' => 'publish_posts',
+                'Moderate Comments' => 'moderate_comments',
+                'Administer site' => 'level_10'
+            );
+            
+            // make sure that the capability that was supplied is a valid capability from the drop-down list
+            if (array_search($input['minimum_bypass_level'], $capability_choices))
+                $validated['minimum_bypass_level'] = $input['minimum_bypass_level'];
+            else // if not, then set it to the default of 'read'
+                $validated['minimum_bypass_level'] = $capability_choices['All registered users'];
+            
             return $validated;
         }
         
@@ -490,7 +507,6 @@ COMMENT_FORM;
         
         // store the xhtml in a separate file and use include on it
         function show_settings_page() {
-            $options = $this->options;
             include("settings.html");
         }
         
@@ -531,28 +547,45 @@ COMMENT_FORM;
             }
         }
         
-        function recaptcha_dropdown_capabilities($select_name, $checked_value="") {
+        function build_dropdown($name, $keyvalue, $checked_value) {
+            echo '<select name="' . $name . '" id="' . $name . '">' . "\n";
+            
+            foreach ($keyvalue as $key => $value) {
+                if ($value == $checked_value)
+                    $checked = ' selected="selected" ';
+                
+                echo '\t <option value="' . $value . '"' . $checked . ">$key</option> \n";
+                $checked = NULL;
+            }
+            
+            echo "</select> \n";
+        }
+        
+        function capabilities_dropdown() {
             // define choices: Display text => permission slug
-            $capability_choices = array (
+            $capabilities = array (
                 'All registered users' => 'read',
                 'Edit posts' => 'edit_posts',
                 'Publish Posts' => 'publish_posts',
                 'Moderate Comments' => 'moderate_comments',
                 'Administer site' => 'level_10'
-                );
-                
-            // print the <select> and loop through <options>
-            echo '<select name="' . $select_name . '" id="' . $select_name . '">' . "\n";
+            );
             
-            foreach ($capability_choices as $text => $capability) {
-                if ($capability == $checked_value)
-                    $checked = ' selected="selected" ';
-                
-                echo '\t <option value="' . $capability . '"' . $checked . ">$text</option> \n";
-                $checked = NULL;
-            }
+            $this->build_dropdown('recaptcha_options[minimum_bypass_level]', $capabilities, $this->options['minimum_bypass_level']);
+        }
+        
+        function theme_dropdown($which) {
+            $themes = array (
+                'Red' => 'red',
+                'White' => 'white',
+                'Black Glass' => 'blackglass',
+                'Clean' => 'clean'
+            );
             
-            echo "</select> \n";
+            if ($which == 'comments')
+                $this->build_dropdown('recaptcha_options[comments_theme]', $themes, $this->options['comments_theme']);
+            else if ($which == 'registration')
+                $this->build_dropdown('recaptcha_options[registration_theme]', $themes, $this->options['registration_theme']);
         }
     } // end class declaration
 } // end of class exists clause
