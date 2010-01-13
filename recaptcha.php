@@ -31,7 +31,7 @@ if (!class_exists('reCAPTCHA')) {
             // styling
             add_action('wp_head', array(&$this, 'register_stylesheets')); // make unnecessary: instead, inform of classes for styling
             add_action('admin_head', array(&$this, 'register_stylesheets')); // make unnecessary: shouldn't require styling in the options page
-            add_action('login_head', array(&$this, 'register_stylesheets')); // make unnecessary: instead use jQuery and add to the footer?
+            add_action('login_head', array(&$this, 'registration_style')); // make unnecessary: instead use jQuery and add to the footer?
 
             // options
             register_activation_hook($this->path_to_plugin(), array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
@@ -44,6 +44,7 @@ if (!class_exists('reCAPTCHA')) {
                 add_action('register_form', array(&$this, 'show_recaptcha_form'));
 
             add_action('comment_form', array(&$this, 'recaptcha_comment_form'));
+            add_action('wp_footer', array(&$this, 'save_comment_script')); // preserve the comment that was entered
 
             // recaptcha comment processing (look into doing all of this with AJAX, optionally)
             add_action('wp_head', array(&$this, 'saved_comment'), 0);
@@ -177,25 +178,16 @@ if (!class_exists('reCAPTCHA')) {
             if ($this->options['registration_theme'] == 'clean')
                 $width = 485;
             else
-                $width = 358;
+                $width = 360;
 
             echo <<<REGISTRATION
-                <style type="text/css">
-                #login {
-                    width: {$width}px !important;
-                }
-
-                #login a {
-                    text-align: center;
-                }
-
-                #nav {
-                    text-align: center;
-                }
-                form .submit {
-                    margin-top: 10px;
-                }
-                </style>
+                <script type="text/javascript">
+                window.onload = function() {
+                    document.getElementById('login').style.width = '{$width}px';
+                    document.getElementById('reg_passmail').style.marginTop = '10px';
+                    document.getElementById('recaptcha_widget_div').style.marginBottom = '10px';
+                };
+                </script>
 REGISTRATION;
         }
         
@@ -230,10 +222,9 @@ COMMENT_FORM;
                 
                 // for regular wordpress
                 else {
-                    echo '<hr style="clear: both; margin-bottom: 1.5em; border: 0; border-top: 1px solid #999; height: 1px;" />';
                     echo $format . $this->get_recaptcha_html($_GET['rerror'], $use_ssl);
-              }
-           }
+                }
+            }
         }
         
         function validate_dropdown($array, $key, $value) {
@@ -245,6 +236,8 @@ COMMENT_FORM;
         }
         
         function validate_options($input) {
+            // todo: make sure that 'incorrect_response_error' is not empty, prevent from being empty in the validation phase
+            
             // trim the spaces out of the key, as they are usually present when copied and pasted
             // todo: keys seem to usually be 40 characters in length, verify and if confirmed, add to validation process
             $validated['public_key'] = trim($input['public_key']);
@@ -370,13 +363,13 @@ COMMENT_FORM;
 
             else {
                 // Did the user fail to match the CAPTCHA? If so, let them know
-                if ($_GET['rerror'] == 'incorrect-captcha-sol')
+                if (($_GET['rerror'] == 'incorrect-captcha-sol'))
                     echo '<p class="recaptcha-error">' . $this->options['incorrect_response_error'] . "</p>";
 
                 //modify the comment form for the reCAPTCHA widget
                 $recaptcha_js_opts = <<<OPTS
                 <script type='text/javascript'>
-                    var RecaptchaOptions = { theme : '{$this->options['registration_theme']}', lang : '{$this->options['recaptcha_language']}' , tabindex : {$this->options['tab_index']} };
+                    var RecaptchaOptions = { theme : '{$this->options['comments_theme']}', lang : '{$this->options['recaptcha_language']}' , tabindex : {$this->options['tab_index']} };
                 </script>
 OPTS;
 
@@ -384,33 +377,13 @@ OPTS;
                 // todo: use math to increment+1 the submit button based on what the tab_index option is
                 if ($this->options['xhtml_compliance']) {
                     $comment_string = <<<COMMENT_FORM
-                        <div id="recaptcha-submit-btn-area"><br /></div>
-                        <script type='text/javascript'>
-                        var sub = document.getElementById('submit');
-                        sub.parentNode.removeChild(sub);
-                        document.getElementById('recaptcha-submit-btn-area').appendChild (sub);
-                        document.getElementById('submit').tabIndex = 6;
-                        if ( typeof _recaptcha_wordpress_savedcomment != 'undefined') {
-                                document.getElementById('comment').value = _recaptcha_wordpress_savedcomment;
-                        }
-                        document.getElementById('recaptcha_table').style.direction = 'ltr';
-                        </script>
+                        <div id="recaptcha-submit-btn-area">&nbsp;</div>
 COMMENT_FORM;
                 }
 
                 else {
                     $comment_string = <<<COMMENT_FORM
-                        <div id="recaptcha-submit-btn-area"></div> 
-                        <script type='text/javascript'>
-                        var sub = document.getElementById('submit');
-                        sub.parentNode.removeChild(sub);
-                        document.getElementById('recaptcha-submit-btn-area').appendChild (sub);
-                        document.getElementById('submit').tabIndex = 6;
-                        if ( typeof _recaptcha_wordpress_savedcomment != 'undefined') {
-                                document.getElementById('comment').value = _recaptcha_wordpress_savedcomment;
-                        }
-                        document.getElementById('recaptcha_table').style.direction = 'ltr';
-                        </script>
+                        <div id="recaptcha-submit-btn-area">&nbsp;</div>
                         <noscript>
                          <style type='text/css'>#submit {display:none;}</style>
                          <input name="submit" type="submit" id="submit-alt" tabindex="6" value="Submit Comment"/> 
@@ -418,7 +391,6 @@ COMMENT_FORM;
 COMMENT_FORM;
                 }
 
-                // todo: is this still needed with new recaptchalib?
                 if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on")
                     $use_ssl = true;
                 else
@@ -426,6 +398,22 @@ COMMENT_FORM;
 
                 echo $recaptcha_js_opts . $this->get_recaptcha_html($_GET['rerror'], $use_ssl) . $comment_string;
            }
+        }
+        
+        // this is what does the submit-button re-ordering
+        function save_comment_script() {
+            $javascript = <<<JS
+                <script type="text/javascript">
+                var sub = document.getElementById('submit');
+                document.getElementById('recaptcha-submit-btn-area').appendChild (sub);
+                document.getElementById('submit').tabIndex = 6;
+                if ( typeof _recaptcha_wordpress_savedcomment != 'undefined') {
+                        document.getElementById('comment').value = _recaptcha_wordpress_savedcomment;
+                }
+                document.getElementById('recaptcha_table').style.direction = 'ltr';
+                </script>
+JS;
+            echo $javascript;
         }
         
         // todo: this doesn't seem necessary
