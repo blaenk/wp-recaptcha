@@ -2,9 +2,9 @@
 Contributors: BlaenkDenum
 Donate link: http://www.blaenkdenum.com
 Tags: comments, registration, recaptcha, antispam, mailhide, captcha, wpmu
-Requires at least: 2.1
-Tested up to: 2.7.1
-Stable tag: 2.9.6
+Requires at least: 2.7
+Tested up to: 2.9.1
+Stable tag: 3.0
 
 Integrates reCAPTCHA anti-spam methods with WordPress including comment, registration, and email spam protection. WPMU Compatible.
 
@@ -30,10 +30,6 @@ To install in regular WordPress:
 1. Activate the plugin through the `Plugins` menu in WordPress
 1. Get the reCAPTCHA keys [here](http://recaptcha.net/api/getkey?domain=www.blaenkdenum.com&app=wordpress "reCAPTCHA API keys") and/or the MailHide keys [here](http://mailhide.recaptcha.net/apikey "MailHide keys")
 
-To install in WordPress MU (Optional Activation by Users):
-
-1. Follow the instructions for regular WordPress above
-
 To install in WordPress MU (Forced Activation/Site-Wide):
 
 1. Upload the `wp-recaptcha` folder to the `/wp-content/mu-plugins` directory
@@ -51,6 +47,10 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 
 == ChangeLog ==
 
+= Version 3.0 =
+* Rewrote the entire plugin in an object-oriented manner with separation of concerns in mind to increase maintainability and extensibility
+* Redesigned the options page for the plugin
+* Fixed the issue where comments would not be saved if the reCAPTCHA was entered incorrectly (or not entered at all)
 = Version 2.9.6 =
 * Fixed a careless bug affecting custom hidden emails
 * Fixed broken links in readme.txt
@@ -79,7 +79,7 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 * Administration interface is now integrated with 2.5's look and feel. Thanks to [Jeremy Clarke](http://simianuprising.com/ "Jeremy Clarke").
 * Users can now have more control over who sees the reCAPTCHA form and who can see emails in their true form (If MailHide is enabled). Thanks to [Jeremy Clarke](http://simianuprising.com/ "Jeremy Clarke").
 * Fixed a very stupid (**One character deal**) fatal error on most Windows Servers which don't support short tags (short_open_tag). I'm speaking of the so called 'Unexpected $end' error.
-* Accomodated for the fact that in +2.6 the wp-content folder can be anywhere.
+* Accommodated for the fact that in +2.6 the wp-content folder can be anywhere.
 
 == Frequently Asked Questions ==
 
@@ -89,10 +89,10 @@ There are four common issues that make reCAPTCHA appear to be broken:
 1. **Moderation Emails**: reCAPTCHA marks comments as spam, so even though the comments don't actually get posted, you will be notified of what is supposedly new spam. It is recommended to turn off moderation emails with reCAPTCHA.
 1. **Akismet Spam Queue**: Again, because reCAPTCHA marks comments with a wrongly entered CAPTCHA as spam, they are added to the spam queue. These comments however weren't posted to the blog so reCAPTCHA is still doing it's job. It is recommended to either ignore the Spam Queue and clear it regularly or disable Akismet completely. reCAPTCHA takes care of all of the spam created by bots, which is the usual type of spam. The only other type of spam that would get through is human spam, where humans are hired to manually solve CAPTCHAs. If you still get spam while only having reCAPTCHA enabled, you could be a victim of the latter practice. If this is the case, then turning on Akismet will most likely solve your problem. Again, just because it shows up in the Spam Queue does NOT mean that spam is being posted to your blog, it's more of a 'comments that have been caught as spam by reCAPTCHA' queue.
 1. **Trackbacks and Pingbacks**: reCAPTCHA can't do anything about pingbacks and trackbacks. You can disable pingbacks and trackbacks in Options > Discussion > Allow notifications from other Weblogs (Pingbacks and trackbacks).
-1. **Human Spammers**: Believe it or not, there are people who are paid (or maybe slave labor?) to solve CAPTCHAs all over the internet and spam. This is the last and rarest reason for which it might appear that reCAPTCHA is not working, but it does happen. On this plugin's [home page](http://www.blaenkdenum.com/wp-recaptcha/ Blaenk Denum - WP-reCAPTCHA), these people sometimes attempt to post spam to try and make it seem as if reCAPTCHA is not working. A combination of reCAPTCHA and Akismet might help to solve this problem, and if spam still gets through for this reason, it would be very minimal and easy to manually take care of.
+1. **Human Spammers**: Believe it or not, there are people who are paid (or maybe slave labor?) to solve CAPTCHAs all over the internet and spam. This is the last and rarest reason for which it might appear that reCAPTCHA is not working, but it does happen. On this plugin's [home page](http://www.blaenkdenum.com/wp-recaptcha/ "Blaenk Denum - WP-reCAPTCHA"), these people sometimes attempt to post spam to try and make it seem as if reCAPTCHA is not working. A combination of reCAPTCHA and Akismet might help to solve this problem, and if spam still gets through for this reason, it would be very minimal and easy to manually take care of.
 
-= Why am I getting “Warning: pack() [function.pack]: Type H: illegal hex digit”? =
-You have the keys in the wrong place. Remember, the reCAPTCHA keys are different from the MailHide keys. And the Public keys are different from the Private keys as well. You can’t mix them around. Go through your keys and make sure you have them each in the correct box.
+= Why am I getting Warning: pack() [function.pack]: Type H: illegal hex digit?
+You have the keys in the wrong place. Remember, the reCAPTCHA keys are different from the MailHide keys. And the Public keys are different from the Private keys as well. You can't mix them around. Go through your keys and make sure you have them each in the correct box.
 
 = Aren't you increasing the time users spend solving CAPTCHAs by requiring them to type two words instead of one? =
 Actually, no. Most CAPTCHAs on the Web ask users to enter strings of random characters, which are slower to type than English words. reCAPTCHA requires no more time to solve than most other CAPTCHAs.
