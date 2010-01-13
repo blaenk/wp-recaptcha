@@ -121,7 +121,8 @@ if (!class_exists('reCAPTCHA')) {
             // styling
             $option_defaults['comments_theme'] = 'red'; // the default theme for reCAPTCHA on the comment post
             $option_defaults['registration_theme'] = 'red'; // the default theme for reCAPTCHA on the registration form
-            $option_defaults['language'] = 'en'; // the default language for reCAPTCHA
+            $option_defaults['recaptcha_language'] = 'en'; // the default language for reCAPTCHA
+            $option_defaults['plugin_language'] = 'english'; // the default language for the plugin
             $option_defaults['xhtml_compliance'] = false; // whether or not to be XHTML 1.0 Strict compliant
             $option_defaults['tab_index'] = 5; // the default tabindex for reCAPTCHA
 
@@ -203,7 +204,7 @@ REGISTRATION;
             if ($this->options['show_in_registration']) {
                 $format = <<<FORMAT
                 <script type='text/javascript'>
-                var RecaptchaOptions = { theme : '{$this->options['registration_theme']}', lang : '{$this->options['language']}' , tabindex : 30 };
+                var RecaptchaOptions = { theme : '{$this->options['registration_theme']}', lang : '{$this->options['recaptcha_language']}' , tabindex : 30 };
                 </script>
 FORMAT;
 
@@ -235,26 +236,40 @@ COMMENT_FORM;
            }
         }
         
+        function validate_dropdown($array, $key, $value) {
+            // make sure that the capability that was supplied is a valid capability from the drop-down list
+            if (in_array($value, $array))
+                return $value;
+            else // if not, load the old value
+                return $this->options[$key];
+        }
+        
         function validate_options($input) {
             $validated['public_key'] = $input['public_key'];
-            $validated['private_key'] = $input ['private_key'];
+            $validated['private_key'] = $input['private_key'];
             
             $validated['show_in_comments'] = ($input['show_in_comments'] == 1 ? 1 : 0);
             $validated['bypass_for_registered_users'] = ($input['bypass_for_registered_users'] == 1 ? 1: 0);
             
-            $capability_choices = array (
-                'All registered users' => 'read',
-                'Edit posts' => 'edit_posts',
-                'Publish Posts' => 'publish_posts',
-                'Moderate Comments' => 'moderate_comments',
-                'Administer site' => 'level_10'
-            );
+            $capabilities = array ('read', 'edit_posts', 'publish_posts', 'moderate_comments', 'level_10');
+            $themes = array ('red', 'white', 'blackglass', 'clean');
             
-            // make sure that the capability that was supplied is a valid capability from the drop-down list
-            if (array_search($input['minimum_bypass_level'], $capability_choices))
-                $validated['minimum_bypass_level'] = $input['minimum_bypass_level'];
-            else // if not, then set it to the default of 'read'
-                $validated['minimum_bypass_level'] = $capability_choices['All registered users'];
+            $recaptcha_languages = array ('en', 'nl', 'fr', 'de', 'pt', 'ru', 'es', 'tr');
+            $plugin_languages = array ('english');
+            
+            $validated['minimum_bypass_level'] = $this->validate_dropdown($capabilities, 'minimum_bypass_level', $input['minimum_bypass_level']);
+            $validated['comments_theme'] = $this->validate_dropdown($themes, 'comments_theme', $input['comments_theme']);
+            
+            $validated['tab_index'] = $input['tab_index']; // use the intval filter
+            
+            $validated['show_in_registration'] = ($input['show_in_registration'] == 1 ? 1 : 0);
+            $validated['registration_theme'] = $this->validate_dropdown($themes, 'registration_theme', $input['registration_theme']);
+            
+            $validated['recaptcha_language'] = $this->validate_dropdown($recaptcha_languages, 'recaptcha_language', $input['recaptcha_language']);
+            $validated['plugin_language'] = $this->validate_dropdown($plugin_languages, 'plugin_language', $input['plugin_language']);
+            
+            $validated['no_response_error'] = $input['no_response_error'];
+            $validated['incorrect_response_error'] = $input['incorrect_response_error'];
             
             return $validated;
         }
@@ -358,7 +373,7 @@ COMMENT_FORM;
                 //modify the comment form for the reCAPTCHA widget
                 $recaptcha_js_opts = <<<OPTS
                 <script type='text/javascript'>
-                    var RecaptchaOptions = { theme : '{$this->options['registration_theme']}', lang : '{$this->options['language']}' , tabindex : {$this->options['tab_index']} };
+                    var RecaptchaOptions = { theme : '{$this->options['registration_theme']}', lang : '{$this->options['recaptcha_language']}' , tabindex : {$this->options['tab_index']} };
                 </script>
 OPTS;
 
@@ -532,7 +547,7 @@ COMMENT_FORM;
                 // styling
                 $option_defaults['comments_theme'] = $_POST['comments_theme']; // the default theme for reCAPTCHA on the comment post
                 $option_defaults['registration_theme'] = $_POST['registration_theme']; // the default theme for reCAPTCHA on the registration form
-                $option_defaults['language'] = $_POST['language']; // the default language for reCAPTCHA
+                $option_defaults['recaptcha_language'] = $_POST['recaptcha_language']; // the default language for reCAPTCHA
                 $option_defaults['xhtml_compliance'] = $_POST['xhtml_compliance']; // whether or not to be XHTML 1.0 Strict compliant
                 $option_defaults['tab_index'] = $_POST['tab_index']; // the default tabindex for reCAPTCHA
 
@@ -564,11 +579,11 @@ COMMENT_FORM;
         function capabilities_dropdown() {
             // define choices: Display text => permission slug
             $capabilities = array (
-                'All registered users' => 'read',
-                'Edit posts' => 'edit_posts',
-                'Publish Posts' => 'publish_posts',
-                'Moderate Comments' => 'moderate_comments',
-                'Administer site' => 'level_10'
+                'all registered users' => 'read',
+                'edit posts' => 'edit_posts',
+                'publish posts' => 'publish_posts',
+                'moderate comments' => 'moderate_comments',
+                'administer site' => 'level_10'
             );
             
             $this->build_dropdown('recaptcha_options[minimum_bypass_level]', $capabilities, $this->options['minimum_bypass_level']);
@@ -586,6 +601,29 @@ COMMENT_FORM;
                 $this->build_dropdown('recaptcha_options[comments_theme]', $themes, $this->options['comments_theme']);
             else if ($which == 'registration')
                 $this->build_dropdown('recaptcha_options[registration_theme]', $themes, $this->options['registration_theme']);
+        }
+        
+        function recaptcha_language_dropdown() {
+            $languages = array (
+                'English' => 'en',
+                'Dutch' => 'nl',
+                'French' => 'fr',
+                'German' => 'de',
+                'Portuguese' => 'pt',
+                'Russian' => 'ru',
+                'Spanish' => 'es',
+                'Turkish' => 'tr'
+            );
+            
+            $this->build_dropdown('recaptcha_options[recaptcha_language]', $languages, $this->options['recaptcha_language']);
+        }
+        
+        function plugin_language_dropdown() {
+            $languages = array (
+                'English' => 'en'
+            );
+            
+            $this->build_dropdown('recaptcha_options[plugin_language]', $languages, $this->options['plugin_language']);
         }
     } // end class declaration
 } // end of class exists clause
