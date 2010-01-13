@@ -46,9 +46,9 @@ if (!class_exists('reCAPTCHA')) {
             add_action('comment_form', array(&$this, 'recaptcha_comment_form'));
 
             // recaptcha comment processing (look into doing all of this with AJAX, optionally)
-            add_action('wp_head', array(&$this, 'saved_comment'));
-            add_action('preprocess_comment', array(&$this, 'check_comment'));
-            add_action('comment_post_redirect', array(&$this, 'relative_redirect'));
+            add_action('wp_head', array(&$this, 'saved_comment'), 0);
+            add_action('preprocess_comment', array(&$this, 'check_comment'), 0);
+            add_action('comment_post_redirect', array(&$this, 'relative_redirect'), 0, 2);
 
             // administration (menus, pages, notifications, etc.)
             $plugin = plugin_basename($this->path_to_plugin());
@@ -225,13 +225,13 @@ COMMENT_FORM;
                     $error = $errors->get_error_message('captcha');
                     echo '<label for="verification">Verification:</label>';
                     echo ($error ? '<p class="error">'.$error.'</p>' : '');
-                    echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl);
+                    echo $format . $this->get_recaptcha_html($_GET['rerror'], $use_ssl);
                 }
                 
                 // for regular wordpress
                 else {
                     echo '<hr style="clear: both; margin-bottom: 1.5em; border: 0; border-top: 1px solid #999; height: 1px;" />';
-                    echo $format . recaptcha_wp_get_html($_GET['rerror'], $use_ssl);
+                    echo $format . $this->get_recaptcha_html($_GET['rerror'], $use_ssl);
               }
            }
         }
@@ -245,8 +245,10 @@ COMMENT_FORM;
         }
         
         function validate_options($input) {
-            $validated['public_key'] = $input['public_key'];
-            $validated['private_key'] = $input['private_key'];
+            // trim the spaces out of the key, as they are usually present when copied and pasted
+            // todo: keys seem to usually be 40 characters in length, verify and if confirmed, add to validation process
+            $validated['public_key'] = trim($input['public_key']);
+            $validated['private_key'] = trim($input['private_key']);
             
             $validated['show_in_comments'] = ($input['show_in_comments'] == 1 ? 1 : 0);
             $validated['bypass_for_registered_users'] = ($input['bypass_for_registered_users'] == 1 ? 1: 0);
@@ -267,6 +269,7 @@ COMMENT_FORM;
             
             $validated['recaptcha_language'] = $this->validate_dropdown($recaptcha_languages, 'recaptcha_language', $input['recaptcha_language']);
             $validated['plugin_language'] = $this->validate_dropdown($plugin_languages, 'plugin_language', $input['plugin_language']);
+            $validated['xhtml_compliance'] = ($input['xhtml_compliance'] == 1 ? 1 : 0);
             
             $validated['no_response_error'] = $input['no_response_error'];
             $validated['incorrect_response_error'] = $input['incorrect_response_error'];
@@ -378,6 +381,7 @@ COMMENT_FORM;
 OPTS;
 
                 // todo: replace this with jquery: http://digwp.com/2009/06/including-jquery-in-wordpress-the-right-way/
+                // todo: use math to increment+1 the submit button based on what the tab_index option is
                 if ($this->options['xhtml_compliance']) {
                     $comment_string = <<<COMMENT_FORM
                         <div id="recaptcha-submit-btn-area"><br /></div>
@@ -420,7 +424,7 @@ COMMENT_FORM;
                 else
                     $use_ssl = false;
 
-                echo $recaptcha_js_opts . recaptcha_wp_get_html($_GET['rerror'], $use_ssl) . $comment_string;
+                echo $recaptcha_js_opts . $this->get_recaptcha_html($_GET['rerror'], $use_ssl) . $comment_string;
            }
         }
         
@@ -439,7 +443,7 @@ COMMENT_FORM;
             if (($needed_capability && current_user_can($needed_capability)) || !$this->options['show_in_comments'])
                 return $comment_data;
             
-            if (show_captcha_for_comment()) {
+            if ($this->show_captcha_for_comment()) {
                 // do not check trackbacks/pingbacks
                 if ($comment_data['comment_type'] == '') {
                     $challenge = $_POST['recaptcha_challenge_field'];
@@ -470,7 +474,7 @@ COMMENT_FORM;
                     ((strpos($location, "?") === false) ? "?" : "&") .
                     'rcommentid=' . $comment->comment_ID .
                     '&rerror=' . $this->saved_error .
-                    '&rchash=' . hash_comment($comment->comment_ID) .
+                    '&rchash=' . $this->hash_comment($comment->comment_ID) .
                     '#commentform';
             }
             
@@ -481,7 +485,7 @@ COMMENT_FORM;
             if (!is_single() && !is_page())
                 return;
             
-            if ($_GET['rcommentid'] && $_GET['rchash'] == hash_comment($_GET['rcommentid'])) {
+            if ($_GET['rcommentid'] && $_GET['rchash'] == $this->hash_comment($_GET['rcommentid'])) {
                 $comment = get_comment($_GET['rcommentid']);
 
                 $com = preg_replace('/([\\/\(\)\+\;\'\"])/e','\'%\'.dechex(ord(\'$1\'))', $comment->comment_content);

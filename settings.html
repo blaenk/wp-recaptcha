@@ -97,6 +97,14 @@
                <?php $this->plugin_language_dropdown(); ?>
             </td>
          </tr>
+         
+         <tr valign="top">
+            <th scope="row">Standards Compliance</th>
+            <td>
+               <input type="checkbox" id ="recaptcha_options[xhtml_compliance]" name="recaptcha_options[xhtml_compliance]" value="1" <?php checked('1', $this->options['xhtml_compliance']); ?> />
+               <label for="recaptcha_options[xhtml_compliance]">Produce XHTML 1.0 Strict Compliant Code</label>
+            </td>
+         </tr>
       </table>
       
       <h3>Error Messages</h3>
