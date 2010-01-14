@@ -56,7 +56,7 @@
          <tr valign="top">
             <th scope="row">Tab Index</th>
             <td>
-               <input type="text" name="recaptcha_options[tab_index]" size="10" value="<?php echo $this->options['tab_index']; ?>" />
+               <input type="text" name="recaptcha_options[comments_tab_index]" size="10" value="<?php echo $this->options['comments_tab_index']; ?>" />
             </td>
          </tr>
       </table>
@@ -76,6 +76,13 @@
             <td>
                <label for="recaptcha_options[registration_theme]">Theme:</label>
                <?php $this->theme_dropdown('registration'); ?>
+            </td>
+         </tr>
+         
+         <tr valign="top">
+            <th scope="row">Tab Index</th>
+            <td>
+               <input type="text" name="recaptcha_options[registration_tab_index]" size="10" value="<?php echo $this->options['registration_tab_index']; ?>" />
             </td>
          </tr>
       </table>

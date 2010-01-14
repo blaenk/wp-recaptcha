@@ -31,25 +31,33 @@ if (!class_exists('reCAPTCHA')) {
             // styling
             add_action('wp_head', array(&$this, 'register_stylesheets')); // make unnecessary: instead, inform of classes for styling
             add_action('admin_head', array(&$this, 'register_stylesheets')); // make unnecessary: shouldn't require styling in the options page
-            add_action('login_head', array(&$this, 'registration_style')); // make unnecessary: instead use jQuery and add to the footer?
+            
+            if ($this->options['show_in_registration'])
+                add_action('login_head', array(&$this, 'registration_style')); // make unnecessary: instead use jQuery and add to the footer?
 
             // options
             register_activation_hook($this->path_to_plugin(), array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
             add_action('admin_init', array(&$this, 'register_settings_group'));
 
-            // recaptcha form display
-            if ($this->wordpress_mu)
-                add_action('signup_extra_fields', array(&$this, 'show_recaptcha_form'));
-            else
-                add_action('register_form', array(&$this, 'show_recaptcha_form'));
+            // only register the hooks if the user wants recaptcha on the registration page
+            if ($this->options['show_in_registration']) {
+                // recaptcha form display
+                if ($this->wordpress_mu)
+                    add_action('signup_extra_fields', array(&$this, 'show_recaptcha_form'));
+                else
+                    add_action('register_form', array(&$this, 'show_recaptcha_form'));
+            }
 
-            add_action('comment_form', array(&$this, 'recaptcha_comment_form'));
-            add_action('wp_footer', array(&$this, 'save_comment_script')); // preserve the comment that was entered
+            // only register the hooks if the user wants recaptcha on the comments page
+            if ($this->options['show_in_comments']) {
+                add_action('comment_form', array(&$this, 'recaptcha_comment_form'));
+                add_action('wp_footer', array(&$this, 'save_comment_script')); // preserve the comment that was entered
 
-            // recaptcha comment processing (look into doing all of this with AJAX, optionally)
-            add_action('wp_head', array(&$this, 'saved_comment'), 0);
-            add_action('preprocess_comment', array(&$this, 'check_comment'), 0);
-            add_action('comment_post_redirect', array(&$this, 'relative_redirect'), 0, 2);
+                // recaptcha comment processing (look into doing all of this with AJAX, optionally)
+                add_action('wp_head', array(&$this, 'saved_comment'), 0);
+                add_action('preprocess_comment', array(&$this, 'check_comment'), 0);
+                add_action('comment_post_redirect', array(&$this, 'relative_redirect'), 0, 2);
+            }
 
             // administration (menus, pages, notifications, etc.)
             $plugin = plugin_basename($this->path_to_plugin());
@@ -61,11 +69,14 @@ if (!class_exists('reCAPTCHA')) {
         function register_filters() {
             // Filters
 
-            // recaptcha validation
-            if ($this->wordpress_mu)
-                add_filter('wpmu_validate_user_signup', array(&$this, 'validate_response_wpmu'));
-            else
-                add_filter('registration_errors', array(&$this, 'validate_response'));
+            // only register the hooks if the user wants recaptcha on the registration page
+            if ($this->options['show_in_registration']) {
+                // recaptcha validation
+                if ($this->wordpress_mu)
+                    add_filter('wpmu_validate_user_signup', array(&$this, 'validate_response_wpmu'));
+                else
+                    add_filter('registration_errors', array(&$this, 'validate_response'));
+            }
         }
         
         // determine whether it's WordPress regular or WordPress MU sitewide
@@ -128,7 +139,8 @@ if (!class_exists('reCAPTCHA')) {
                 $option_defaults['recaptcha_language'] = $old_options['re_lang']; // the default language for reCAPTCHA
                 $option_defaults['plugin_language'] = 'english'; // the default language for the plugin
                 $option_defaults['xhtml_compliance'] = $old_options['re_xhtml']; // whether or not to be XHTML 1.0 Strict compliant
-                $option_defaults['tab_index'] = $old_options['re_tabindex']; // the default tabindex for reCAPTCHA
+                $option_defaults['comments_tab_index'] = $old_options['re_tabindex']; // the default tabindex for reCAPTCHA
+                $option_defaults['registration_tab_index'] = 30; // the default tabindex for reCAPTCHA
 
                 // error handling
                 $option_defaults['no_response_error'] = $old_options['error_blank']; // message for no CAPTCHA response
@@ -159,7 +171,8 @@ if (!class_exists('reCAPTCHA')) {
                 $option_defaults['recaptcha_language'] = 'en'; // the default language for reCAPTCHA
                 $option_defaults['plugin_language'] = 'english'; // the default language for the plugin
                 $option_defaults['xhtml_compliance'] = false; // whether or not to be XHTML 1.0 Strict compliant
-                $option_defaults['tab_index'] = 5; // the default tabindex for reCAPTCHA
+                $option_defaults['comments_tab_index'] = 5; // the default tabindex for reCAPTCHA
+                $option_defaults['registration_tab_index'] = 30; // the default tabindex for reCAPTCHA
 
                 // error handling
                 $option_defaults['no_response_error'] = '<strong>ERROR</strong>: Please fill in the reCAPTCHA form.'; // message for no CAPTCHA response
@@ -201,16 +214,9 @@ if (!class_exists('reCAPTCHA')) {
         
         // stylesheet information
         function registration_style() {
-            // if they don't want to show it in the registration form then just exit
-           // todo: maybe just set the conditional on the add_action call?
-           if (!$this->options['show_in_registration'])
-               return;
-
             $width = 0; // the width of the recaptcha form
 
-            // every theme is 358 pixels wide except for the
-            // clean theme, so we have to programmatically handle that
-            // todo: perhaps do this with jquery?
+            // every theme is 358 pixels wide except for the clean theme, so we have to programmatically handle that
             if ($this->options['registration_theme'] == 'clean')
                 $width = 485;
             else
@@ -229,37 +235,35 @@ REGISTRATION;
         
         // display recaptcha
         function show_recaptcha_form($errors) {
-            if ($this->options['show_in_registration']) {
-                $format = <<<FORMAT
-                <script type='text/javascript'>
-                var RecaptchaOptions = { theme : '{$this->options['registration_theme']}', lang : '{$this->options['recaptcha_language']}' , tabindex : 30 };
-                </script>
+            $format = <<<FORMAT
+            <script type='text/javascript'>
+            var RecaptchaOptions = { theme : '{$this->options['registration_theme']}', lang : '{$this->options['recaptcha_language']}' , tabindex : {$this->options['registration_tab_index']} };
+            </script>
 FORMAT;
 
-                $comment_string = <<<COMMENT_FORM
-                <script type='text/javascript'>   
-                document.getElementById('recaptcha_table').style.direction = 'ltr';
-                </script>
+            $comment_string = <<<COMMENT_FORM
+            <script type='text/javascript'>   
+            document.getElementById('recaptcha_table').style.direction = 'ltr';
+            </script>
 COMMENT_FORM;
 
-                // todo: is this check necessary? look at the latest recaptchalib.php
-                if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on")
-                    $use_ssl = true;
-                else
-                    $use_ssl = false;
+            // todo: is this check necessary? look at the latest recaptchalib.php
+            if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on")
+                $use_ssl = true;
+            else
+                $use_ssl = false;
 
-                // if it's for wordpress mu, show the errors
-                if ($this->wordpress_mu) {
-                    $error = $errors->get_error_message('captcha');
-                    echo '<label for="verification">Verification:</label>';
-                    echo ($error ? '<p class="error">'.$error.'</p>' : '');
-                    echo $format . $this->get_recaptcha_html($_GET['rerror'], $use_ssl);
-                }
-                
-                // for regular wordpress
-                else {
-                    echo $format . $this->get_recaptcha_html($_GET['rerror'], $use_ssl);
-                }
+            // if it's for wordpress mu, show the errors
+            if ($this->wordpress_mu) {
+                $error = $errors->get_error_message('captcha');
+                echo '<label for="verification">Verification:</label>';
+                echo ($error ? '<p class="error">'.$error.'</p>' : '');
+                echo $format . $this->get_recaptcha_html($_GET['rerror'], $use_ssl);
+            }
+            
+            // for regular wordpress
+            else {
+                echo $format . $this->get_recaptcha_html($_GET['rerror'], $use_ssl);
             }
         }
         
@@ -291,10 +295,11 @@ COMMENT_FORM;
             $validated['minimum_bypass_level'] = $this->validate_dropdown($capabilities, 'minimum_bypass_level', $input['minimum_bypass_level']);
             $validated['comments_theme'] = $this->validate_dropdown($themes, 'comments_theme', $input['comments_theme']);
             
-            $validated['tab_index'] = $input['tab_index']; // use the intval filter
+            $validated['comments_tab_index'] = $input['comments_tab_index']; // use the intval filter
             
             $validated['show_in_registration'] = ($input['show_in_registration'] == 1 ? 1 : 0);
             $validated['registration_theme'] = $this->validate_dropdown($themes, 'registration_theme', $input['registration_theme']);
+            $validated['registration_tab_index'] = $input['registration_tab_index']; // use the intval filter
             
             $validated['recaptcha_language'] = $this->validate_dropdown($recaptcha_languages, 'recaptcha_language', $input['recaptcha_language']);
             $validated['plugin_language'] = $this->validate_dropdown($plugin_languages, 'plugin_language', $input['plugin_language']);
@@ -405,7 +410,7 @@ COMMENT_FORM;
                 //modify the comment form for the reCAPTCHA widget
                 $recaptcha_js_opts = <<<OPTS
                 <script type='text/javascript'>
-                    var RecaptchaOptions = { theme : '{$this->options['comments_theme']}', lang : '{$this->options['recaptcha_language']}' , tabindex : {$this->options['tab_index']} };
+                    var RecaptchaOptions = { theme : '{$this->options['comments_theme']}', lang : '{$this->options['recaptcha_language']}' , tabindex : {$this->options['comments_tab_index']} };
                 </script>
 OPTS;
 
