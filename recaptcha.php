@@ -43,14 +43,14 @@ if (!class_exists('reCAPTCHA')) {
             if ($this->options['show_in_registration']) {
                 // recaptcha form display
                 if ($this->wordpress_mu)
-                    add_action('signup_extra_fields', array(&$this, 'show_recaptcha_form'));
+                    add_action('signup_extra_fields', array(&$this, 'show_recaptcha_in_registration'));
                 else
-                    add_action('register_form', array(&$this, 'show_recaptcha_form'));
+                    add_action('register_form', array(&$this, 'show_recaptcha_in_registration'));
             }
 
             // only register the hooks if the user wants recaptcha on the comments page
             if ($this->options['show_in_comments']) {
-                add_action('comment_form', array(&$this, 'recaptcha_comment_form'));
+                add_action('comment_form', array(&$this, 'show_recaptcha_in_comments'));
                 add_action('wp_footer', array(&$this, 'save_comment_script')); // preserve the comment that was entered
 
                 // recaptcha comment processing (look into doing all of this with AJAX, optionally)
@@ -73,9 +73,9 @@ if (!class_exists('reCAPTCHA')) {
             if ($this->options['show_in_registration']) {
                 // recaptcha validation
                 if ($this->wordpress_mu)
-                    add_filter('wpmu_validate_user_signup', array(&$this, 'validate_response_wpmu'));
+                    add_filter('wpmu_validate_user_signup', array(&$this, 'validate_recaptcha_response_wpmu'));
                 else
-                    add_filter('registration_errors', array(&$this, 'validate_response'));
+                    add_filter('registration_errors', array(&$this, 'validate_recaptcha_response'));
             }
         }
         
@@ -234,7 +234,7 @@ REGISTRATION;
         }
         
         // display recaptcha
-        function show_recaptcha_form($errors) {
+        function show_recaptcha_in_registration($errors) {
             $format = <<<FORMAT
             <script type='text/javascript'>
             var RecaptchaOptions = { theme : '{$this->options['registration_theme']}', lang : '{$this->options['recaptcha_language']}' , tabindex : {$this->options['registration_tab_index']} };
@@ -311,25 +311,7 @@ COMMENT_FORM;
             return $validated;
         }
         
-        // recaptcha validation
-        function validate_response_old() {
-            global $errors;
-            
-            // empty so throw the empty response error
-            if (empty($_POST['recaptcha_response_field']))
-                $errors['blank_captcha'] = $this->options['no_response_error'];
-            
-            else {
-                $response = recaptcha_check_answer($this->options['private_key'], $_SERVER['REMOTE_ADDR'], $_POST['recaptcha_challenge_field'], $_POST['recaptcha_response_field']);
-                
-                // response is bad, add incorrect response error
-                if (!$response->is_valid)
-                    if ($response->error == 'incorrect-captcha-sol')
-                        $errors['captcha_wrong'] = $this->options['incorrect_response_error'];
-            }
-        }
-        
-        function validate_response($errors) {
+        function validate_recaptcha_response($errors) {
             // empty so throw the empty response error
             if (empty($_POST['recaptcha_response_field']) || $_POST['recaptcha_response_field'] == '') {
                 $errors->add('blank_captcha', $this->options['no_response_error']);
@@ -346,7 +328,7 @@ COMMENT_FORM;
            return $errors;
         }
         
-        function validate_response_wpmu($result) {
+        function validate_recaptcha_response_wpmu($result) {
             // must make a check here, otherwise the wp-admin/user-new.php script will keep trying to call
             // this function despite not having called do_action('signup_extra_fields'), so the recaptcha
             // field was never shown. this way it won't validate if it's called in the admin interface
@@ -391,7 +373,7 @@ COMMENT_FORM;
             return recaptcha_get_html($this->options['public_key'], $recaptcha_error, $use_ssl, $this->options['xhtml_compliance']);
         }
         
-        function recaptcha_comment_form() {
+        function show_recaptcha_in_comments() {
             global $user_ID;
 
             // set the minimum capability needed to skip the captcha if there is one
@@ -517,7 +499,8 @@ JS;
             if ($_GET['rcommentid'] && $_GET['rchash'] == $this->hash_comment($_GET['rcommentid'])) {
                 $comment = get_comment($_GET['rcommentid']);
 
-                $com = preg_replace('/([\\/\(\)\+\;\'\"])/e','\'%\'.dechex(ord(\'$1\'))', $comment->comment_content);
+                // todo: removed double quote from list of 'dangerous characters'
+                $com = preg_replace('/([\\/\(\)\+\;\'])/e','\'%\'.dechex(ord(\'$1\'))', $comment->comment_content);
                 $com = preg_replace('/\\r\\n/m', '\\\n', $com);
 
                 echo "
@@ -532,6 +515,7 @@ JS;
         }
         
         // todo: is this still needed?
+        // this is used for the api keys url in the administration interface
         function blog_domain() {
             $uri = parse_url(get_settings('siteurl'));
             return $uri['host'];
@@ -556,43 +540,6 @@ JS;
         // store the xhtml in a separate file and use include on it
         function show_settings_page() {
             include("settings.html");
-        }
-        
-        function options_subpanel() {
-            // $this->register_defaults(); this is no longer needed?
-            
-            // Check form submission and update options if no error occurred
-            if (isset($_POST['submit'])) {
-                $options_update = array();
-                
-                // keys
-                $option_defaults['public_key'] = trim($_POST['public_key']); // the public key for reCAPTCHA
-                $option_defaults['private_key'] = trim($_POST['private_key']); // the private key for reCAPTCHA
-
-                // placement
-                $option_defaults['show_in_comments'] = $_POST['show_in_comments']; // whether or not to show reCAPTCHA on the comment post
-                $option_defaults['show_in_registration'] = $_POST['show_in_registration']; // whether or not to show reCAPTCHA on the registration page
-
-                // bypass levels
-                $option_defaults['bypass_for_registered_users'] = $_POST['bypass_for_registered_users']; // whether to skip reCAPTCHAs for registered users
-                $option_defaults['minimum_bypass_level'] = $_POST['minimum_bypass_level']; // who doesn't have to do the reCAPTCHA (should be a valid WordPress capability slug)
-
-                // styling
-                $option_defaults['comments_theme'] = $_POST['comments_theme']; // the default theme for reCAPTCHA on the comment post
-                $option_defaults['registration_theme'] = $_POST['registration_theme']; // the default theme for reCAPTCHA on the registration form
-                $option_defaults['recaptcha_language'] = $_POST['recaptcha_language']; // the default language for reCAPTCHA
-                $option_defaults['xhtml_compliance'] = $_POST['xhtml_compliance']; // whether or not to be XHTML 1.0 Strict compliant
-                $option_defaults['tab_index'] = $_POST['tab_index']; // the default tabindex for reCAPTCHA
-
-                // error handling
-                $option_defaults['no_response_error'] = $_POST['no_response_error']; // message for no CAPTCHA response
-                $option_defaults['incorrect_response_error'] = $_POST['incorrect_response_error']; // message for incorrect CAPTCHA response
-                
-                if ($this->wordpress_mu)
-                    update_site_option('recaptcha', $options_update);
-                else
-                    update_option('recaptcha', $options_update);
-            }
         }
         
         function build_dropdown($name, $keyvalue, $checked_value) {
