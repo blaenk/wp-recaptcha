@@ -27,6 +27,9 @@ if (!class_exists('reCAPTCHA')) {
         
         function register_actions() {
             // Actions
+            
+            // load the plugin's textdomain for localization
+            add_action('init', 'load_textdomain');
 
             // styling
             add_action('wp_head', array(&$this, 'register_stylesheets')); // make unnecessary: instead, inform of classes for styling
@@ -77,6 +80,10 @@ if (!class_exists('reCAPTCHA')) {
                 else
                     add_filter('registration_errors', array(&$this, 'validate_recaptcha_response'));
             }
+        }
+        
+        function load_textdomain() {
+            load_plugin_textdomain('recaptcha', false, 'locales');
         }
         
         // determine whether it's WordPress regular or WordPress MU sitewide
