@@ -155,6 +155,11 @@ if (!class_exists('reCAPTCHA')) {
                 
                 // now remove the option from the wp_options table because it's no longer needed
                 // at least someone cares to keep the database nice and tidy, right?
+                // todo: if this is done here, then mailhide won't be able to retrieve the options
+                // possible solutions:
+                //      - set priority level of mailhide to be after this one and then delete the option in that one
+                //      - make mailhide a member object of this class and call mailhide's register_default_options in this section?
+                //      - merge mailhide code into this class
                 delete_option('recaptcha');
             }
             
@@ -165,19 +170,21 @@ if (!class_exists('reCAPTCHA')) {
                 $option_defaults['private_key'] = ''; // the private key for reCAPTCHA
 
                 // placement
-                $option_defaults['show_in_comments'] = true; // whether or not to show reCAPTCHA on the comment post
-                $option_defaults['show_in_registration'] = true; // whether or not to show reCAPTCHA on the registration page
+                $option_defaults['show_in_comments'] = 1; // whether or not to show reCAPTCHA on the comment post
+                $option_defaults['show_in_registration'] = 1; // whether or not to show reCAPTCHA on the registration page
 
                 // bypass levels
-                $option_defaults['bypass_for_registered_users'] = true; // whether to skip reCAPTCHAs for registered users
-                $option_defaults['minimum_bypass_level'] = ''; // who doesn't have to do the reCAPTCHA (should be a valid WordPress capability slug)
+                $option_defaults['bypass_for_registered_users'] = 1; // whether to skip reCAPTCHAs for registered users
+                $option_defaults['minimum_bypass_level'] = 'read'; // who doesn't have to do the reCAPTCHA (should be a valid WordPress capability slug)
 
                 // styling
                 $option_defaults['comments_theme'] = 'red'; // the default theme for reCAPTCHA on the comment post
                 $option_defaults['registration_theme'] = 'red'; // the default theme for reCAPTCHA on the registration form
                 $option_defaults['recaptcha_language'] = 'en'; // the default language for reCAPTCHA
+                // todo: this option is probably not necessary, I believe it is automatically detected
+                // based on the wordpress language
                 $option_defaults['plugin_language'] = 'english'; // the default language for the plugin
-                $option_defaults['xhtml_compliance'] = false; // whether or not to be XHTML 1.0 Strict compliant
+                $option_defaults['xhtml_compliance'] = 0; // whether or not to be XHTML 1.0 Strict compliant
                 $option_defaults['comments_tab_index'] = 5; // the default tabindex for reCAPTCHA
                 $option_defaults['registration_tab_index'] = 30; // the default tabindex for reCAPTCHA
 
@@ -530,7 +537,10 @@ JS;
         
         // add a settings link to the plugin in the plugin list
         function show_settings_link($links) {
-            $settings_link = '<a href="options-general.php?page=wp-recaptcha/recaptcha.php" title="Go to the Settings for this Plugin">Settings</a>';
+            $settings_title = __('Settings for this Plugin', 'recaptcha');
+            $settings = __('Settings', 'recaptcha');
+            $settings_link = '<a href="options-general.php?page=wp-recaptcha/recaptcha.php" title="' . $settings_title . '">' . $settings . '</a>';
+            
             array_unshift($links, $settings_link);
             return $links;
         }
@@ -566,11 +576,11 @@ JS;
         function capabilities_dropdown() {
             // define choices: Display text => permission slug
             $capabilities = array (
-                'all registered users' => 'read',
-                'edit posts' => 'edit_posts',
-                'publish posts' => 'publish_posts',
-                'moderate comments' => 'moderate_comments',
-                'administer site' => 'level_10'
+                __('all registered users', 'recaptcha') => 'read',
+                __('edit posts', 'recaptcha') => 'edit_posts',
+                __('publish posts', 'recaptcha') => 'publish_posts',
+                __('moderate comments', 'recaptcha') => 'moderate_comments',
+                __('administer site', 'recaptcha') => 'level_10'
             );
             
             $this->build_dropdown('recaptcha_options[minimum_bypass_level]', $capabilities, $this->options['minimum_bypass_level']);
@@ -578,10 +588,10 @@ JS;
         
         function theme_dropdown($which) {
             $themes = array (
-                'Red' => 'red',
-                'White' => 'white',
-                'Black Glass' => 'blackglass',
-                'Clean' => 'clean'
+                __('Red', 'recaptcha') => 'red',
+                __('White', 'recaptcha') => 'white',
+                __('Black Glass', 'recaptcha') => 'blackglass',
+                __('Clean', 'recaptcha') => 'clean'
             );
             
             if ($which == 'comments')
@@ -592,14 +602,14 @@ JS;
         
         function recaptcha_language_dropdown() {
             $languages = array (
-                'English' => 'en',
-                'Dutch' => 'nl',
-                'French' => 'fr',
-                'German' => 'de',
-                'Portuguese' => 'pt',
-                'Russian' => 'ru',
-                'Spanish' => 'es',
-                'Turkish' => 'tr'
+                __('English', 'recaptcha') => 'en',
+                __('Dutch', 'recaptcha') => 'nl',
+                __('French', 'recaptcha') => 'fr',
+                __('German', 'recaptcha') => 'de',
+                __('Portuguese', 'recaptcha') => 'pt',
+                __('Russian', 'recaptcha') => 'ru',
+                __('Spanish', 'recaptcha') => 'es',
+                __('Turkish', 'recaptcha') => 'tr'
             );
             
             $this->build_dropdown('recaptcha_options[recaptcha_language]', $languages, $this->options['recaptcha_language']);
