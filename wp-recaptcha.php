@@ -12,8 +12,10 @@ Author URI: http://www.blaenkdenum.com
 // this is the 'driver' file that instantiates the objects and registers every hook
 
 require_once('recaptcha.php');
+require_once('mailhide.php');
 
 // initialize an object of type recaptcha (should take care of preliminary checks in constructor)
 $recaptcha = new reCAPTCHA();
+$mailhide = new MailHide();
 
 ?>

@@ -243,40 +243,6 @@ if (!class_exists('reCAPTCHA')) {
 REGISTRATION;
         }
         
-        // display recaptcha
-        function show_recaptcha_in_registration($errors) {
-            $format = <<<FORMAT
-            <script type='text/javascript'>
-            var RecaptchaOptions = { theme : '{$this->options['registration_theme']}', lang : '{$this->options['recaptcha_language']}' , tabindex : {$this->options['registration_tab_index']} };
-            </script>
-FORMAT;
-
-            $comment_string = <<<COMMENT_FORM
-            <script type='text/javascript'>   
-            document.getElementById('recaptcha_table').style.direction = 'ltr';
-            </script>
-COMMENT_FORM;
-
-            // todo: is this check necessary? look at the latest recaptchalib.php
-            if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on")
-                $use_ssl = true;
-            else
-                $use_ssl = false;
-
-            // if it's for wordpress mu, show the errors
-            if ($this->wordpress_mu) {
-                $error = $errors->get_error_message('captcha');
-                echo '<label for="verification">Verification:</label>';
-                echo ($error ? '<p class="error">'.$error.'</p>' : '');
-                echo $format . $this->get_recaptcha_html($_GET['rerror'], $use_ssl);
-            }
-            
-            // for regular wordpress
-            else {
-                echo $format . $this->get_recaptcha_html($_GET['rerror'], $use_ssl);
-            }
-        }
-        
         function validate_dropdown($array, $key, $value) {
             // make sure that the capability that was supplied is a valid capability from the drop-down list
             if (in_array($value, $array))
@@ -317,6 +283,40 @@ COMMENT_FORM;
             $validated['incorrect_response_error'] = $input['incorrect_response_error'];
             
             return $validated;
+        }
+        
+        // display recaptcha
+        function show_recaptcha_in_registration($errors) {
+            $format = <<<FORMAT
+            <script type='text/javascript'>
+            var RecaptchaOptions = { theme : '{$this->options['registration_theme']}', lang : '{$this->options['recaptcha_language']}' , tabindex : {$this->options['registration_tab_index']} };
+            </script>
+FORMAT;
+
+            $comment_string = <<<COMMENT_FORM
+            <script type='text/javascript'>   
+            document.getElementById('recaptcha_table').style.direction = 'ltr';
+            </script>
+COMMENT_FORM;
+
+            // todo: is this check necessary? look at the latest recaptchalib.php
+            if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on")
+                $use_ssl = true;
+            else
+                $use_ssl = false;
+
+            // if it's for wordpress mu, show the errors
+            if ($this->wordpress_mu) {
+                $error = $errors->get_error_message('captcha');
+                echo '<label for="verification">Verification:</label>';
+                echo ($error ? '<p class="error">'.$error.'</p>' : '');
+                echo $format . $this->get_recaptcha_html($_GET['rerror'], $use_ssl);
+            }
+            
+            // for regular wordpress
+            else {
+                echo $format . $this->get_recaptcha_html($_GET['rerror'], $use_ssl);
+            }
         }
         
         function validate_recaptcha_response($errors) {
