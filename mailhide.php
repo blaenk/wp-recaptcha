@@ -112,7 +112,7 @@ if (!class_exists('MailHide')) {
         }
         
         function load_textdomain() {
-            load_plugin_textdomain('recaptcha', false, 'locales');
+            load_plugin_textdomain('recaptcha', false, 'languages');
         }
         
         function register_default_options() {

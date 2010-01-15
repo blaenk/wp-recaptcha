@@ -83,7 +83,7 @@ if (!class_exists('reCAPTCHA')) {
         }
         
         function load_textdomain() {
-            load_plugin_textdomain('recaptcha', false, 'locales');
+            load_plugin_textdomain('recaptcha', false, 'languages');
         }
         
         // determine whether it's WordPress regular or WordPress MU sitewide
