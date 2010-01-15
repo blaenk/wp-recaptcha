@@ -144,7 +144,6 @@ if (!class_exists('reCAPTCHA')) {
                 $option_defaults['comments_theme'] = $old_options['re_theme']; // the default theme for reCAPTCHA on the comment post
                 $option_defaults['registration_theme'] = $old_options['re_theme_reg']; // the default theme for reCAPTCHA on the registration form
                 $option_defaults['recaptcha_language'] = $old_options['re_lang']; // the default language for reCAPTCHA
-                $option_defaults['plugin_language'] = 'english'; // the default language for the plugin
                 $option_defaults['xhtml_compliance'] = $old_options['re_xhtml']; // whether or not to be XHTML 1.0 Strict compliant
                 $option_defaults['comments_tab_index'] = $old_options['re_tabindex']; // the default tabindex for reCAPTCHA
                 $option_defaults['registration_tab_index'] = 30; // the default tabindex for reCAPTCHA
@@ -181,9 +180,6 @@ if (!class_exists('reCAPTCHA')) {
                 $option_defaults['comments_theme'] = 'red'; // the default theme for reCAPTCHA on the comment post
                 $option_defaults['registration_theme'] = 'red'; // the default theme for reCAPTCHA on the registration form
                 $option_defaults['recaptcha_language'] = 'en'; // the default language for reCAPTCHA
-                // todo: this option is probably not necessary, I believe it is automatically detected
-                // based on the wordpress language
-                $option_defaults['plugin_language'] = 'english'; // the default language for the plugin
                 $option_defaults['xhtml_compliance'] = 0; // whether or not to be XHTML 1.0 Strict compliant
                 $option_defaults['comments_tab_index'] = 5; // the default tabindex for reCAPTCHA
                 $option_defaults['registration_tab_index'] = 30; // the default tabindex for reCAPTCHA
@@ -304,7 +300,6 @@ COMMENT_FORM;
             $themes = array ('red', 'white', 'blackglass', 'clean');
             
             $recaptcha_languages = array ('en', 'nl', 'fr', 'de', 'pt', 'ru', 'es', 'tr');
-            $plugin_languages = array ('english');
             
             $validated['minimum_bypass_level'] = $this->validate_dropdown($capabilities, 'minimum_bypass_level', $input['minimum_bypass_level']);
             $validated['comments_theme'] = $this->validate_dropdown($themes, 'comments_theme', $input['comments_theme']);
@@ -316,7 +311,6 @@ COMMENT_FORM;
             $validated['registration_tab_index'] = $input['registration_tab_index']; // use the intval filter
             
             $validated['recaptcha_language'] = $this->validate_dropdown($recaptcha_languages, 'recaptcha_language', $input['recaptcha_language']);
-            $validated['plugin_language'] = $this->validate_dropdown($plugin_languages, 'plugin_language', $input['plugin_language']);
             $validated['xhtml_compliance'] = ($input['xhtml_compliance'] == 1 ? 1 : 0);
             
             $validated['no_response_error'] = $input['no_response_error'];
@@ -613,14 +607,6 @@ JS;
             );
             
             $this->build_dropdown('recaptcha_options[recaptcha_language]', $languages, $this->options['recaptcha_language']);
-        }
-        
-        function plugin_language_dropdown() {
-            $languages = array (
-                'English' => 'en'
-            );
-            
-            $this->build_dropdown('recaptcha_options[plugin_language]', $languages, $this->options['plugin_language']);
         }
     } // end class declaration
 } // end of class exists clause
