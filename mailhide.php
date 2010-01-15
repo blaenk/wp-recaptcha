@@ -33,6 +33,10 @@ if (!class_exists('MailHide')) {
             register_activation_hook($this->path_to_plugin(), array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
             add_action('admin_init', array(&$this, 'register_settings_group'));
             add_action('admin_init', array(&$this, 'settings_section'));
+            
+            // admin notice
+            add_action('admin_notices', array(&$this, 'missing_mcrypt_notice'));
+            add_action('admin_notices', array(&$this, 'missing_keys_notice'));
         }
         
         function register_filters() {
@@ -58,6 +62,34 @@ if (!class_exists('MailHide')) {
             }
         }
         
+        function mailhide_enabled() {
+            return ($this->options['use_in_posts'] || $this->options['use_in_comments'] || $this->options['use_in_rss'] || $this->options['use_in_rss_comments']);
+        }
+        
+        function keys_missing() {
+            return (empty($this->options['public_key']) || empty($this->options['private_key']));
+        }
+        
+        function create_error_notice($message, $anchor = '') {
+            $options_url = admin_url('options-general.php?page=wp-recaptcha/recaptcha.php') . $anchor;
+            $error_message = sprintf(__($message . ' <a href="%s" title="WP-reCAPTCHA Options">Fix this</a>', 'recaptcha'), $options_url);
+            
+            echo '<div class="error"><p><strong>' . $error_message . '</strong></p></div>';
+        }
+        
+        function missing_mcrypt_notice() {
+            if ($this->mailhide_enabled() && !$this->mcrypt_loaded) {
+                $this->create_error_notice('You enabled MailHide but the mcrypt PHP extension does not seem to be loaded.', '#mailhide');
+            }
+        }
+        
+        // todo: make a check in mailhide_settings partial so that if the keys are missing, the appropriate box is highlighted with #FFFFE0 bg-color 1px solid #E6DB55 border
+        function missing_keys_notice() {
+            if ($this->mailhide_enabled() && $this->keys_missing()) {
+                $this->create_error_notice('You enabled MailHide, but some of the MailHide API Keys seem to be missing.', '#mailhide');
+            }
+        }
+        
         function settings_section() {
             add_settings_section('mailhide_options', '', array(&$this, 'show_settings_section'), 'recaptcha_options_page');
         }
@@ -68,8 +100,6 @@ if (!class_exists('MailHide')) {
         
         function verify_mcrypt() {
             $this->mcrypt_loaded = extension_loaded('mcrypt');
-            
-            // todo: present warning here
         }
         
         // some utility methods for path-finding
