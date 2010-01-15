@@ -476,6 +476,7 @@ JS;
                     else {
                         $this->saved_error = $recaptcha_response->error;
                         
+                        // http://codex.wordpress.org/Plugin_API/Filter_Reference#Database_Writes_2
                         add_filter('pre_comment_approved', create_function('$a', 'return \'spam\';'));
                         return $comment_data;
                     }

@@ -42,8 +42,17 @@ if (!class_exists('MailHide')) {
                   add_filter('the_content', array(&$this, 'mailhide_emails'));
                if ($this->options['use_in_comments'])
                   add_filter('get_comment_text', array(&$this, 'mailhide_emails'));
-               if ($this->options['use_in_rss'])
+               // todo: this seems like it doesn't work: http://codex.wordpress.org/Plugin_API/Filter_Reference/the_content_rss
+               //   instead check for is_feed() on 'the_content' filter
+               //   the_excerpt_rss filter works fine
+               // concern: it seems like the feeds still show the email encoded in CDATA
+               if ($this->options['use_in_rss']) {
                   add_filter('the_content_rss', array(&$this, 'mailhide_emails'));
+                  add_filter('the_excerpt_rss', array(&$this, 'mailhide_emails')); // this one is sometimes used instead
+               }
+               // todo: atom requires the html to be escaped, rss does not. do so accordingly in the preg_replace_callbacks
+               // todo: also be sure to escape replace_link_with
+               //       - use htmlentities($var, ENT_QUOTES); for escaping?
                if ($this->options['use_in_rss_comments'])
                   add_filter('comment_text_rss', array(&$this, 'mailhide_emails'));
             }
@@ -60,8 +69,7 @@ if (!class_exists('MailHide')) {
         function verify_mcrypt() {
             $this->mcrypt_loaded = extension_loaded('mcrypt');
             
-            if (!$this->mcrypt_loaded)
-                die('no mcrypt, fool');
+            // todo: present warning here
         }
         
         // some utility methods for path-finding
