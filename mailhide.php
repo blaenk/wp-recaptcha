@@ -6,6 +6,10 @@ if (!class_exists('MailHide')) {
         private $options;
         private $wordpress_mu;
         private $mcrypt_loaded;
+        
+        function MailHide() {
+            $this->__construct();
+        }
 
         function __construct() {
             // verify mcrypt is loaded

@@ -1,5 +1,16 @@
 <?php
 
+/* these are probably necessary
+if ( ! defined( 'WP_CONTENT_URL' ) )
+  define( 'WP_CONTENT_URL', get_option( 'siteurl' ) . '/wp-content' );
+if ( ! defined( 'WP_CONTENT_DIR' ) )
+  define( 'WP_CONTENT_DIR', ABSPATH . 'wp-content' );
+if ( ! defined( 'WP_PLUGIN_URL' ) )
+  define( 'WP_PLUGIN_URL', WP_CONTENT_URL. '/plugins' );
+if ( ! defined( 'WP_PLUGIN_DIR' ) )
+  define( 'WP_PLUGIN_DIR', WP_CONTENT_DIR . '/plugins' );
+  */
+
 if (!class_exists('reCAPTCHA')) {
     class reCAPTCHA {
         // member variables
@@ -8,6 +19,12 @@ if (!class_exists('reCAPTCHA')) {
 
         private $saved_error;
         
+        // php 4 constructor
+        function reCAPTCHA() {
+            $this->__construct();
+        }
+        
+        // php 5 constructor
         function __construct() {
             // initialize anything that might need initializing
             
