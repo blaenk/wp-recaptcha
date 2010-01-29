@@ -389,9 +389,9 @@ COMMENT_FORM;
             define ("RECAPTCHA_WP_HASH_SALT", "b7e0638d85f5d7f3694f68e944136d62");
             
             if (function_exists('wp_hash'))
-                return wp_hash(RECAPTCHA_WP_HASH_COMMENT . $id);
+                return wp_hash(RECAPTCHA_WP_HASH_SALT . $id);
             else
-                return md5(RECAPTCHA_WP_HASH_COMMENT . $this->options['private_key'] . $id);
+                return md5(RECAPTCHA_WP_HASH_SALT . $this->options['private_key'] . $id);
         }
         
         function get_recaptcha_html($recaptcha_error, $use_ssl=false) {
