@@ -77,5 +77,5 @@
       </tr>
    </table>
 
-   <p class="submit"><input type="submit" class="button-primary" value="<?php _e('Save Changes') ?> &raquo;" /></p>
+   <p class="submit"><input type="submit" class="button-primary" title="<?php _e('Save MailHide Options') ?>" value="<?php _e('Save Changes') ?> &raquo;" /></p>
 </form>

@@ -84,6 +84,9 @@ if (!class_exists('reCAPTCHA')) {
             add_filter("plugin_action_links_$plugin", array(&$this, 'show_settings_link'));
 
             add_action('admin_menu', array(&$this, 'add_settings_page'));
+            
+            // admin notices
+            add_action('admin_notices', array(&$this, 'missing_keys_notice'));
         }
         
         function register_filters() {
@@ -258,6 +261,27 @@ if (!class_exists('reCAPTCHA')) {
                 };
                 </script>
 REGISTRATION;
+        }
+        
+        function recaptcha_enabled() {
+            return ($this->options['show_in_comments'] || $this->options['show_in_registration']);
+        }
+        
+        function keys_missing() {
+            return (empty($this->options['public_key']) || empty($this->options['private_key']));
+        }
+        
+        function create_error_notice($message, $anchor = '') {
+            $options_url = admin_url('options-general.php?page=wp-recaptcha/recaptcha.php') . $anchor;
+            $error_message = sprintf(__($message . ' <a href="%s" title="WP-reCAPTCHA Options">Fix this</a>', 'recaptcha'), $options_url);
+            
+            echo '<div class="error"><p><strong>' . $error_message . '</strong></p></div>';
+        }
+        
+        function missing_keys_notice() {
+            if ($this->recaptcha_enabled() && $this->keys_missing()) {
+                $this->create_error_notice('You enabled reCAPTCHA, but some of the reCAPTCHA API Keys seem to be missing.');
+            }
         }
         
         function validate_dropdown($array, $key, $value) {
