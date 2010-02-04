@@ -11,6 +11,8 @@ Author URI: http://www.blaenkdenum.com
 
 // this is the 'driver' file that instantiates the objects and registers every hook
 
+define('ALLOW_INCLUDE', true);
+
 require_once('recaptcha.php');
 require_once('mailhide.php');
 

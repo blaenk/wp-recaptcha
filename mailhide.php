@@ -99,7 +99,7 @@ if (!class_exists('MailHide')) {
         }
         
         function show_settings_section() {
-            include('mailhide_settings.html');
+            include('mailhide_settings.php');
         }
         
         function verify_mcrypt() {

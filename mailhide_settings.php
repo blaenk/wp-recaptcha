@@ -1,3 +1,10 @@
+<?php
+
+    if (defined('ALLOW_INCLUDE') === false)
+        die('no direct acess');
+
+?>
+
 <a name="mailhide"></a>
 <h2><?php _e('MailHide Options', 'recaptcha'); ?></h2>
 <p><?php _e('One common misconception about MailHide is that it edits your email addresses on the database. This is false, your actual content is never actually modified. Instead, it is "filtered" such that it appears modified to the reader.', 'recaptcha'); ?></p>

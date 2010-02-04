@@ -1,5 +1,10 @@
-<!-- do a referrer check here, or something, to ensure that this is only fetched/view from the administration interface
-     if the user is an administrator -->
+<?php
+
+    if (defined('ALLOW_INCLUDE') === false)
+        die('no direct acess');
+
+?>
+
 <div class="wrap">
    <a name="recaptcha"></a>
    <h2><?php _e('reCAPTCHA Options', 'recaptcha'); ?></h2>

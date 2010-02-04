@@ -568,7 +568,7 @@ JS;
         
         // store the xhtml in a separate file and use include on it
         function show_settings_page() {
-            include("settings.html");
+            include("settings.php");
         }
         
         function build_dropdown($name, $keyvalue, $checked_value) {
