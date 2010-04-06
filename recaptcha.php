@@ -140,49 +140,58 @@ if (!class_exists('reCAPTCHA')) {
                 return $this->path_to_plugin_directory() . '/wp-recaptcha.php';
         }
         
+        // migrate the old options
+        function migrate_old_options($old_options) {
+            $option_defaults = array();
+            
+            // keys
+            $option_defaults['public_key'] = $old_options['pubkey']; // the public key for reCAPTCHA
+            $option_defaults['private_key'] = $old_options['privkey']; // the private key for reCAPTCHA
+
+            // placement
+            $option_defaults['show_in_comments'] = $old_options['re_comments']; // whether or not to show reCAPTCHA on the comment post
+            $option_defaults['show_in_registration'] = $old_options['re_registration']; // whether or not to show reCAPTCHA on the registration page
+
+            // bypass levels
+            $option_defaults['bypass_for_registered_users'] = $old_options['re_bypass']; // whether to skip reCAPTCHAs for registered users
+            $option_defaults['minimum_bypass_level'] = $old_options['re_bypasslevel']; // who doesn't have to do the reCAPTCHA (should be a valid WordPress capability slug)
+
+            // styling
+            $option_defaults['comments_theme'] = $old_options['re_theme']; // the default theme for reCAPTCHA on the comment post
+            $option_defaults['registration_theme'] = $old_options['re_theme_reg']; // the default theme for reCAPTCHA on the registration form
+            $option_defaults['recaptcha_language'] = $old_options['re_lang']; // the default language for reCAPTCHA
+            $option_defaults['xhtml_compliance'] = $old_options['re_xhtml']; // whether or not to be XHTML 1.0 Strict compliant
+            $option_defaults['comments_tab_index'] = $old_options['re_tabindex']; // the default tabindex for reCAPTCHA
+            $option_defaults['registration_tab_index'] = 30; // the default tabindex for reCAPTCHA
+
+            // error handling
+            $option_defaults['no_response_error'] = $old_options['error_blank']; // message for no CAPTCHA response
+            $option_defaults['incorrect_response_error'] = $old_options['error_incorrect']; // message for incorrect CAPTCHA response
+            
+            // now remove the option from the wp_options table because it's no longer needed
+            // at least someone cares to keep the database nice and tidy, right?
+            // todo: if this is done here, then mailhide won't be able to retrieve the options
+            // possible solutions:
+            //      - set priority level of mailhide to be after this one and then delete the option in that one
+            //      - make mailhide a member object of this class and call mailhide's register_default_options in this section?
+            //      - merge mailhide code into this class
+            delete_option('recaptcha');
+            
+            return $option_defaults;
+        }
+        
         // set the default options
         function register_default_options() {
-            // store the options in an array, to ensure that the options will be stored in a single database entry
-            $option_defaults = array();
-
-            // migrate the settings from the previous version of the plugin if they exist
+            // check if there are already options from previous versions, if so, retrieve them
             $old_options = get_option('recaptcha');
+            
+            // migrate these old options to the new options
             if ($old_options) {
-                // keys
-                $option_defaults['public_key'] = $old_options['pubkey']; // the public key for reCAPTCHA
-                $option_defaults['private_key'] = $old_options['privkey']; // the private key for reCAPTCHA
-
-                // placement
-                $option_defaults['show_in_comments'] = $old_options['re_comments']; // whether or not to show reCAPTCHA on the comment post
-                $option_defaults['show_in_registration'] = $old_options['re_registration']; // whether or not to show reCAPTCHA on the registration page
-
-                // bypass levels
-                $option_defaults['bypass_for_registered_users'] = $old_options['re_bypass']; // whether to skip reCAPTCHAs for registered users
-                $option_defaults['minimum_bypass_level'] = $old_options['re_bypasslevel']; // who doesn't have to do the reCAPTCHA (should be a valid WordPress capability slug)
-
-                // styling
-                $option_defaults['comments_theme'] = $old_options['re_theme']; // the default theme for reCAPTCHA on the comment post
-                $option_defaults['registration_theme'] = $old_options['re_theme_reg']; // the default theme for reCAPTCHA on the registration form
-                $option_defaults['recaptcha_language'] = $old_options['re_lang']; // the default language for reCAPTCHA
-                $option_defaults['xhtml_compliance'] = $old_options['re_xhtml']; // whether or not to be XHTML 1.0 Strict compliant
-                $option_defaults['comments_tab_index'] = $old_options['re_tabindex']; // the default tabindex for reCAPTCHA
-                $option_defaults['registration_tab_index'] = 30; // the default tabindex for reCAPTCHA
-
-                // error handling
-                $option_defaults['no_response_error'] = $old_options['error_blank']; // message for no CAPTCHA response
-                $option_defaults['incorrect_response_error'] = $old_options['error_incorrect']; // message for incorrect CAPTCHA response
-                
-                // now remove the option from the wp_options table because it's no longer needed
-                // at least someone cares to keep the database nice and tidy, right?
-                // todo: if this is done here, then mailhide won't be able to retrieve the options
-                // possible solutions:
-                //      - set priority level of mailhide to be after this one and then delete the option in that one
-                //      - make mailhide a member object of this class and call mailhide's register_default_options in this section?
-                //      - merge mailhide code into this class
-                delete_option('recaptcha');
+                // set the now-default options to be the options that were already set
+                $option_defaults = $this->migrate_old_options($old_options);
             }
             
-            // define new settings
+            // no old settings to import, so define the defaults now
             else {
                 // keys
                 $option_defaults['public_key'] = ''; // the public key for reCAPTCHA
