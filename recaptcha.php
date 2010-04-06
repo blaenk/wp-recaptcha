@@ -555,7 +555,7 @@ JS;
             if (!is_single() && !is_page())
                 return;
             
-            if ($_GET['rcommentid'] && $_GET['rchash'] == $this->hash_comment($_GET['rcommentid'])) {
+            if (!empty($_GET['rcommentid']) && $_GET['rchash'] == $this->hash_comment($_GET['rcommentid'])) {
                 $comment = get_comment($_GET['rcommentid']);
 
                 // todo: removed double quote from list of 'dangerous characters'
