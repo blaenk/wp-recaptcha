@@ -1,33 +1,26 @@
 <?php
 
+require_once('plugin.php');
+
 if (!class_exists('MailHide')) {
-    class MailHide {
+    class MailHide extends Plugin {
         // member variables
-        private $options;
-        private $wordpress_mu;
         private $mcrypt_loaded;
         
-        private $old_option_defaults;
-        
-        function MailHide() {
-            $this->__construct();
+        function MailHide($options_name, $old_options = false) {
+            $args = func_get_args();
+            call_user_func_array(array(&$this, "__construct"), $args);
         }
 
-        function __construct($old_option_defaults) {
-            // set the old options if they exist
-            $this->old_option_defaults = $old_option_defaults;
-            
-            // verify mcrypt is loaded
-            $this->verify_mcrypt();
-            
-            // determine what environment we're in
-            $this->determine_environment();
-            
-            // get the site options
-            $this->retrieve_options();
+        function __construct($options_name, $old_options = false) {
+            // instantiate super class (sets: options, environment, options_name, old_options)
+            parent::__construct($options_name, $old_options);
             
             // require the recaptcha library
             $this->require_library();
+            
+            // verify mcrypt is loaded
+            $this->verify_mcrypt();
             
             // register the hooks
             $this->register_actions();
@@ -39,7 +32,7 @@ if (!class_exists('MailHide')) {
             add_action('init', array(&$this, 'load_textdomain'));
             
             // options
-            register_activation_hook($this->path_to_plugin(), array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
+            register_activation_hook(Plugin::path_to_plugin(__FILE__), array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
             add_action('admin_init', array(&$this, 'register_settings_group'));
             add_action('admin_init', array(&$this, 'settings_section'));
             
@@ -53,8 +46,10 @@ if (!class_exists('MailHide')) {
             if ($this->mcrypt_loaded) {
                if ($this->options['use_in_posts'])
                   add_filter('the_content', array(&$this, 'mailhide_emails'));
+                  
                if ($this->options['use_in_comments'])
                   add_filter('get_comment_text', array(&$this, 'mailhide_emails'));
+                  
                // todo: this seems like it doesn't work: http://codex.wordpress.org/Plugin_API/Filter_Reference/the_content_rss
                //   instead check for is_feed() on 'the_content' filter
                //   the_excerpt_rss filter works fine
@@ -63,6 +58,7 @@ if (!class_exists('MailHide')) {
                   add_filter('the_content_rss', array(&$this, 'mailhide_emails'));
                   add_filter('the_excerpt_rss', array(&$this, 'mailhide_emails')); // this one is sometimes used instead
                }
+               
                // todo: atom requires the html to be escaped, rss does not. do so accordingly in the preg_replace_callbacks
                // todo: also be sure to escape replace_link_with
                //       - use htmlentities($var, ENT_QUOTES); for escaping?
@@ -111,43 +107,9 @@ if (!class_exists('MailHide')) {
             $this->mcrypt_loaded = extension_loaded('mcrypt');
         }
         
-        // some utility methods for path-finding
-        function plugins_directory() {
-            if ($this->wordpress_mu)
-                return WP_CONTENT_DIR . '/mu-plugins';
-            else
-                return WP_CONTENT_DIR . '/plugins';
-        }
-        
-        function path_to_plugin_directory() {
-            return $this->plugins_directory() . '/wp-recaptcha/';
-        }
-        
-        function path_to_plugin() {
-            if ($this->wordpress_mu)
-                return $this->plugins_directory() . '/wp-recaptcha.php';
-            else
-                return $this->path_to_plugin_directory() . '/wp-recaptcha.php';
-        }
-        
-        // determine whether it's WordPress regular or WordPress MU sitewide
-        function determine_environment() {
-            // is it wordpress mu?
-            if (is_dir(WP_CONTENT_DIR . '/mu-plugins')) {
-                // is it site-wide?
-                if (is_file(WP_CONTENT_DIR . '/mu-plugins/wp-recaptcha.php')) // forced activated
-                   $this->wordpress_mu = true;
-            }
-            
-            // otherwise it's just regular wordpress
-            else {
-                $this->wordpress_mu = false;
-            }
-        }
-        
         // require the recaptcha library
         function require_library() {
-            require_once($this->path_to_plugin_directory() . '/recaptchalib.php');
+            require_once(Plugin::path_to_plugin_directory(__FILE__) . '/recaptchalib.php');
         }
         
         function load_textdomain() {
@@ -206,18 +168,7 @@ if (!class_exists('MailHide')) {
             }
             
             // add the option based on what environment we're in
-            if ($this->wordpress_mu)
-                add_site_option('mailhide_options', $option_defaults);
-            else
-                add_option('mailhide_options', $option_defaults);
-        }
-        
-        function retrieve_options() {
-            if ($this->wordpress_mu)
-                $this->options = get_site_option('mailhide_options');
-
-            else
-                $this->options = get_option('mailhide_options');
+            Plugin::add_options($this->options_name, $option_defaults);
         }
         
         function register_settings_group() {

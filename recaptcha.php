@@ -1,57 +1,22 @@
 <?php
 
-/* these are probably necessary
-if ( ! defined( 'WP_CONTENT_URL' ) )
-  define( 'WP_CONTENT_URL', get_option( 'siteurl' ) . '/wp-content' );
-if ( ! defined( 'WP_CONTENT_DIR' ) )
-  define( 'WP_CONTENT_DIR', ABSPATH . 'wp-content' );
-if ( ! defined( 'WP_PLUGIN_URL' ) )
-  define( 'WP_PLUGIN_URL', WP_CONTENT_URL. '/plugins' );
-if ( ! defined( 'WP_PLUGIN_DIR' ) )
-  define( 'WP_PLUGIN_DIR', WP_CONTENT_DIR . '/plugins' );
-  */
-  
-/*
-// 0 - not multi-blog
-// 1 - wp 3 multi-site
-// 2 - wp mu
-function re_multi_blog() {
-    global $wpmu_version;
-    if (function_exists('is_multisite'))
-        if (is_multisite())
-            return 1;
-    if (!empty($wpmu_version))
-        return 2;
-    
-    return 0;
-}
-*/
+require_once('plugin.php');
 
 if (!class_exists('reCAPTCHA')) {
-    class reCAPTCHA {
+    class reCAPTCHA extends Plugin {
         // member variables
-        private $options;
-        private $wordpress_mu;
-
         private $saved_error;
         
-        private $old_option_defaults;
-        
         // php 4 constructor
-        function reCAPTCHA() {
-            $this->__construct();
+        function reCAPTCHA($options_name, $old_options = false) {
+            $args = func_get_args();
+            call_user_func_array(array(&$this, "__construct"), $args);
         }
         
         // php 5 constructor
-        function __construct($old_option_defaults) {
-            // store the old option defaults if they exist
-            $this->old_option_defaults = $old_option_defaults;
-            
-            // determine what environment we're in
-            $this->determine_environment();
-            
-            // get the site options
-            $this->retrieve_options();
+        function __construct($options_name, $old_options = false) {
+            // instantiate super class (sets: options, environment, options_name, old_options)
+            parent::__construct($options_name, $old_options);
             
             // require the recaptcha library
             $this->require_library();
@@ -73,13 +38,13 @@ if (!class_exists('reCAPTCHA')) {
                 add_action('login_head', array(&$this, 'registration_style')); // make unnecessary: instead use jQuery and add to the footer?
 
             // options
-            register_activation_hook($this->path_to_plugin(), array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
+            register_activation_hook(Plugin::path_to_plugin(__FILE__), array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
             add_action('admin_init', array(&$this, 'register_settings_group'));
 
             // only register the hooks if the user wants recaptcha on the registration page
             if ($this->options['show_in_registration']) {
                 // recaptcha form display
-                if ($this->wordpress_mu)
+                if ($this->is_multi_blog())
                     add_action('signup_extra_fields', array(&$this, 'show_recaptcha_in_registration'));
                 else
                     add_action('register_form', array(&$this, 'show_recaptcha_in_registration'));
@@ -97,8 +62,8 @@ if (!class_exists('reCAPTCHA')) {
             }
 
             // administration (menus, pages, notifications, etc.)
-            $plugin = plugin_basename($this->path_to_plugin());
-            add_filter("plugin_action_links_$plugin", array(&$this, 'show_settings_link'));
+            $plugin = plugin_basename($this->path_to_plugin(__FILE__));
+            add_filter("plugin_action_links_${plugin}", array(&$this, 'show_settings_link'));
 
             add_action('admin_menu', array(&$this, 'add_settings_page'));
             
@@ -110,7 +75,7 @@ if (!class_exists('reCAPTCHA')) {
             // only register the hooks if the user wants recaptcha on the registration page
             if ($this->options['show_in_registration']) {
                 // recaptcha validation
-                if ($this->wordpress_mu)
+                if ($this->is_multi_blog())
                     add_filter('wpmu_validate_user_signup', array(&$this, 'validate_recaptcha_response_wpmu'));
                 else
                     add_filter('registration_errors', array(&$this, 'validate_recaptcha_response'));
@@ -119,40 +84,6 @@ if (!class_exists('reCAPTCHA')) {
         
         function load_textdomain() {
             load_plugin_textdomain('recaptcha', false, 'languages');
-        }
-        
-        // determine whether it's WordPress regular or WordPress MU sitewide
-        function determine_environment() {
-            // is it wordpress mu?
-            if (is_dir(WP_CONTENT_DIR . '/mu-plugins')) {
-                // is it site-wide?
-                if (is_file(WP_CONTENT_DIR . '/mu-plugins/wp-recaptcha.php')) // forced activated
-                   $this->wordpress_mu = true;
-            }
-            
-            // otherwise it's just regular wordpress
-            else {
-                $this->wordpress_mu = false;
-            }
-        }
-        
-        // some utility methods for path-finding
-        function plugins_directory() {
-            if ($this->wordpress_mu)
-                return WP_CONTENT_DIR . '/mu-plugins';
-            else
-                return WP_CONTENT_DIR . '/plugins';
-        }
-        
-        function path_to_plugin_directory() {
-            return $this->plugins_directory() . '/wp-recaptcha/';
-        }
-        
-        function path_to_plugin() {
-            if ($this->wordpress_mu)
-                return $this->plugins_directory() . '/wp-recaptcha.php';
-            else
-                return $this->path_to_plugin_directory() . '/wp-recaptcha.php';
         }
         
         // migrate the old options
@@ -189,9 +120,9 @@ if (!class_exists('reCAPTCHA')) {
         // set the default options
         function register_default_options() {
             // migrate these old options to the new options if they exist
-            if ($this->old_option_defaults) {
+            if ($this->old_options) {
                 // set the now-default options to be the options that were already set
-                $option_defaults = $this->migrate_old_options($this->old_option_defaults);
+                $option_defaults = $this->migrate_old_options($this->old_options);
             }
             
             // no old settings to import, so define the defaults now
@@ -222,39 +153,29 @@ if (!class_exists('reCAPTCHA')) {
             }
 
             // add the option based on what environment we're in
-            if ($this->wordpress_mu)
-                add_site_option('recaptcha_options', $option_defaults);
-            else
-                add_option('recaptcha_options', $option_defaults);
-        }
-        
-        // retrieve the options (call as needed for refresh)
-        function retrieve_options() {
-            if ($this->wordpress_mu)
-                $this->options = get_site_option('recaptcha_options');
-
-            else
-                $this->options = get_option('recaptcha_options');
+            Plugin::add_options($this->options_name, $option_defaults);
         }
         
         // require the recaptcha library
         function require_library() {
-            require_once($this->path_to_plugin_directory() . '/recaptchalib.php');
+            require_once($this->path_to_plugin_directory(__FILE__) . '/recaptchalib.php');
         }
         
         // register the settings
         function register_settings_group() {
-            register_setting('recaptcha_options_group', 'recaptcha_options', array(&$this, 'validate_options'));
+            register_setting('mailhide_options_group', 'mailhide_options', array(&$this, 'validate_options'));
+            register_setting("recaptcha_options_group", 'recaptcha_options', array(&$this, 'validate_options'));
         }
         
         // todo: make unnecessary
         function register_stylesheets() {
-            $path = $this->path_to_plugin_directory() . '/recaptcha.css';
+            $path = Plugin::path_to_plugin_directory(__FILE__) . '/recaptcha.css';
                 
             echo '<link rel="stylesheet" type="text/css" href="' . $path . '" />';
         }
         
         // stylesheet information
+        // todo: this 'hack' isn't nice, try to figure out a workaround
         function registration_style() {
             $width = 0; // the width of the recaptcha form
 
@@ -359,7 +280,7 @@ COMMENT_FORM;
                 $use_ssl = false;
 
             // if it's for wordpress mu, show the errors
-            if ($this->wordpress_mu) {
+            if ($this->is_multi_blog()) {
                 $error = $errors->get_error_message('captcha');
                 echo '<label for="verification">Verification:</label>';
                 echo ($error ? '<p class="error">'.$error.'</p>' : '');
@@ -394,7 +315,7 @@ COMMENT_FORM;
             // this function despite not having called do_action('signup_extra_fields'), so the recaptcha
             // field was never shown. this way it won't validate if it's called in the admin interface
             
-            if (!is_admin()) {
+            if (!$this->is_authority()) {
                 // blogname in 2.6, blog_id prior to that
                 // todo: why is this done?
                 if (isset($_POST['blog_id']) || isset($_POST['blogname']))
@@ -596,9 +517,12 @@ JS;
         // add the settings page
         function add_settings_page() {
             // add the options page
-            if ($this->wordpress_mu && is_site_admin())
+            if ($this->environment == WordPressMU && $this->is_authority())
                 add_submenu_page('wpmu-admin.php', 'WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, array(&$this, 'show_settings_page'));
 
+            if ($this->environment == WordPressMS && $this->is_authority())
+                add_submenu_page('ms-admin.php', 'reCAPTCHA', 'reCAPTCHA', 'manage_options', __FILE__, 'recaptcha_wp_options_subpanel');
+            
             add_options_page('WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, array(&$this, 'show_settings_page'));
         }
         

@@ -13,17 +13,19 @@ Author URI: http://www.blaenkdenum.com
 
 define('ALLOW_INCLUDE', true);
 
+require_once('plugin.php');
 require_once('recaptcha.php');
 require_once('mailhide.php');
 
 // get the old option defaults in case they exist
-$old_option_defaults = get_option('recaptcha');
+// todo: have to use get_site_option if wpmu
+$old_option_defaults = Plugin::retrieve_options('recaptcha');
 
 // initialize an object of type recaptcha (should take care of preliminary checks in constructor)
-$recaptcha = new reCAPTCHA($old_option_defaults);
-$mailhide = new MailHide($old_option_defaults);
+$recaptcha = new reCAPTCHA('recaptcha_options', $old_option_defaults);
+$mailhide = new MailHide('mailhide_options', $old_option_defaults);
 
 // remove the old option defaults in case they exist
-delete_option('recaptcha');
+Plugin::remove_options('recaptcha');
 
 ?>

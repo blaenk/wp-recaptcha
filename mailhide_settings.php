@@ -55,7 +55,7 @@
          <td>
             <input type="checkbox" id="mailhide_options[bypass_for_registered_users]" name="mailhide_options[bypass_for_registered_users]" value="1" <?php checked('1', $this->options['bypass_for_registered_users']); ?> />
             <label for="mailhide_options[bypass_for_registered_users]"><?php _e('Show actual email addresses to Registered Users who can', 'recaptcha'); ?></label>
-            <?php $this->capabilities_dropdown(); // <select> of capabilities ?>
+            <?php $this->capabilities_dropdown(); ?>
          </td>
       </tr>
    </table>
