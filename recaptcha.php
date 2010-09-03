@@ -10,6 +10,22 @@ if ( ! defined( 'WP_PLUGIN_URL' ) )
 if ( ! defined( 'WP_PLUGIN_DIR' ) )
   define( 'WP_PLUGIN_DIR', WP_CONTENT_DIR . '/plugins' );
   */
+  
+/*
+// 0 - not multi-blog
+// 1 - wp 3 multi-site
+// 2 - wp mu
+function re_multi_blog() {
+    global $wpmu_version;
+    if (function_exists('is_multisite'))
+        if (is_multisite())
+            return 1;
+    if (!empty($wpmu_version))
+        return 2;
+    
+    return 0;
+}
+*/
 
 if (!class_exists('reCAPTCHA')) {
     class reCAPTCHA {

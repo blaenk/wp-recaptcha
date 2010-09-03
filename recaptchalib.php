@@ -37,6 +37,7 @@
  */
 define("RECAPTCHA_API_SERVER", "http://api.recaptcha.net");
 define("RECAPTCHA_API_SECURE_SERVER", "https://api-secure.recaptcha.net");
+define("RECAPTCHA_VERIFY_SERVER", "api-verify.recaptcha.net");
 
 /**
  * Encodes the given data into a query string format
@@ -175,7 +176,7 @@ function recaptcha_check_answer($privkey, $remoteip, $challenge, $response, $ext
           return $recaptcha_response;
    }
    
-   $response = _recaptcha_http_post (gethostbyname('api-verify.recaptcha.net'), "/verify",
+   $response = _recaptcha_http_post (RECAPTCHA_VERIFY_SERVER, "/verify",
       array (
              'privatekey' => $privkey,
              'remoteip' => $remoteip,
