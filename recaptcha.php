@@ -35,14 +35,17 @@ if (!class_exists('reCAPTCHA')) {
 
         private $saved_error;
         
+        private $old_option_defaults;
+        
         // php 4 constructor
         function reCAPTCHA() {
             $this->__construct();
         }
         
         // php 5 constructor
-        function __construct() {
-            // initialize anything that might need initializing
+        function __construct($old_option_defaults) {
+            // store the old option defaults if they exist
+            $this->old_option_defaults = $old_option_defaults;
             
             // determine what environment we're in
             $this->determine_environment();
@@ -59,8 +62,6 @@ if (!class_exists('reCAPTCHA')) {
         }
         
         function register_actions() {
-            // Actions
-            
             // load the plugin's textdomain for localization
             add_action('init', array(&$this, 'load_textdomain'));
 
@@ -106,8 +107,6 @@ if (!class_exists('reCAPTCHA')) {
         }
         
         function register_filters() {
-            // Filters
-
             // only register the hooks if the user wants recaptcha on the registration page
             if ($this->options['show_in_registration']) {
                 // recaptcha validation
@@ -184,27 +183,15 @@ if (!class_exists('reCAPTCHA')) {
             $option_defaults['no_response_error'] = $old_options['error_blank']; // message for no CAPTCHA response
             $option_defaults['incorrect_response_error'] = $old_options['error_incorrect']; // message for incorrect CAPTCHA response
             
-            // now remove the option from the wp_options table because it's no longer needed
-            // at least someone cares to keep the database nice and tidy, right?
-            // todo: if this is done here, then mailhide won't be able to retrieve the options
-            // possible solutions:
-            //      - set priority level of mailhide to be after this one and then delete the option in that one
-            //      - make mailhide a member object of this class and call mailhide's register_default_options in this section?
-            //      - merge mailhide code into this class
-            delete_option('recaptcha');
-            
             return $option_defaults;
         }
         
         // set the default options
         function register_default_options() {
-            // check if there are already options from previous versions, if so, retrieve them
-            $old_options = get_option('recaptcha');
-            
-            // migrate these old options to the new options
-            if ($old_options) {
+            // migrate these old options to the new options if they exist
+            if ($this->old_option_defaults) {
                 // set the now-default options to be the options that were already set
-                $option_defaults = $this->migrate_old_options($old_options);
+                $option_defaults = $this->migrate_old_options($this->old_option_defaults);
             }
             
             // no old settings to import, so define the defaults now

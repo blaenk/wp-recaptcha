@@ -7,11 +7,16 @@ if (!class_exists('MailHide')) {
         private $wordpress_mu;
         private $mcrypt_loaded;
         
+        private $old_option_defaults;
+        
         function MailHide() {
             $this->__construct();
         }
 
-        function __construct() {
+        function __construct($old_option_defaults) {
+            // set the old options if they exist
+            $this->old_option_defaults = $old_option_defaults;
+            
             // verify mcrypt is loaded
             $this->verify_mcrypt();
             
@@ -149,33 +154,35 @@ if (!class_exists('MailHide')) {
             load_plugin_textdomain('recaptcha', false, 'languages');
         }
         
+        function migrate_old_options($old_options) {
+            $option_defaults = array();
+            
+            // keys
+            $option_defaults['public_key'] = $old_options['mailhide_pub']; // mailhide public key
+            $option_defaults['private_key'] = $old_options['mailhide_priv']; // mailhide private key
+
+            // placement
+            $option_defaults['use_in_posts'] = $old_options['use_mailhide_posts']; // mailhide for posts/pages
+            $option_defaults['use_in_comments'] = $old_options['use_mailhide_comments']; // use mailhide for comments
+            $option_defaults['use_in_rss'] = $old_options['use_mailhide_rss']; // use mailhide for the rss feed of the posts/pages
+            $option_defaults['use_in_rss_comments'] = $old_options['use_mailhide_rss_comments']; // use mailhide for the rss comments
+
+            // bypass levels
+            $option_defaults['bypass_for_registered_users'] = $old_options['mh_bypass']; // whether to sometimes skip the MailHide filter for registered users
+            $option_defaults['minimum_bypass_level'] = $old_options['my_bypasslevel']; // who can see full emails normally (should be a valid WordPress capability slug)
+
+            // styling
+            $option_defaults['replace_link_with'] = $old_options['mh_replace_link']; // name the link something else
+            $option_defaults['replace_title_with'] = $old_options['mh_replace_title']; // title of the link
+            
+            return $old_options;
+        }
+        
         function register_default_options() {
             $option_defaults = array();
             
-            // migrate the settings from the previous version of the plugin if they exist
-            $old_options = get_option('recaptcha');
             if ($old_options) {
-                // keys
-                $option_defaults['public_key'] = $old_options['mailhide_pub']; // mailhide public key
-                $option_defaults['private_key'] = $old_options['mailhide_priv']; // mailhide private key
-
-                // placement
-                $option_defaults['use_in_posts'] = $old_options['use_mailhide_posts']; // mailhide for posts/pages
-                $option_defaults['use_in_comments'] = $old_options['use_mailhide_comments']; // use mailhide for comments
-                $option_defaults['use_in_rss'] = $old_options['use_mailhide_rss']; // use mailhide for the rss feed of the posts/pages
-                $option_defaults['use_in_rss_comments'] = $old_options['use_mailhide_rss_comments']; // use mailhide for the rss comments
-
-                // bypass levels
-                $option_defaults['bypass_for_registered_users'] = $old_options['mh_bypass']; // whether to sometimes skip the MailHide filter for registered users
-                $option_defaults['minimum_bypass_level'] = $old_options['my_bypasslevel']; // who can see full emails normally (should be a valid WordPress capability slug)
-
-                // styling
-                $option_defaults['replace_link_with'] = $old_options['mh_replace_link']; // name the link something else
-                $option_defaults['replace_title_with'] = $old_options['mh_replace_title']; // title of the link
-                
-                // now remove the option from the wp_options table because it's no longer needed
-                // at least someone cares to keep the database nice and tidy, right?
-                delete_option('recaptcha');
+                $option_defaults = $this->migrate_old_options($this->old_option_defaults);
             }
             
             else {

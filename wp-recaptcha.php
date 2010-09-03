@@ -16,8 +16,14 @@ define('ALLOW_INCLUDE', true);
 require_once('recaptcha.php');
 require_once('mailhide.php');
 
+// get the old option defaults in case they exist
+$old_option_defaults = get_option('recaptcha');
+
 // initialize an object of type recaptcha (should take care of preliminary checks in constructor)
-$recaptcha = new reCAPTCHA();
-$mailhide = new MailHide();
+$recaptcha = new reCAPTCHA($old_option_defaults);
+$mailhide = new MailHide($old_option_defaults);
+
+// remove the old option defaults in case they exist
+delete_option('recaptcha');
 
 ?>
