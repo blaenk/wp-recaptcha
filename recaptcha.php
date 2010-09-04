@@ -521,7 +521,7 @@ JS;
                 add_submenu_page('wpmu-admin.php', 'WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, array(&$this, 'show_settings_page'));
 
             if ($this->environment == WordPressMS && $this->is_authority())
-                add_submenu_page('ms-admin.php', 'reCAPTCHA', 'reCAPTCHA', 'manage_options', __FILE__, 'recaptcha_wp_options_subpanel');
+                add_submenu_page('ms-admin.php', 'reCAPTCHA', 'reCAPTCHA', 'manage_options', __FILE__, array(&$this, 'show_settings_page'));
             
             add_options_page('WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, array(&$this, 'show_settings_page'));
         }
