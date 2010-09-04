@@ -36,17 +36,17 @@
       <tr valign="top">
          <th scope="row"><?php _e('Use MailHide in', 'recaptcha'); ?></th>
          <td>
-            <input type="checkbox" name="mailhide_options[use_in_posts]" id="mailhide_options[use_in_posts]" value="1" <?php checked('1', $this->options['use_in_posts']); ?> />
-            <label for="mailhide_options[use_in_posts]">Posts and Pages</label><br />
+            <input type="checkbox" id="mailhide_options[use_in_posts]" name="mailhide_options[use_in_posts]" value="1" <?php checked('1', $this->options['use_in_posts']); ?> />
+            <label for="mailhide_options[use_in_posts]"><?php _e('Posts and Pages', 'recaptcha'); ?></label><br />
             
-            <input type="checkbox" name="mailhide_options[use_in_comments]" id="mailhide_options[use_in_comments]" value="1" <?php checked('1', $this->options['use_in_comments']); ?> />
-            <label for="mailhide_options[use_in_comments]">Comments</label><br />
+            <input type="checkbox" id="mailhide_options[use_in_comments]" name="mailhide_options[use_in_comments]" value="1" <?php checked('1', $this->options['use_in_comments']); ?> />
+            <label for="mailhide_options[use_in_comments]"><?php _e('Comments', 'recaptcha'); ?></label><br />
             
-            <input type="checkbox" name="mailhide_options[use_in_rss]" id="mailhide_options[use_in_rss]" value="1" <?php checked('1', $this->options['use_in_rss']); ?> />
-            <label for="mailhide_options[use_in_rss]">RSS Feed of Posts and Pages</label><br />
+            <input type="checkbox" id="mailhide_options[use_in_rss]" name="mailhide_options[use_in_rss]" value="1" <?php checked('1', $this->options['use_in_rss']); ?> />
+            <label for="mailhide_options[use_in_rss]"><?php _e('RSS Feed of Posts and Pages', 'recaptcha'); ?></label><br />
             
-            <input type="checkbox" name="mailhide_options[use_in_rss_comments]" id="mailhide_options[use_in_rss_comments]" value="1" <?php checked('1', $this->options['use_in_rss_comments']); ?> />
-            <label for="mailhide_options[use_in_rss_comments]">RSS Feed of Comments</label><br />
+            <input type="checkbox" id="mailhide_options[use_in_rss_comments]" name="mailhide_options[use_in_rss_comments]" value="1" <?php checked('1', $this->options['use_in_rss_comments']); ?> />
+            <label for="mailhide_options[use_in_rss_comments]"><?php _e('RSS Feed of Comments', 'recaptcha'); ?></label><br />
          </td>
       </tr>
       

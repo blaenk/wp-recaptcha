@@ -164,7 +164,7 @@ if (!class_exists('MailHide')) {
             $validated['use_in_rss'] = ($input['use_in_rss'] == 1 ? 1 : 0); // use mailhide for the rss feed of the posts/pages
             $validated['use_in_rss_comments'] = ($input['use_in_rss_comments'] == 1 ? 1 : 0); // use mailhide for the rss comments
 
-            $capabilities = array ('read', 'edit_posts', 'publish_posts', 'moderate_comments', 'level_10');
+            $capabilities = array('read', 'edit_posts', 'publish_posts', 'moderate_comments', 'level_10');
 
             // bypass levels
             $validated['bypass_for_registered_users'] = ($input['bypass_for_registered_users'] == 1 ? 1: 0); // whether to sometimes skip the MailHide filter for registered users
@@ -193,7 +193,7 @@ if (!class_exists('MailHide')) {
         
         function capabilities_dropdown() {
             // define choices: Display text => permission slug
-            $capabilities = array (
+            $capabilities = array(
                 __('all registered users', 'recaptcha') => 'read',
                 __('edit posts', 'recaptcha') => 'edit_posts',
                 __('publish posts', 'recaptcha') => 'publish_posts',

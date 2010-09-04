@@ -122,7 +122,6 @@ if (!class_exists('reCAPTCHA')) {
         
         // register the settings
         function register_settings_group() {
-            register_setting('mailhide_options_group', 'mailhide_options', array(&$this, 'validate_options'));
             register_setting("recaptcha_options_group", 'recaptcha_options', array(&$this, 'validate_options'));
         }
         
