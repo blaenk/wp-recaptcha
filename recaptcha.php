@@ -119,6 +119,8 @@ if (!class_exists('reCAPTCHA')) {
         
         // set the default options
         function register_default_options() {
+            echo '<div class="reg">function calleD<br \>' . var_dump($this->old_options) . '</div>';
+            
             // migrate these old options to the new options if they exist
             if ($this->old_options) {
                 // set the now-default options to be the options that were already set

@@ -21,6 +21,8 @@ require_once('mailhide.php');
 // todo: have to use get_site_option if wpmu
 $old_option_defaults = Plugin::retrieve_options('recaptcha');
 
+echo '<div class="initial">' . var_dump($old_option_defaults) . '</div>';
+
 // initialize an object of type recaptcha (should take care of preliminary checks in constructor)
 $recaptcha = new reCAPTCHA('recaptcha_options', $old_option_defaults);
 $mailhide = new MailHide('mailhide_options', $old_option_defaults);
