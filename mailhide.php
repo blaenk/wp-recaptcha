@@ -291,7 +291,7 @@ if (!class_exists('MailHide')) {
            }
 
            // style it
-           $html = '<span class="mh-plaintext">' . $html . "</span>";
+           $html = '<span class="mh-email">' . $html . "</span>";
 
            return $html;
         }

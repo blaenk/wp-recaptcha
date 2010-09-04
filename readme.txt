@@ -52,7 +52,6 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 * Redesigned the options page for the plugin
 * Fixed the issue where comments would not be saved if the reCAPTCHA was entered incorrectly (or not entered at all)
 * Fixed an issue where saved comments (from bad reCAPTCHA response) would replace double quotes with backslashes
-* New options set, with support for migrating and removing old one (i.e. your options will transfer over)
 = Version 2.9.6 =
 * Fixed a careless bug affecting custom hidden emails
 * Fixed broken links in readme.txt

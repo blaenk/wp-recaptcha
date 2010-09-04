@@ -76,6 +76,26 @@
          </td>
       </tr>
    </table>
+   
+   <h3><?php _e('Styling', 'recaptcha'); ?></h3>
+   <p>You can style hidden emails using a variety of classes. Style the classes in your theme's stylesheet and be sure to clear any caches you might have to see the results.</p>
+   
+   <ul>
+       <li><strong>.mh-email</strong> is assigned to the complete email</li>
+       <li><strong>.mh-first</strong> is assigned to the first part of the email</li>
+       <li><strong>.mh-middle</strong> is assigned to the middle of the email (the link)</li>
+       <li><strong>.mh-last</strong> is assigned to the last part of the email</li>
+   </ul>
+   
+   <p>The following is an example of the structure:</p>
+   
+   <code>
+       &lt;span class=&quot;mh-email&quot;&gt; <br \>
+       &nbsp;&nbsp;&nbsp; &lt;span class=&quot;mh-first&quot;&gt;jorg&lt;/span&gt; <br \>
+       &nbsp;&nbsp;&nbsp; &lt;a href=&quot;url&quot; class=&quot;mh-middle&quot;&gt;...&lt;/a&gt; <br \>
+       &nbsp;&nbsp;&nbsp; &lt;span class=&quot;mh-last&quot;&gt;@gmail.com&lt;/span&gt; <br \>
+       &lt;/span&gt;
+   </code>
 
    <p class="submit"><input type="submit" class="button-primary" title="<?php _e('Save MailHide Options') ?>" value="<?php _e('Save Changes') ?> &raquo;" /></p>
 </form>
