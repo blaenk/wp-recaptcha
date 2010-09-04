@@ -7,14 +7,14 @@ if (!class_exists('MailHide')) {
         // member variables
         private $mcrypt_loaded;
         
-        function MailHide($options_name, $old_options = false) {
+        function MailHide($options_name) {
             $args = func_get_args();
             call_user_func_array(array(&$this, "__construct"), $args);
         }
 
-        function __construct($options_name, $old_options = false) {
-            // instantiate super class (sets: options, environment, options_name, old_options)
-            parent::__construct($options_name, $old_options);
+        function __construct($options_name) {
+            // instantiate super class (sets: options, environment, options_name)
+            parent::__construct($options_name);
             
             // require the recaptcha library
             $this->require_library();
@@ -116,56 +116,26 @@ if (!class_exists('MailHide')) {
             load_plugin_textdomain('recaptcha', false, 'languages');
         }
         
-        function migrate_old_options($old_options) {
-            $option_defaults = array();
-            
-            // keys
-            $option_defaults['public_key'] = $old_options['mailhide_pub']; // mailhide public key
-            $option_defaults['private_key'] = $old_options['mailhide_priv']; // mailhide private key
-
-            // placement
-            $option_defaults['use_in_posts'] = $old_options['use_mailhide_posts']; // mailhide for posts/pages
-            $option_defaults['use_in_comments'] = $old_options['use_mailhide_comments']; // use mailhide for comments
-            $option_defaults['use_in_rss'] = $old_options['use_mailhide_rss']; // use mailhide for the rss feed of the posts/pages
-            $option_defaults['use_in_rss_comments'] = $old_options['use_mailhide_rss_comments']; // use mailhide for the rss comments
-
-            // bypass levels
-            $option_defaults['bypass_for_registered_users'] = $old_options['mh_bypass']; // whether to sometimes skip the MailHide filter for registered users
-            $option_defaults['minimum_bypass_level'] = $old_options['my_bypasslevel']; // who can see full emails normally (should be a valid WordPress capability slug)
-
-            // styling
-            $option_defaults['replace_link_with'] = $old_options['mh_replace_link']; // name the link something else
-            $option_defaults['replace_title_with'] = $old_options['mh_replace_title']; // title of the link
-            
-            return $old_options;
-        }
-        
         function register_default_options() {
             $option_defaults = array();
             
-            if ($old_options) {
-                $option_defaults = $this->migrate_old_options($this->old_option_defaults);
-            }
-            
-            else {
-                // keys
-                $option_defaults['public_key'] = ''; // mailhide public key
-                $option_defaults['private_key'] = ''; // mailhide private key
+            // keys
+            $option_defaults['public_key'] = ''; // mailhide public key
+            $option_defaults['private_key'] = ''; // mailhide private key
 
-                // placement
-                $option_defaults['use_in_posts'] = 0; // mailhide for posts/pages
-                $option_defaults['use_in_comments'] = 0; // use mailhide for comments
-                $option_defaults['use_in_rss'] = 0; // use mailhide for the rss feed of the posts/pages
-                $option_defaults['use_in_rss_comments'] = 0; // use mailhide for the rss comments
+            // placement
+            $option_defaults['use_in_posts'] = 0; // mailhide for posts/pages
+            $option_defaults['use_in_comments'] = 0; // use mailhide for comments
+            $option_defaults['use_in_rss'] = 0; // use mailhide for the rss feed of the posts/pages
+            $option_defaults['use_in_rss_comments'] = 0; // use mailhide for the rss comments
 
-                // bypass levels
-                $option_defaults['bypass_for_registered_users'] = 0; // whether to sometimes skip the MailHide filter for registered users
-                $option_defaults['minimum_bypass_level'] = 'read'; // who can see full emails normally (should be a valid WordPress capability slug)
+            // bypass levels
+            $option_defaults['bypass_for_registered_users'] = 0; // whether to sometimes skip the MailHide filter for registered users
+            $option_defaults['minimum_bypass_level'] = 'read'; // who can see full emails normally (should be a valid WordPress capability slug)
 
-                // styling
-                $option_defaults['replace_link_with'] = ''; // name the link something else
-                $option_defaults['replace_title_with'] = ''; // title of the link
-            }
+            // styling
+            $option_defaults['replace_link_with'] = ''; // name the link something else
+            $option_defaults['replace_title_with'] = ''; // title of the link
             
             // add the option based on what environment we're in
             Plugin::add_options($this->options_name, $option_defaults);

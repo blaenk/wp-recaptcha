@@ -17,21 +17,17 @@ if (!class_exists('Plugin')) {
     abstract class Plugin {
         protected $environment; // what environment are we in
         protected $options_name; // the name of the options associated with this plugin
-        protected $old_options; // the old options (if migrating)
         
         protected $options;
         
-        // passes old defaults for option migration
-        function Plugin($options_name, $old_options = false) {
-            // $this->__construct($options_name, $old_options);
+        function Plugin($options_name) {
             $args = func_get_args();
             call_user_func_array(array(&$this, "__construct"), $args);
         }
         
-        function __construct($options_name, $old_options = false) {
+        function __construct($options_name) {
             $this->environment = Plugin::determine_environment();
             $this->options_name = $options_name;
-            $this->old_options = $old_options;
             
             $this->options = Plugin::retrieve_options($this->options_name);
         }
@@ -78,7 +74,6 @@ if (!class_exists('Plugin')) {
         }
         
         // options
-        abstract protected function migrate_old_options($options);
         abstract protected function register_default_options();
         
         // option retrieval
