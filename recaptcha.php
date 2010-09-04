@@ -355,10 +355,7 @@ COMMENT_FORM;
 COMMENT_FORM;
                 }
 
-                if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on")
-                    $use_ssl = true;
-                else
-                    $use_ssl = false;
+                $use_ssl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on");
 
                 echo $recaptcha_js_opts . $this->get_recaptcha_html(isset($_GET['rerror']) ? $_GET['rerror'] : null, $use_ssl) . $comment_string;
            }
