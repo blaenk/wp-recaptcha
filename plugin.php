@@ -83,6 +83,10 @@ if (!class_exists('Plugin')) {
         
         // option retrieval
         static function retrieve_options($options_name) {
+            echo '<div class="func-called">' . $options_name . '</div>';
+            
+            echo '<div class="env">' . Plugin::determine_environment() . '</div>';
+            
             if (Plugin::determine_environment() == Environment::WordPressMU || Plugin::determine_environment() == Environment::WordPressMS)
                 return get_site_option($options_name);
             else
