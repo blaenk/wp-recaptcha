@@ -517,11 +517,11 @@ JS;
         // add the settings page
         function add_settings_page() {
             // add the options page
-            if ($this->environment == WordPressMU && $this->is_authority())
+            if ($this->environment == Environment::WordPressMU && $this->is_authority())
                 add_submenu_page('wpmu-admin.php', 'WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, array(&$this, 'show_settings_page'));
 
-            if ($this->environment == WordPressMS && $this->is_authority())
-                add_submenu_page('ms-admin.php', 'reCAPTCHA', 'reCAPTCHA', 'manage_options', __FILE__, array(&$this, 'show_settings_page'));
+            if ($this->environment == Environment::WordPressMS && $this->is_authority())
+                add_submenu_page('ms-admin.php', 'WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, array(&$this, 'show_settings_page'));
             
             add_options_page('WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, array(&$this, 'show_settings_page'));
         }
