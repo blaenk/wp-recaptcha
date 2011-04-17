@@ -61,8 +61,7 @@ if (!class_exists('reCAPTCHA')) {
             }
 
             // administration (menus, pages, notifications, etc.)
-            $plugin = plugin_basename($this->path_to_plugin(__FILE__));
-            add_filter("plugin_action_links_${plugin}", array(&$this, 'show_settings_link'));
+            add_filter("plugin_action_links", array(&$this, 'show_settings_link'), 10, 2);
 
             add_action('admin_menu', array(&$this, 'add_settings_page'));
             
@@ -460,12 +459,14 @@ JS;
         }
         
         // add a settings link to the plugin in the plugin list
-        function show_settings_link($links) {
-            $settings_title = __('Settings for this Plugin', 'recaptcha');
-            $settings = __('Settings', 'recaptcha');
-            $settings_link = '<a href="options-general.php?page=wp-recaptcha/recaptcha.php" title="' . $settings_title . '">' . $settings . '</a>';
+        function show_settings_link($links, $file) {
+            if ($file == plugin_basename($this->path_to_plugin(__FILE__))) {
+               $settings_title = __('Settings for this Plugin', 'recaptcha');
+               $settings = __('Settings', 'recaptcha');
+               $settings_link = '<a href="options-general.php?page=wp-recaptcha/recaptcha.php" title="' . $settings_title . '">' . $settings . '</a>';
+               array_unshift($links, $settings_link);
+            }
             
-            array_unshift($links, $settings_link);
             return $links;
         }
         
