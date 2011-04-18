@@ -26,10 +26,12 @@ if (!class_exists('MailHide')) {
             $this->register_actions();
             $this->register_filters();
             
+            // keep this in the arsenal just in case
             // disable the make_clickable filter cause it screws things up
+            /*
             if ($this->mailhide_enabled()) {
-               // remove_filter('comment_text', 'make_clickable', 9);
-            }
+               remove_filter('comment_text', 'make_clickable', 9);
+            }*/
         }
         
         function register_actions() {
@@ -253,31 +255,23 @@ if (!class_exists('MailHide')) {
 
             // Regular Expressions thanks to diabolic from EFNet #regex
 
-            echo "<pre>" . $content . "</pre>";
-
             // match hyperlinks with emails
-            $regex = '/<a[^>]*href="((?:mailto:)?([^@"]+@[^@"]+))"[^>]*>(.+?)<\/a>/i';
+            $regex = '/(?!\[nohide\])<a[^>]*href="((?:mailto:)?([^@"]+@[^@"]+))"[^>]*>(.+?)<\/a>(?!\[\/nohide\])/i';
             $content = preg_replace_callback($regex, array(&$this, "replace_hyperlinked"), $content);
 
             // match emails
             // this seems to no longer be necessary because wordpress automatically linkifies all plaintext emails
-            $regex = '%\b([\w.+-]+@[a-z\d.-]+\.[a-z]{2,6})\b(?!\s*\[\/nohide\]|(?:(?!<a[^>]*>).)*<\/a>)%i';
+            $regex = '/\b([\w.+-]+@[a-z\d.-]+\.[a-z]{2,6})\b(?!\s*\[\/nohide\]|(?:(?!<a[^>]*>).)*<\/a>)/i';
             $content = preg_replace_callback($regex, array(&$this, "replace_plaintext"), $content);
-
-            echo "<pre>" . $content . "</pre>";
             
             // remove the nohides
             $content = preg_replace('/\[\/?nohide\]/i','',$content);
-            
-            echo "<pre>" . $content . "</pre>";
             
             return $content;
         }
         
         // replace the hyperlinked emails i.e. <a href="haha@lol.com">this</a> or <a href="mailto:haha@lol.com">that</a>
         function replace_hyperlinked($matches) {
-           var_dump($matches);
-           
            // set the minimum capability needed to skip the MailHide if there is one
            if ($recaptcha_opt['bypass_for_registered_users'] && $this->options['minimum_bypass_level'])
               $needed_capability = $this->options['minimum_bypass_level'];
