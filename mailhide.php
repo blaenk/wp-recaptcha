@@ -256,8 +256,13 @@ if (!class_exists('MailHide')) {
             $regex = '%\b([\w.+-]+@[a-z\d.-]+\.[a-z]{2,6})\b(?!\s*\[\/nohide\]|(?:(?!<a[^>]*>).)*<\/a>)%i';
             $content = preg_replace_callback($regex, array(&$this, "replace_plaintext"), $content);
 
+            echo "<pre>" . $content . "</pre>";
+
             // remove the nohides
             $content = preg_replace('/\[\/?nohide\]/i','',$content);
+            
+            echo "<pre>" . $content . "</pre>";
+            
             return $content;
         }
         
@@ -293,8 +298,6 @@ if (!class_exists('MailHide')) {
            if ($this->options['replace_link_with'] == "" && $this->options['replace_title_with'] == "") {
               // find plain text emails and hide them
               $html = recaptcha_mailhide_html($this->options['public_key'], $this->options['private_key'], $matches[0]);
-              
-              echo "<pre>" . $html . "</pre>";
            }
 
            else {
@@ -324,8 +327,6 @@ if (!class_exists('MailHide')) {
 
            // style it
            $html = '<span class="mh-email">' . $html . "</span>";
-
-           echo "<pre>" . $html . "</pre>";
 
            return $html;
         }
