@@ -476,9 +476,16 @@ JS;
                echo '<div class="savedcom">in</div>';
                 $comment = get_comment($_GET['rcommentid']);
 
+                echo '<div class="savedcom">comment: '. $comment .'</div>';
+                
                 // todo: removed double quote from list of 'dangerous characters'
                 $com = preg_replace('/([\\/\(\)\+\;\'])/e','\'%\'.dechex(ord(\'$1\'))', $comment->comment_content);
+                
+                echo '<div class="savedcom">comment 1: '. $com .'</div>';
+                
                 $com = preg_replace('/\\r\\n/m', '\\\n', $com);
+                
+                echo '<div class="savedcom">comment 2: '. $com .'</div>';
 
                 echo "
                 <script type='text/javascript'>
