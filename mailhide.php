@@ -246,6 +246,8 @@ if (!class_exists('MailHide')) {
             if ($this->options['bypass_for_registered_users'] && $this->options['minimum_bypass_level'])
                 $needed_capability = $this->options['minimum_bypass_level'];
 
+            var_dump($needed_capability);
+
             // skip the MailHide display if the minimum capability is met
             // todo: only 'use in comments' is checked, have to check each of them?
             // todo: wait, is that necessary? the filter isn't even added if that field is false, removed
