@@ -226,7 +226,7 @@ if (!class_exists('MailHide')) {
                 __('edit posts', 'recaptcha') => 'edit_posts',
                 __('publish posts', 'recaptcha') => 'publish_posts',
                 __('moderate comments', 'recaptcha') => 'moderate_comments',
-                __('administer site', 'recaptcha') => 'activate_plugins'
+                __('activate plugins', 'recaptcha') => 'activate_plugins'
             );
             
             $this->build_dropdown('mailhide_options[minimum_bypass_level]', $capabilities, $this->options['minimum_bypass_level']);

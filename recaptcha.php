@@ -161,7 +161,7 @@ if (!class_exists('reCAPTCHA')) {
         
         // todo: make unnecessary
         function register_stylesheets() {
-            $path = Plugin::path_to_plugin_directory() . '/recaptcha.css';
+            $path = Plugin::path_to_plugin('recaptcha.css');
                 
             echo '<link rel="stylesheet" type="text/css" href="' . $path . '" />';
         }
@@ -465,7 +465,7 @@ JS;
         }
         
         function saved_comment() {
-            if (!is_single() && !is_page())
+            if (!is_single() || !is_page())
                 return;
             
             if (!empty($_GET['rcommentid']) && $_GET['rchash'] == $this->hash_comment($_GET['rcommentid'])) {
@@ -542,7 +542,7 @@ JS;
                 __('edit posts', 'recaptcha') => 'edit_posts',
                 __('publish posts', 'recaptcha') => 'publish_posts',
                 __('moderate comments', 'recaptcha') => 'moderate_comments',
-                __('administer site', 'recaptcha') => 'activate_plugins'
+                __('activate plugins', 'recaptcha') => 'activate_plugins'
             );
             
             $this->build_dropdown('recaptcha_options[minimum_bypass_level]', $capabilities, $this->options['minimum_bypass_level']);
