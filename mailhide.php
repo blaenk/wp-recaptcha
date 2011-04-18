@@ -133,8 +133,8 @@ if (!class_exists('MailHide')) {
                $option_defaults['use_in_rss_comments'] = $old_options['use_mailhide_rss_comments']; // use mailhide for the rss comments
 
                // bypass levels
-               $option_defaults['bypass_for_registered_users'] = $old_options['mh_bypass']; // whether to sometimes skip the MailHide filter for registered users
-               $option_defaults['minimum_bypass_level'] = $old_options['my_bypasslevel']; // who can see full emails normally (should be a valid WordPress capability slug)
+               $option_defaults['bypass_for_registered_users'] = ($old_options['mh_bypass'] == "on") ? 1 : 0; // whether to sometimes skip the MailHide filter for registered users
+               $option_defaults['minimum_bypass_level'] = $old_options['mh_bypasslevel']; // who can see full emails normally (should be a valid WordPress capability slug)
 
                // styling
                $option_defaults['replace_link_with'] = $old_options['mh_replace_link']; // name the link something else

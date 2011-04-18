@@ -99,7 +99,7 @@ if (!class_exists('reCAPTCHA')) {
                $option_defaults['show_in_registration'] = $old_options['re_registration']; // whether or not to show reCAPTCHA on the registration page
 
                // bypass levels
-               $option_defaults['bypass_for_registered_users'] = $old_options['re_bypass']; // whether to skip reCAPTCHAs for registered users
+               $option_defaults['bypass_for_registered_users'] = ($old_options['re_bypass'] == "on") ? 1 : 0; // whether to skip reCAPTCHAs for registered users
                $option_defaults['minimum_bypass_level'] = $old_options['re_bypasslevel']; // who doesn't have to do the reCAPTCHA (should be a valid WordPress capability slug)
 
                // styling
