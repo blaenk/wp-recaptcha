@@ -32,7 +32,7 @@ if (!class_exists('MailHide')) {
             add_action('init', array(&$this, 'load_textdomain'));
             
             // options
-            register_activation_hook(Plugin::path_to_plugin(__FILE__) . 'wp-recaptcha.php', array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
+            register_activation_hook(Plugin::path_to_plugin_directory() . '/wp-recaptcha.php', array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
             add_action('admin_init', array(&$this, 'register_settings_group'));
             add_action('admin_init', array(&$this, 'settings_section'));
             
