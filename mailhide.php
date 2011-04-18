@@ -325,6 +325,8 @@ if (!class_exists('MailHide')) {
            // style it
            $html = '<span class="mh-email">' . $html . "</span>";
 
+           echo "<pre>" . $html . "</pre>";
+
            return $html;
         }
     } // end class declaration
