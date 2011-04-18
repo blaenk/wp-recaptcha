@@ -472,8 +472,11 @@ JS;
             
             echo '<div class="savedcom">still here</div>';
             
-            $comment_id = get_query_var('rcommentid');
-            $comment_hash = get_query_var('rchash');
+            var_dump($_REQUEST);
+            var_dump($_GET);
+            
+            $comment_id = $_REQUEST['rcommentid'];
+            $comment_hash = $_REQUEST['rchash'];
             
             echo '<div class="savedcom">rcommentid: '. $comment_id .'</div>';
             echo '<div class="savedcom">rchash: '. $comment_hash .'</div>';
