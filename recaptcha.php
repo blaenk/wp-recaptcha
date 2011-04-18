@@ -161,7 +161,7 @@ if (!class_exists('reCAPTCHA')) {
         
         // todo: make unnecessary
         function register_stylesheets() {
-            $path = Plugin::path_to_plugin('recaptcha.css');
+            $path = Plugin::path_to_plugin(Plugin::path_to_plugin_directory() . 'recaptcha.css');
                 
             echo '<link rel="stylesheet" type="text/css" href="' . $path . '" />';
         }
