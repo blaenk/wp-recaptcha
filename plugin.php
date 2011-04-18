@@ -74,7 +74,7 @@ if (!class_exists('Plugin')) {
         static function url_to_plugin_directory() {
            $current_directory = basename(dirname(__FILE__));
            
-           return Plugin:plugins_url() . "/${current_directory}";
+           return Plugin::plugins_url() . "/${current_directory}";
         }
         
         static function path_to_plugin($file_path) {
