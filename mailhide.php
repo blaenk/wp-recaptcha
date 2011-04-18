@@ -288,6 +288,8 @@ if (!class_exists('MailHide')) {
         
         // replace the plain text emails i.e. haha@lol.com
         function replace_plaintext($matches) {
+           var_dump($matches);
+           
            if ($this->options['replace_link_with'] == "" && $this->options['replace_title_with'] == "") {
               // find plain text emails and hide them
               $html = recaptcha_mailhide_html($this->options['public_key'], $this->options['private_key'], $matches[0]);
