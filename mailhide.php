@@ -249,7 +249,7 @@ if (!class_exists('MailHide')) {
             // Regular Expressions thanks to diabolic from EFNet #regex
 
             // match hyperlinks with emails
-            $regex = '%(?<!\[nohide\])<a[^>]*href="((?:mailto:)?([^@"]+@[^@"]+))"[^>]*>(.+?)<\/a>(?!\[/nohide\])%i';
+            $regex = '%(?<!\[nohide\])<a[^>]*href="((?:mailto:)?([^@"]+@[^@"]+))"[^>]*>(.+?)<\/a>(?!\[\/nohide\])%i';
             $content = preg_replace_callback($regex, array(&$this, "replace_hyperlinked"), $content);
 
             // match emails
@@ -280,14 +280,28 @@ if (!class_exists('MailHide')) {
                 return $content;
            }
 
-           // get the url, the part inside the href. this is the email of course
-           $url = recaptcha_mailhide_url($this->options['mailhide_pub'], $this->options['mailhide_priv'], $matches[2]);
+           $html = "";
+           $email = $matches[2];
+           $text = $matches[3];
+           
+           if ($email == $text) {
+              // employ the use of email parts instead
+              $html = recaptcha_mailhide_html($this->options['public_key'], $this->options['private_key'], $email);
+              
+              // style it
+              $html = '<span class="mh-email">' . $html . "</span>";
+           }
+           
+           else {
+               // get the url, the part inside the href. this is the email of course
+               $url = recaptcha_mailhide_url($this->options['mailhide_pub'], $this->options['mailhide_priv'], $email);
 
-           // construct a new hyperlink with the url hidden but the link text the same
-           $html = "<a href='" . $url . "' onclick=\"window.open('" . htmlentities ($url, ENT_QUOTES) . "', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;\">" . $matches[3] . "</a>";
+              // construct a new hyperlink with the url hidden but the link text the same
+              $html = "<a href='" . $url . "' onclick=\"window.open('" . htmlentities ($url, ENT_QUOTES) . "', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;\">" . $text . "</a>";
 
-           // style it
-           $html = '<span class="mh-hyperlinked">' . $html . "</span>";
+              // style it
+              $html = '<span class="mh-hyperlinked">' . $html . "</span>";
+           }
 
            return $html;
         }
