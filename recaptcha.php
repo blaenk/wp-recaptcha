@@ -102,6 +102,10 @@ if (!class_exists('reCAPTCHA')) {
                $option_defaults['bypass_for_registered_users'] = ($old_options['re_bypass'] == "on") ? 1 : 0; // whether to skip reCAPTCHAs for registered users
                $option_defaults['minimum_bypass_level'] = $old_options['re_bypasslevel']; // who doesn't have to do the reCAPTCHA (should be a valid WordPress capability slug)
 
+               if ($option_defaults['minimum_bypass_level'] == "level_10") {
+                  $option_defaults['minimum_bypass_level'] = "activate_plugins";
+               }
+
                // styling
                $option_defaults['comments_theme'] = $old_options['re_theme']; // the default theme for reCAPTCHA on the comment post
                $option_defaults['registration_theme'] = $old_options['re_theme_reg']; // the default theme for reCAPTCHA on the registration form
@@ -224,7 +228,7 @@ REGISTRATION;
             $validated['show_in_comments'] = ($input['show_in_comments'] == 1 ? 1 : 0);
             $validated['bypass_for_registered_users'] = ($input['bypass_for_registered_users'] == 1 ? 1: 0);
             
-            $capabilities = array ('read', 'edit_posts', 'publish_posts', 'moderate_comments', 'level_10');
+            $capabilities = array ('read', 'edit_posts', 'publish_posts', 'moderate_comments', 'activate_plugins');
             $themes = array ('red', 'white', 'blackglass', 'clean');
             
             $recaptcha_languages = array ('en', 'nl', 'fr', 'de', 'pt', 'ru', 'es', 'tr');
@@ -538,7 +542,7 @@ JS;
                 __('edit posts', 'recaptcha') => 'edit_posts',
                 __('publish posts', 'recaptcha') => 'publish_posts',
                 __('moderate comments', 'recaptcha') => 'moderate_comments',
-                __('administer site', 'recaptcha') => 'level_10'
+                __('administer site', 'recaptcha') => 'activate_plugins'
             );
             
             $this->build_dropdown('recaptcha_options[minimum_bypass_level]', $capabilities, $this->options['minimum_bypass_level']);

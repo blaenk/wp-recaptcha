@@ -135,6 +135,10 @@ if (!class_exists('MailHide')) {
                // bypass levels
                $option_defaults['bypass_for_registered_users'] = ($old_options['mh_bypass'] == "on") ? 1 : 0; // whether to sometimes skip the MailHide filter for registered users
                $option_defaults['minimum_bypass_level'] = $old_options['mh_bypasslevel']; // who can see full emails normally (should be a valid WordPress capability slug)
+               
+               if ($option_defaults['minimum_bypass_level'] == "level_10") {
+                  $option_defaults['minimum_bypass_level'] = "activate_plugins";
+               }
 
                // styling
                $option_defaults['replace_link_with'] = $old_options['mh_replace_link']; // name the link something else
@@ -188,7 +192,7 @@ if (!class_exists('MailHide')) {
             $validated['use_in_rss'] = ($input['use_in_rss'] == 1 ? 1 : 0); // use mailhide for the rss feed of the posts/pages
             $validated['use_in_rss_comments'] = ($input['use_in_rss_comments'] == 1 ? 1 : 0); // use mailhide for the rss comments
 
-            $capabilities = array('read', 'edit_posts', 'publish_posts', 'moderate_comments', 'level_10');
+            $capabilities = array('read', 'edit_posts', 'publish_posts', 'moderate_comments', 'activate_plugins');
 
             // bypass levels
             $validated['bypass_for_registered_users'] = ($input['bypass_for_registered_users'] == 1 ? 1: 0); // whether to sometimes skip the MailHide filter for registered users
@@ -222,7 +226,7 @@ if (!class_exists('MailHide')) {
                 __('edit posts', 'recaptcha') => 'edit_posts',
                 __('publish posts', 'recaptcha') => 'publish_posts',
                 __('moderate comments', 'recaptcha') => 'moderate_comments',
-                __('administer site', 'recaptcha') => 'level_10'
+                __('administer site', 'recaptcha') => 'activate_plugins'
             );
             
             $this->build_dropdown('mailhide_options[minimum_bypass_level]', $capabilities, $this->options['minimum_bypass_level']);
