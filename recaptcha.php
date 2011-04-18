@@ -465,10 +465,15 @@ JS;
         }
         
         function saved_comment() {
+            echo '<div class="savedcom">ran</div>';
+           
             if (!is_single() && !is_page())
                 return;
             
+            echo '<div class="savedcom">still here</div>';
+            
             if (!empty($_GET['rcommentid']) && $_GET['rchash'] == $this->hash_comment($_GET['rcommentid'])) {
+               echo '<div class="savedcom">in</div>';
                 $comment = get_comment($_GET['rcommentid']);
 
                 // todo: removed double quote from list of 'dangerous characters'
@@ -484,6 +489,7 @@ JS;
 
                 wp_delete_comment($comment->comment_ID);
             }
+            echo '<div class="savedcom">out</div>';
         }
         
         // todo: is this still needed?
