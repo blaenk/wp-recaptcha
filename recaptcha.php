@@ -472,13 +472,16 @@ JS;
             
             echo '<div class="savedcom">still here</div>';
             
-            echo '<div class="savedcom">rcommentid: '. $_GET['rcommentid'] .'</div>';
-            echo '<div class="savedcom">rchash: '. $_GET['rchash'] .'</div>';
-            echo '<div class="savedcom">computed rchash: '. $this->hash_comment($_GET['rcommentid']) .'</div>';
+            $comment_id = get_query_var('rcommentid');
+            $comment_hash = get_query_var('rchash');
             
-            if (!empty($_GET['rcommentid']) && $_GET['rchash'] == $this->hash_comment($_GET['rcommentid'])) {
+            echo '<div class="savedcom">rcommentid: '. $comment_id .'</div>';
+            echo '<div class="savedcom">rchash: '. $comment_hash .'</div>';
+            echo '<div class="savedcom">computed rchash: '. $this->hash_comment($comment_id) .'</div>';
+            
+            if (!empty($comment_id) && $comment_hash == $this->hash_comment($comment_id)) {
                echo '<div class="savedcom">in</div>';
-                $comment = get_comment($_GET['rcommentid']);
+                $comment = get_comment($comment_id);
 
                 echo '<div class="savedcom">comment: '. $comment .'</div>';
                 
