@@ -240,6 +240,8 @@ if (!class_exists('MailHide')) {
         }
         
         function mailhide_emails($content) {
+            global $user_ID;
+            
             // set the minimum capability needed to skip the MailHide if there is one
             if ($this->options['bypass_for_registered_users'] && $this->options['minimum_bypass_level'])
                 $needed_capability = $this->options['minimum_bypass_level'];
@@ -272,6 +274,8 @@ if (!class_exists('MailHide')) {
         
         // replace the hyperlinked emails i.e. <a href="haha@lol.com">this</a> or <a href="mailto:haha@lol.com">that</a>
         function replace_hyperlinked($matches) {
+           global $user_ID;
+           
            // set the minimum capability needed to skip the MailHide if there is one
            if ($recaptcha_opt['bypass_for_registered_users'] && $this->options['minimum_bypass_level'])
               $needed_capability = $this->options['minimum_bypass_level'];
