@@ -37,7 +37,7 @@ if (!class_exists('reCAPTCHA')) {
                 add_action('login_head', array(&$this, 'registration_style')); // make unnecessary: instead use jQuery and add to the footer?
 
             // options
-            register_activation_hook(Plugin::path_to_plugin(__FILE__), array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
+            register_activation_hook(Plugin::path_to_plugin(__FILE__) . 'recaptcha.php', array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
             add_action('admin_init', array(&$this, 'register_settings_group'));
 
             // only register the hooks if the user wants recaptcha on the registration page
@@ -116,7 +116,7 @@ if (!class_exists('reCAPTCHA')) {
         
         // require the recaptcha library
         function require_library() {
-            require_once($this->path_to_plugin_directory(__FILE__) . '/recaptchalib.php');
+            require_once($this->path_to_plugin_directory(__FILE__) . 'recaptchalib.php');
         }
         
         // register the settings
@@ -126,7 +126,7 @@ if (!class_exists('reCAPTCHA')) {
         
         // todo: make unnecessary
         function register_stylesheets() {
-            $path = Plugin::path_to_plugin_directory(__FILE__) . '/recaptcha.css';
+            $path = Plugin::path_to_plugin_directory(__FILE__) . 'recaptcha.css';
                 
             echo '<link rel="stylesheet" type="text/css" href="' . $path . '" />';
         }
@@ -460,7 +460,7 @@ JS;
         
         // add a settings link to the plugin in the plugin list
         function show_settings_link($links, $file) {
-            if ($file == plugin_basename($this->path_to_plugin(__FILE__))) {
+            if ($file == plugin_basename($this->path_to_plugin(__FILE__)) . 'recaptcha.php') {
                $settings_title = __('Settings for this Plugin', 'recaptcha');
                $settings = __('Settings', 'recaptcha');
                $settings_link = '<a href="options-general.php?page=wp-recaptcha/recaptcha.php" title="' . $settings_title . '">' . $settings . '</a>';

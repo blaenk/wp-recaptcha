@@ -1,7 +1,7 @@
 <?php
 
     if (defined('ALLOW_INCLUDE') === false)
-        die('no direct acess');
+        die('no direct access');
 
 ?>
 
