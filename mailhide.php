@@ -109,7 +109,7 @@ if (!class_exists('MailHide')) {
         
         // require the recaptcha library
         function require_library() {
-            require_once(Plugin::path_to_plugin_directory(__FILE__) . 'recaptchalib.php');
+            require_once(Plugin::path_to_plugin_directory() . '/recaptchalib.php');
         }
         
         function load_textdomain() {

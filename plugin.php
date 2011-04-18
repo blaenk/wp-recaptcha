@@ -58,10 +58,10 @@ if (!class_exists('Plugin')) {
                 return WP_CONTENT_DIR . '/plugins';
         }
         
-        static function path_to_plugin_directory($file_path) {
-            $current_directory = basename(dirname($file_path));
+        static function path_to_plugin_directory() {
+            $current_directory = basename(dirname(__FILE__));
             
-            return Plugin::plugins_directory() . "/${current_directory}/";
+            return Plugin::plugins_directory() . "/${current_directory}";
         }
         
         static function path_to_plugin($file_path) {
@@ -70,7 +70,7 @@ if (!class_exists('Plugin')) {
             if (Plugin::determine_environment() == Environment::WordPressMU)
                 return Plugin::plugins_directory() . "/${file_name}";
             else
-                return Plugin::path_to_plugin_directory($file_path) . "/${file_name}";
+                return Plugin::path_to_plugin_directory() . "/${file_name}";
         }
         
         // options
