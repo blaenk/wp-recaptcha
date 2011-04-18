@@ -27,7 +27,7 @@ function create_error_notice($message, $anchor = '') {
 }
 
 function unconfigured_notice() {
-   create_error_notice('You enabled reCAPTCHA, neither reCAPTCHA nor MailHide are configured.');
+   create_error_notice('You enabled reCAPTCHA, however, neither reCAPTCHA nor MailHide is configured.');
 }
 
 if ($recaptcha->keys_missing() && $recaptcha->keys_missing()) {

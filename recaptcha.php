@@ -37,7 +37,7 @@ if (!class_exists('reCAPTCHA')) {
                 add_action('login_head', array(&$this, 'registration_style')); // make unnecessary: instead use jQuery and add to the footer?
 
             // options
-            register_activation_hook(Plugin::path_to_plugin(__FILE__) . 'recaptcha.php', array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
+            register_activation_hook(Plugin::path_to_plugin(__FILE__) . 'wp-recaptcha.php', array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
             add_action('admin_init', array(&$this, 'register_settings_group'));
 
             // only register the hooks if the user wants recaptcha on the registration page
@@ -460,7 +460,7 @@ JS;
         
         // add a settings link to the plugin in the plugin list
         function show_settings_link($links, $file) {
-            if ($file == plugin_basename($this->path_to_plugin(__FILE__)) . 'recaptcha.php') {
+            if ($file == plugin_basename($this->path_to_plugin(__FILE__)) . 'wp-recaptcha.php') {
                $settings_title = __('Settings for this Plugin', 'recaptcha');
                $settings = __('Settings', 'recaptcha');
                $settings_link = '<a href="options-general.php?page=wp-recaptcha/recaptcha.php" title="' . $settings_title . '">' . $settings . '</a>';
