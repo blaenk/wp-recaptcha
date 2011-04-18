@@ -249,14 +249,12 @@ if (!class_exists('MailHide')) {
             // Regular Expressions thanks to diabolic from EFNet #regex
 
             // match hyperlinks with emails
-            $regex = '%(?<!\[nohide\])<a[^>]*href="((?:mailto:)?([^@"]+@[^@"]+))"[^>]*>(.+?)<\/a>(?!\[/nohide\])%i';
-            $content = preg_replace_callback($regex, array(&$this, "replace_hyperlinked"), $content);
+            #$regex = '%(?<!\[nohide\])<a[^>]*href="((?:mailto:)?([^@"]+@[^@"]+))"[^>]*>(.+?)<\/a>(?!\[/nohide\])%i';
+            #$content = preg_replace_callback($regex, array(&$this, "replace_hyperlinked"), $content);
 
             // match emails
             $regex = '%\b([\w.+-]+@[a-z\d.-]+\.[a-z]{2,6})\b(?!\s*\[\/nohide\]|(?:(?!<a[^>]*>).)*<\/a>)%i';
             $content = preg_replace_callback($regex, array(&$this, "replace_plaintext"), $content);
-
-            echo "<pre>" . $content . "</pre>";
 
             // remove the nohides
             $content = preg_replace('/\[\/?nohide\]/i','',$content);
