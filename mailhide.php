@@ -45,25 +45,25 @@ if (!class_exists('MailHide')) {
             // add the filters only if mcrypt is loaded
             if ($this->mcrypt_loaded) {
                if ($this->options['use_in_posts'])
-                  add_filter('the_content', array(&$this, 'mailhide_emails'));
+                  add_filter('the_content', array(&$this, 'mailhide_emails'), 9000);
                   
                if ($this->options['use_in_comments'])
-                  add_filter('get_comment_text', array(&$this, 'mailhide_emails'), -9000);
+                  add_filter('get_comment_text', array(&$this, 'mailhide_emails'), 9000);
                   
                // todo: this seems like it doesn't work: http://codex.wordpress.org/Plugin_API/Filter_Reference/the_content_rss
                //   instead check for is_feed() on 'the_content' filter
                //   the_excerpt_rss filter works fine
                // concern: it seems like the feeds still show the email encoded in CDATA
                if ($this->options['use_in_rss']) {
-                  add_filter('the_content_rss', array(&$this, 'mailhide_emails'));
-                  add_filter('the_excerpt_rss', array(&$this, 'mailhide_emails')); // this one is sometimes used instead
+                  add_filter('the_content_rss', array(&$this, 'mailhide_emails'), 9000);
+                  add_filter('the_excerpt_rss', array(&$this, 'mailhide_emails'), 9000); // this one is sometimes used instead
                }
                
                // todo: atom requires the html to be escaped, rss does not. do so accordingly in the preg_replace_callbacks
                // todo: also be sure to escape replace_link_with
                //       - use htmlentities($var, ENT_QUOTES); for escaping?
                if ($this->options['use_in_rss_comments'])
-                  add_filter('comment_text_rss', array(&$this, 'mailhide_emails'));
+                  add_filter('comment_text_rss', array(&$this, 'mailhide_emails'), 9000);
             }
         }
         
@@ -248,9 +248,11 @@ if (!class_exists('MailHide')) {
 
             // Regular Expressions thanks to diabolic from EFNet #regex
 
+            echo "<pre>" . $content . "</pre>";
+
             // match hyperlinks with emails
-            #$regex = '/<a[^>]*href="((?:mailto:)?([^@"]+@[^@"]+))"[^>]*>(.+?)<\/a>/i';
-            #$content = preg_replace_callback($regex, array(&$this, "replace_hyperlinked"), $content);
+            $regex = '/<a[^>]*href="((?:mailto:)?([^@"]+@[^@"]+))"[^>]*>(.+?)<\/a>/i';
+            $content = preg_replace_callback($regex, array(&$this, "replace_hyperlinked"), $content);
 
             // match emails
             // this seems to no longer be necessary because wordpress automatically linkifies all plaintext emails
