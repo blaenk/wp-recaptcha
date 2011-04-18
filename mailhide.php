@@ -249,7 +249,7 @@ if (!class_exists('MailHide')) {
             // Regular Expressions thanks to diabolic from EFNet #regex
 
             // match hyperlinks with emails
-            $regex = '%<a[^>]*href="((?:mailto:)?([^@"]+@[^@"]+))"[^>]*>(.+?)<\/a>%i';
+            $regex = '/<a[^>]*href="((?:mailto:)?([^@"]+@[^@"]+))"[^>]*>(.+?)<\/a>/i';
             $content = preg_replace_callback($regex, array(&$this, "replace_hyperlinked"), $content);
 
             // match emails
