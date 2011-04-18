@@ -25,6 +25,11 @@ if (!class_exists('MailHide')) {
             // register the hooks
             $this->register_actions();
             $this->register_filters();
+            
+            // disable the make_clickable filter cause it screws things up
+            if ($this->mailhide_enabled()) {
+               // remove_filter('comment_text', 'make_clickable', 9);
+            }
         }
         
         function register_actions() {
@@ -48,7 +53,7 @@ if (!class_exists('MailHide')) {
                   add_filter('the_content', array(&$this, 'mailhide_emails'), 9000);
                   
                if ($this->options['use_in_comments'])
-                  add_filter('get_comment_text', array(&$this, 'mailhide_emails'), 9000);
+                  add_filter('comment_text', array(&$this, 'mailhide_emails'), 9000);
                   
                // todo: this seems like it doesn't work: http://codex.wordpress.org/Plugin_API/Filter_Reference/the_content_rss
                //   instead check for is_feed() on 'the_content' filter
