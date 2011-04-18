@@ -460,9 +460,7 @@ JS;
         
         // add a settings link to the plugin in the plugin list
         function show_settings_link($links, $file) {
-            die(plugin_basename($this->path_to_plugin(__FILE__)) . 'wp-recaptcha.php');
-           
-            if ($file == plugin_basename($this->path_to_plugin(__FILE__)) . 'wp-recaptcha.php') {
+            if ($file == plugin_basename($this->path_to_plugin(__FILE__))) {
                $settings_title = __('Settings for this Plugin', 'recaptcha');
                $settings = __('Settings', 'recaptcha');
                $settings_link = '<a href="options-general.php?page=wp-recaptcha/recaptcha.php" title="' . $settings_title . '">' . $settings . '</a>';
