@@ -249,7 +249,7 @@ if (!class_exists('MailHide')) {
             // skip the MailHide display if the minimum capability is met
             // todo: only 'use in comments' is checked, have to check each of them?
             // todo: wait, is that necessary? the filter isn't even added if that field is false, removed
-            if (($needed_capability && current_user_can($needed_capability))) {
+            if ($needed_capability && current_user_can($needed_capability)) {
                 // remove the nohides
                 $content = preg_replace('/\[\/?nohide\]/i','',$content);
                 return $content;
@@ -274,19 +274,6 @@ if (!class_exists('MailHide')) {
         
         // replace the hyperlinked emails i.e. <a href="haha@lol.com">this</a> or <a href="mailto:haha@lol.com">that</a>
         function replace_hyperlinked($matches) {
-           global $user_ID;
-           
-           // set the minimum capability needed to skip the MailHide if there is one
-           if ($recaptcha_opt['bypass_for_registered_users'] && $this->options['minimum_bypass_level'])
-              $needed_capability = $this->options['minimum_bypass_level'];
-
-            // skip the MailHide display if the minimum capability is met
-            if (($needed_capability && current_user_can($needed_capability))) {
-              // remove the nohides
-              $content = preg_replace('/\[\/?nohide\]/i','',$content);
-                return $content;
-           }
-
            $html = "";
            $email = $matches[2];
            $text = $matches[3];
