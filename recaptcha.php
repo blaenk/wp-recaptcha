@@ -465,39 +465,24 @@ JS;
         }
         
         function saved_comment() {
-            echo '<div class="savedcom">ran</div>';
-           
             if (!is_single() && !is_page())
                 return;
-            
-            echo '<div class="savedcom">still here</div>';
-            
-            var_dump($_REQUEST);
-            var_dump($_GET);
             
             $comment_id = $_REQUEST['rcommentid'];
             $comment_hash = $_REQUEST['rchash'];
             
-            echo '<div class="savedcom">rcommentid: '. $comment_id .'</div>';
-            echo '<div class="savedcom">rchash: '. $comment_hash .'</div>';
-            echo '<div class="savedcom">computed rchash: '. $this->hash_comment($comment_id) .'</div>';
+            if (empty($comment_id) || empty($comment_hash))
+               return;
             
-            if (!empty($comment_id) && $comment_hash == $this->hash_comment($comment_id)) {
-               echo '<div class="savedcom">in</div>';
-                $comment = get_comment($comment_id);
+            if ($comment_hash == $this->hash_comment($comment_id)) {
+               $comment = get_comment($comment_id);
 
-                echo '<div class="savedcom">comment: '. $comment .'</div>';
+               // todo: removed double quote from list of 'dangerous characters'
+               $com = preg_replace('/([\\/\(\)\+\;\'])/e','\'%\'.dechex(ord(\'$1\'))', $comment->comment_content);
                 
-                // todo: removed double quote from list of 'dangerous characters'
-                $com = preg_replace('/([\\/\(\)\+\;\'])/e','\'%\'.dechex(ord(\'$1\'))', $comment->comment_content);
+               $com = preg_replace('/\\r\\n/m', '\\\n', $com);
                 
-                echo '<div class="savedcom">comment 1: '. $com .'</div>';
-                
-                $com = preg_replace('/\\r\\n/m', '\\\n', $com);
-                
-                echo '<div class="savedcom">comment 2: '. $com .'</div>';
-
-                echo "
+               echo "
                 <script type='text/javascript'>
                 var _recaptcha_wordpress_savedcomment =  '" . $com  ."';
                 _recaptcha_wordpress_savedcomment = unescape(_recaptcha_wordpress_savedcomment);
@@ -506,7 +491,6 @@ JS;
 
                 wp_delete_comment($comment->comment_ID);
             }
-            echo '<div class="savedcom">out</div>';
         }
         
         // todo: is this still needed?
