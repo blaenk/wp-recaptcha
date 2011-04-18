@@ -465,7 +465,7 @@ JS;
         }
         
         function saved_comment() {
-            if (!is_single() || !is_page())
+            if (!is_single() && !is_page())
                 return;
             
             if (!empty($_GET['rcommentid']) && $_GET['rchash'] == $this->hash_comment($_GET['rcommentid'])) {
