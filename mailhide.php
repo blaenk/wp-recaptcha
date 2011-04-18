@@ -250,9 +250,6 @@ if (!class_exists('MailHide')) {
             // todo: only 'use in comments' is checked, have to check each of them?
             // todo: wait, is that necessary? the filter isn't even added if that field is false, removed
             
-            var_dump($needed_capability);
-            var_dump(current_user_can($needed_capability));
-            
             if ($needed_capability && current_user_can($needed_capability)) {
                 // remove the nohides
                 $content = preg_replace('/\[\/?nohide\]/i','',$content);
