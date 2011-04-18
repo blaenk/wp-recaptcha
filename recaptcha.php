@@ -351,10 +351,8 @@ COMMENT_FORM;
             global $user_ID;
 
             // set the minimum capability needed to skip the captcha if there is one
-            if (isset($this->options['bypass_for_registered_uysers']) && $this->options['bypass_for_registered_uysers'] && $this->options['minimum_bypass_level'])
+            if (isset($this->options['bypass_for_registered_users']) && $this->options['bypass_for_registered_users'] && $this->options['minimum_bypass_level'])
                 $needed_capability = $this->options['minimum_bypass_level'];
-
-             echo "<div class=\"needle\">" . $needed_capability . "</div>";
 
             // skip the reCAPTCHA display if the minimum capability is met
             if ((isset($needed_capability) && $needed_capability && current_user_can($needed_capability)) || !$this->options['show_in_comments'])
