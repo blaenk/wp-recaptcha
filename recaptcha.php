@@ -86,29 +86,58 @@ if (!class_exists('reCAPTCHA')) {
         
         // set the default options
         function register_default_options() {
-            // keys
-            $option_defaults['public_key'] = ''; // the public key for reCAPTCHA
-            $option_defaults['private_key'] = ''; // the private key for reCAPTCHA
+            $option_defaults = array();
+           
+            if (Plugin::retrieve_options("recaptcha_options")) {
+               $option_defaults['public_key'] = $old_options['pubkey']; // the public key for reCAPTCHA
+               $option_defaults['private_key'] = $old_options['privkey']; // the private key for reCAPTCHA
 
-            // placement
-            $option_defaults['show_in_comments'] = 1; // whether or not to show reCAPTCHA on the comment post
-            $option_defaults['show_in_registration'] = 1; // whether or not to show reCAPTCHA on the registration page
+               // placement
+               $option_defaults['show_in_comments'] = $old_options['re_comments']; // whether or not to show reCAPTCHA on the comment post
+               $option_defaults['show_in_registration'] = $old_options['re_registration']; // whether or not to show reCAPTCHA on the registration page
 
-            // bypass levels
-            $option_defaults['bypass_for_registered_users'] = 1; // whether to skip reCAPTCHAs for registered users
-            $option_defaults['minimum_bypass_level'] = 'read'; // who doesn't have to do the reCAPTCHA (should be a valid WordPress capability slug)
+               // bypass levels
+               $option_defaults['bypass_for_registered_users'] = $old_options['re_bypass']; // whether to skip reCAPTCHAs for registered users
+               $option_defaults['minimum_bypass_level'] = $old_options['re_bypasslevel']; // who doesn't have to do the reCAPTCHA (should be a valid WordPress capability slug)
 
-            // styling
-            $option_defaults['comments_theme'] = 'red'; // the default theme for reCAPTCHA on the comment post
-            $option_defaults['registration_theme'] = 'red'; // the default theme for reCAPTCHA on the registration form
-            $option_defaults['recaptcha_language'] = 'en'; // the default language for reCAPTCHA
-            $option_defaults['xhtml_compliance'] = 0; // whether or not to be XHTML 1.0 Strict compliant
-            $option_defaults['comments_tab_index'] = 5; // the default tabindex for reCAPTCHA
-            $option_defaults['registration_tab_index'] = 30; // the default tabindex for reCAPTCHA
+               // styling
+               $option_defaults['comments_theme'] = $old_options['re_theme']; // the default theme for reCAPTCHA on the comment post
+               $option_defaults['registration_theme'] = $old_options['re_theme_reg']; // the default theme for reCAPTCHA on the registration form
+               $option_defaults['recaptcha_language'] = $old_options['re_lang']; // the default language for reCAPTCHA
+               $option_defaults['xhtml_compliance'] = $old_options['re_xhtml']; // whether or not to be XHTML 1.0 Strict compliant
+               $option_defaults['comments_tab_index'] = $old_options['re_tabindex']; // the default tabindex for reCAPTCHA
+               $option_defaults['registration_tab_index'] = 30; // the default tabindex for reCAPTCHA
 
-            // error handling
-            $option_defaults['no_response_error'] = '<strong>ERROR</strong>: Please fill in the reCAPTCHA form.'; // message for no CAPTCHA response
-            $option_defaults['incorrect_response_error'] = '<strong>ERROR</strong>: That reCAPTCHA response was incorrect.'; // message for incorrect CAPTCHA response
+               // error handling
+               $option_defaults['no_response_error'] = $old_options['error_blank']; // message for no CAPTCHA response
+               $option_defaults['incorrect_response_error'] = $old_options['error_incorrect']; // message for incorrect CAPTCHA response
+            }
+           
+            else {
+               // keys
+               $option_defaults['public_key'] = ''; // the public key for reCAPTCHA
+               $option_defaults['private_key'] = ''; // the private key for reCAPTCHA
+
+               // placement
+               $option_defaults['show_in_comments'] = 1; // whether or not to show reCAPTCHA on the comment post
+               $option_defaults['show_in_registration'] = 1; // whether or not to show reCAPTCHA on the registration page
+
+               // bypass levels
+               $option_defaults['bypass_for_registered_users'] = 1; // whether to skip reCAPTCHAs for registered users
+               $option_defaults['minimum_bypass_level'] = 'read'; // who doesn't have to do the reCAPTCHA (should be a valid WordPress capability slug)
+
+               // styling
+               $option_defaults['comments_theme'] = 'red'; // the default theme for reCAPTCHA on the comment post
+               $option_defaults['registration_theme'] = 'red'; // the default theme for reCAPTCHA on the registration form
+               $option_defaults['recaptcha_language'] = 'en'; // the default language for reCAPTCHA
+               $option_defaults['xhtml_compliance'] = 0; // whether or not to be XHTML 1.0 Strict compliant
+               $option_defaults['comments_tab_index'] = 5; // the default tabindex for reCAPTCHA
+               $option_defaults['registration_tab_index'] = 30; // the default tabindex for reCAPTCHA
+
+               // error handling
+               $option_defaults['no_response_error'] = '<strong>ERROR</strong>: Please fill in the reCAPTCHA form.'; // message for no CAPTCHA response
+               $option_defaults['incorrect_response_error'] = '<strong>ERROR</strong>: That reCAPTCHA response was incorrect.'; // message for incorrect CAPTCHA response
+            }
             
             // add the option based on what environment we're in
             Plugin::add_options($this->options_name, $option_defaults);
