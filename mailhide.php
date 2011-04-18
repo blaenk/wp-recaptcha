@@ -260,11 +260,15 @@ if (!class_exists('MailHide')) {
             // remove the nohides
             $content = preg_replace('/\[\/?nohide\]/i','',$content);
             
+            echo "<pre>" . $content . "</pre>";
+            
             return $content;
         }
         
         // replace the hyperlinked emails i.e. <a href="haha@lol.com">this</a> or <a href="mailto:haha@lol.com">that</a>
         function replace_hyperlinked($matches) {
+           var_dump($matches);
+           
            // set the minimum capability needed to skip the MailHide if there is one
            if ($recaptcha_opt['bypass_for_registered_users'] && $this->options['minimum_bypass_level'])
               $needed_capability = $this->options['minimum_bypass_level'];
