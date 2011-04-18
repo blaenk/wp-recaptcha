@@ -248,19 +248,21 @@ if (!class_exists('MailHide')) {
 
             // Regular Expressions thanks to diabolic from EFNet #regex
 
-            echo "<pre>" . $content . "</pre>";
-
             // match hyperlinks with emails
             #$regex = '/<a[^>]*href="((?:mailto:)?([^@"]+@[^@"]+))"[^>]*>(.+?)<\/a>/i';
             #$content = preg_replace_callback($regex, array(&$this, "replace_hyperlinked"), $content);
 
             // match emails
             // this seems to no longer be necessary because wordpress automatically linkifies all plaintext emails
-            // $regex = '%\b([\w.+-]+@[a-z\d.-]+\.[a-z]{2,6})\b(?!\s*\[\/nohide\]|(?:(?!<a[^>]*>).)*<\/a>)%i';
-            // $content = preg_replace_callback($regex, array(&$this, "replace_plaintext"), $content);
+            $regex = '%\b([\w.+-]+@[a-z\d.-]+\.[a-z]{2,6})\b(?!\s*\[\/nohide\]|(?:(?!<a[^>]*>).)*<\/a>)%i';
+            $content = preg_replace_callback($regex, array(&$this, "replace_plaintext"), $content);
 
+            echo "<pre>" . $content . "</pre>";
+            
             // remove the nohides
-            #$content = preg_replace('/\[\/?nohide\]/i','',$content);
+            $content = preg_replace('/\[\/?nohide\]/i','',$content);
+            
+            echo "<pre>" . $content . "</pre>";
             
             return $content;
         }
