@@ -251,8 +251,8 @@ if (!class_exists('MailHide')) {
             echo "<pre>" . $content . "</pre>";
 
             // match hyperlinks with emails
-            $regex = '/<a[^>]*href="((?:mailto:)?([^@"]+@[^@"]+))"[^>]*>(.+?)<\/a>/i';
-            $content = preg_replace_callback($regex, array(&$this, "replace_hyperlinked"), $content);
+            #$regex = '/<a[^>]*href="((?:mailto:)?([^@"]+@[^@"]+))"[^>]*>(.+?)<\/a>/i';
+            #$content = preg_replace_callback($regex, array(&$this, "replace_hyperlinked"), $content);
 
             // match emails
             // this seems to no longer be necessary because wordpress automatically linkifies all plaintext emails
@@ -260,7 +260,7 @@ if (!class_exists('MailHide')) {
             // $content = preg_replace_callback($regex, array(&$this, "replace_plaintext"), $content);
 
             // remove the nohides
-            $content = preg_replace('/\[\/?nohide\]/i','',$content);
+            #$content = preg_replace('/\[\/?nohide\]/i','',$content);
             
             return $content;
         }
