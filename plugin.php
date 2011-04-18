@@ -58,10 +58,23 @@ if (!class_exists('Plugin')) {
                 return WP_CONTENT_DIR . '/plugins';
         }
         
+        static function plugins_url() {
+           if (Plugin::determine_environment() == Environment::WordPressMU)
+               return get_option('siteurl') . '/wp-content/mu-plugins';
+           else
+               return get_option('siteurl') . '/wp-content/plugins';
+        }
+        
         static function path_to_plugin_directory() {
             $current_directory = basename(dirname(__FILE__));
             
             return Plugin::plugins_directory() . "/${current_directory}";
+        }
+        
+        static function url_to_plugin_directory() {
+           $current_directory = basename(dirname(__FILE__));
+           
+           return Plugin:plugins_url() . "/${current_directory}";
         }
         
         static function path_to_plugin($file_path) {
