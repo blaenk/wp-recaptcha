@@ -88,7 +88,9 @@ if (!class_exists('reCAPTCHA')) {
         function register_default_options() {
             $option_defaults = array();
            
-            if (Plugin::retrieve_options("recaptcha_options")) {
+            $old_options = Plugin::retrieve_options("recaptcha");
+           
+            if ($old_options) {
                $option_defaults['public_key'] = $old_options['pubkey']; // the public key for reCAPTCHA
                $option_defaults['private_key'] = $old_options['privkey']; // the private key for reCAPTCHA
 

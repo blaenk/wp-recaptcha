@@ -119,7 +119,9 @@ if (!class_exists('MailHide')) {
         function register_default_options() {
             $option_defaults = array();
             
-            if (Plugin::retrieve_options("recaptcha")) {
+            $old_options = Plugin::retrieve_options("recaptcha");
+           
+            if ($old_options) {
                // keys
                $option_defaults['public_key'] = $old_options['mailhide_pub']; // mailhide public key
                $option_defaults['private_key'] = $old_options['mailhide_priv']; // mailhide private key
