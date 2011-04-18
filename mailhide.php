@@ -249,17 +249,16 @@ if (!class_exists('MailHide')) {
             // Regular Expressions thanks to diabolic from EFNet #regex
 
             // match hyperlinks with emails
-            #$regex = '%(?<!\[nohide\])<a[^>]*href="((?:mailto:)?([^@"]+@[^@"]+))"[^>]*>(.+?)<\/a>(?!\[/nohide\])%i';
-            #$content = preg_replace_callback($regex, array(&$this, "replace_hyperlinked"), $content);
+            $regex = '%(?<!\[nohide\])<a[^>]*href="((?:mailto:)?([^@"]+@[^@"]+))"[^>]*>(.+?)<\/a>(?!\[/nohide\])%i';
+            $content = preg_replace_callback($regex, array(&$this, "replace_hyperlinked"), $content);
 
             // match emails
-            $regex = '%\b([\w.+-]+@[a-z\d.-]+\.[a-z]{2,6})\b(?!\s*\[\/nohide\]|(?:(?!<a[^>]*>).)*<\/a>)%i';
-            $content = preg_replace_callback($regex, array(&$this, "replace_plaintext"), $content);
+            // this seems to no longer be necessary because wordpress automatically linkifies all plaintext emails
+            // $regex = '%\b([\w.+-]+@[a-z\d.-]+\.[a-z]{2,6})\b(?!\s*\[\/nohide\]|(?:(?!<a[^>]*>).)*<\/a>)%i';
+            // $content = preg_replace_callback($regex, array(&$this, "replace_plaintext"), $content);
 
             // remove the nohides
             $content = preg_replace('/\[\/?nohide\]/i','',$content);
-            
-            echo "<pre>" . $content . "</pre>";
             
             return $content;
         }
@@ -291,8 +290,6 @@ if (!class_exists('MailHide')) {
         
         // replace the plain text emails i.e. haha@lol.com
         function replace_plaintext($matches) {
-           var_dump($matches);
-           
            if ($this->options['replace_link_with'] == "" && $this->options['replace_title_with'] == "") {
               // find plain text emails and hide them
               $html = recaptcha_mailhide_html($this->options['public_key'], $this->options['private_key'], $matches[0]);
