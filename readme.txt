@@ -12,19 +12,21 @@ Integrates reCAPTCHA anti-spam methods with WordPress including comment, registr
 
 = What is reCAPTCHA? =
 
-[reCAPTCHA](http://recaptcha.net/ "reCAPTCHA") is an anti-spam method originating from [Carnegie Mellon University](http://www.cmu.edu/index.shtml "Carnegie Mellon University") which uses [CAPTCHAs](http://recaptcha.net/captcha.html "CAPTCHA") in a [genius way](http://recaptcha.net/learnmore.html "How Does it Work? - reCAPTCHA"). Instead of randomly generating useless characters which users grow tired of continuosly typing in, risking the possibility that spammers will eventually write sophisticated spam bots which use [OCR](http://en.wikipedia.org/wiki/Optical_character_recognition "Optical Character Recognition - Wikipedia") libraries to read the characters, reCAPTCHA uses a different approach.
+[reCAPTCHA](http://recaptcha.net/ "reCAPTCHA") is an anti-spam method originating from [Carnegie Mellon University](http://www.cmu.edu/index.shtml "Carnegie Mellon University"), then acquired by [Google](http://www.google.com/recaptcha) which uses [CAPTCHAs](http://recaptcha.net/captcha.html "CAPTCHA") in a [genius way](http://recaptcha.net/learnmore.html "How Does it Work? - reCAPTCHA"). Instead of randomly generating useless characters which users grow tired of continuosly typing in, risking the possibility that spammers will eventually write sophisticated spam bots which use [OCR](http://en.wikipedia.org/wiki/Optical_character_recognition "Optical Character Recognition - Wikipedia") libraries to read the characters, reCAPTCHA uses a different approach.
 
-While the world is in the process of digitizing books, sometimes certain words cannot be read. reCAPTCHA uses a combination of these words, further distorts them, and then constructs a CAPTCHA image. After a ceratin percentage of users solve the 'uknown' word the same way it is assumed that it is the correct spelling of the word. This helps digitize books, giving users a ***reason*** to solve reCAPTCHA forms. Because the industry level scanners and OCR software which are used to digitize the books can't read the words with which the CAPTCHAs are constructed, it is safe to assume that in-house spam-bot OCR techniques will not be able to bypass the CAPTCHA either.
+The world is in the process of digitizing books by use of automated machines which employ the use of Optical Character Recognition software. Sometimes the certain words cannot be read by the software. reCAPTCHA uses a combination of these words, further distorts them, and then constructs a CAPTCHA image. After a certain percentage of users solve the 'unknown' word the same way, it is assumed that it is the correct spelling of the word. This helps digitize books, giving users a ***reason*** to solve reCAPTCHA forms. Because the industry level scanners and OCR software which are used to digitize the books can't read the words with which the CAPTCHAs are constructed, it is safe to assume that in-house spam-bot OCR techniques will not be able to bypass the resulting CAPTCHA, which is a further distortion of the unreadable word.
 
-reCAPTCHA has earned a very prestigious reputation among the various CAPTCHA systems available and is used by such sites as [Facebook](http://www.facebook.com), [Twitter](http://www.twitter.com), [StumbleUpon](http://www.stumbleupon.com), and a few U.S. Government Websites such as the [TV Converter Box Coupon Program Website](https://www.dtv2009.gov/ "TV Converter Box Coupon Program Website").
+reCAPTCHA is probably the most popular and widely accepted CAPTCHA systems by both end-users and site-owners. It is used by such sites prominent sites as [Facebook](http://www.facebook.com), [Twitter](http://www.twitter.com), to the Average Joe's little blog out there on the corner of the Internet.
+
+It is accessible by everyone. If the user has trouble reading the CAPTCHA challenge, he or she has the option of requesting a new one. If this does not help, there is also an audio challenge which users may use.
 
 This plugin is [WordPress MU](http://mu.wordpress.org/) compatible.
 
-For more information please view the [plugin page](http://www.blaenkdenum.com/wp-recaptcha/ "WP-reCAPTCHA - Blaenk Denum")..
+For more information please view the [plugin page](http://www.blaenkdenum.com/wp-recaptcha/ "WP-reCAPTCHA - Blaenk Denum").
 
 == Installation ==
 
-To install in regular WordPress:
+To install in regular WordPress and [WordPress MultiSite](http://codex.wordpress.org/Create_A_Network):
 
 1. Upload the `wp-recaptcha` folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the `Plugins` menu in WordPress
@@ -49,9 +51,20 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 
 = Version 3.0 =
 * Rewrote the entire plugin in an object-oriented manner with separation of concerns in mind to increase maintainability and extensibility
-* Redesigned the options page for the plugin
-* Fixed the issue where comments would not be saved if the reCAPTCHA was entered incorrectly (or not entered at all)
+* Implemented the ability to import the options from the option set of older versions of the plugin, such as 2.9.8.2 and less
+* Redesigned the options page for the plugin, now using newer wordpress options/form functionality with support for input-validation
+* Options for recaptcha and mailhide are independent of each other
+* Added support for localization, using gettext
+* Fixed the issue where comments would not be saved if the reCAPTCHA was entered incorrectly (or not entered at all). requires javascript
 * Fixed an issue where saved comments (from bad reCAPTCHA response) would replace double quotes with backslashes
+* Fixed an issue in wordpress 3 and above in which mailhide would not work due to interference with a new filter, make_clickable, which auto-links emails and URLs
+* Fixed a role-check issue in wordpress 3 and above. level_10 (and all levels for that matter) have been deprecated. now using activate_plugins instead.
+= Version 2.9.8.2 =
+* Fixed a bug with WordPress 3.0 Multi-Site
+= Version 2.9.8 =
+* Added support for WordPress 3.0 Multi-Site thanks to Tom Lynch
+= Version 2.9.7 =
+* Fixed a relatively new [critical bug](http://www.blaenkdenum.com/2010/03/recaptcha-marking-all-comments-as-spam/) which marked new comments as spam regardless of reCAPTCHA response
 = Version 2.9.6 =
 * Fixed a careless bug affecting custom hidden emails
 * Fixed broken links in readme.txt
@@ -90,7 +103,7 @@ There are four common issues that make reCAPTCHA appear to be broken:
 1. **Moderation Emails**: reCAPTCHA marks comments as spam, so even though the comments don't actually get posted, you will be notified of what is supposedly new spam. It is recommended to turn off moderation emails with reCAPTCHA.
 1. **Akismet Spam Queue**: Again, because reCAPTCHA marks comments with a wrongly entered CAPTCHA as spam, they are added to the spam queue. These comments however weren't posted to the blog so reCAPTCHA is still doing it's job. It is recommended to either ignore the Spam Queue and clear it regularly or disable Akismet completely. reCAPTCHA takes care of all of the spam created by bots, which is the usual type of spam. The only other type of spam that would get through is human spam, where humans are hired to manually solve CAPTCHAs. If you still get spam while only having reCAPTCHA enabled, you could be a victim of the latter practice. If this is the case, then turning on Akismet will most likely solve your problem. Again, just because it shows up in the Spam Queue does NOT mean that spam is being posted to your blog, it's more of a 'comments that have been caught as spam by reCAPTCHA' queue.
 1. **Trackbacks and Pingbacks**: reCAPTCHA can't do anything about pingbacks and trackbacks. You can disable pingbacks and trackbacks in Options > Discussion > Allow notifications from other Weblogs (Pingbacks and trackbacks).
-1. **Human Spammers**: Believe it or not, there are people who are paid (or maybe slave labor?) to solve CAPTCHAs all over the internet and spam. This is the last and rarest reason for which it might appear that reCAPTCHA is not working, but it does happen. On this plugin's [home page](http://www.blaenkdenum.com/wp-recaptcha/ "Blaenk Denum - WP-reCAPTCHA"), these people sometimes attempt to post spam to try and make it seem as if reCAPTCHA is not working. A combination of reCAPTCHA and Akismet might help to solve this problem, and if spam still gets through for this reason, it would be very minimal and easy to manually take care of.
+1. **Human Spammers**: Believe it or not, there are people who are paid (or maybe slave labor?) to solve CAPTCHAs all over the internet and spam. This is the last and rarest reason for which it might appear that reCAPTCHA is not working, but it does happen. On this plugin's [page](http://www.blaenkdenum.com/wp-recaptcha/ "WP-reCAPTCHA - Blaenk Denum"), these people sometimes attempt to post spam to try and make it seem as if reCAPTCHA is not working. A combination of reCAPTCHA and Akismet might help to solve this problem, and if spam still gets through for this reason, it would be very minimal and easy to manually take care of.
 
 = Why am I getting Warning: pack() [function.pack]: Type H: illegal hex digit?
 You have the keys in the wrong place. Remember, the reCAPTCHA keys are different from the MailHide keys. And the Public keys are different from the Private keys as well. You can't mix them around. Go through your keys and make sure you have them each in the correct box.
