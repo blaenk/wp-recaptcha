@@ -1,9 +1,9 @@
 <?php
 
-require_once('plugin.php');
+require_once('wp-plugin.php');
 
 if (!class_exists('MailHide')) {
-    class MailHide extends Plugin {
+    class MailHide extends WPPlugin {
         // member variables
         private $mcrypt_loaded;
         
@@ -41,7 +41,7 @@ if (!class_exists('MailHide')) {
             add_action('init', array(&$this, 'load_textdomain'));
             
             // options
-            register_activation_hook(Plugin::path_to_plugin_directory() . '/wp-recaptcha.php', array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
+            register_activation_hook(WPPlugin::path_to_plugin_directory() . '/wp-recaptcha.php', array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
             add_action('admin_init', array(&$this, 'register_settings_group'));
             add_action('admin_init', array(&$this, 'settings_section'));
             
@@ -118,7 +118,7 @@ if (!class_exists('MailHide')) {
         
         // require the recaptcha library
         function require_library() {
-            require_once(Plugin::path_to_plugin_directory() . '/recaptchalib.php');
+            require_once(WPPlugin::path_to_plugin_directory() . '/recaptchalib.php');
         }
         
         function load_textdomain() {
@@ -131,7 +131,7 @@ if (!class_exists('MailHide')) {
            
             $option_defaults = array();
             
-            $old_options = Plugin::retrieve_options("recaptcha");
+            $old_options = WPPlugin::retrieve_options("recaptcha");
            
             if ($old_options) {
                // keys
@@ -178,7 +178,7 @@ if (!class_exists('MailHide')) {
             }
             
             // add the option based on what environment we're in
-            Plugin::add_options($this->options_name, $option_defaults);
+            WPPlugin::add_options($this->options_name, $option_defaults);
         }
         
         function register_settings_group() {

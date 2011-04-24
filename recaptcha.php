@@ -1,9 +1,9 @@
 <?php
 
-require_once('plugin.php');
+require_once('wp-plugin.php');
 
 if (!class_exists('reCAPTCHA')) {
-    class reCAPTCHA extends Plugin {
+    class reCAPTCHA extends WPPlugin {
         // member variables
         private $saved_error;
         
@@ -39,7 +39,7 @@ if (!class_exists('reCAPTCHA')) {
                 add_action('login_head', array(&$this, 'registration_style')); // make unnecessary: instead use jQuery and add to the footer?
 
             // options
-            register_activation_hook(Plugin::path_to_plugin_directory() . '/wp-recaptcha.php', array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
+            register_activation_hook(WPPlugin::path_to_plugin_directory() . '/wp-recaptcha.php', array(&$this, 'register_default_options')); // this way it only happens once, when the plugin is activated
             add_action('admin_init', array(&$this, 'register_settings_group'));
 
             // only register the hooks if the user wants recaptcha on the registration page
@@ -93,7 +93,7 @@ if (!class_exists('reCAPTCHA')) {
            
             $option_defaults = array();
            
-            $old_options = Plugin::retrieve_options("recaptcha");
+            $old_options = WPPlugin::retrieve_options("recaptcha");
            
             if ($old_options) {
                $option_defaults['public_key'] = $old_options['pubkey']; // the public key for reCAPTCHA
@@ -151,7 +151,7 @@ if (!class_exists('reCAPTCHA')) {
             }
             
             // add the option based on what environment we're in
-            Plugin::add_options($this->options_name, $option_defaults);
+            WPPlugin::add_options($this->options_name, $option_defaults);
         }
         
         // require the recaptcha library
@@ -166,7 +166,7 @@ if (!class_exists('reCAPTCHA')) {
         
         // todo: make unnecessary
         function register_stylesheets() {
-            $path = Plugin::url_to_plugin_directory() . '/recaptcha.css';
+            $path = WPPlugin::url_to_plugin_directory() . '/recaptcha.css';
                 
             echo '<link rel="stylesheet" type="text/css" href="' . $path . '" />';
         }

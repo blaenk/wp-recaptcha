@@ -4,7 +4,7 @@ Donate link: http://www.blaenkdenum.com
 Tags: comments, registration, recaptcha, antispam, mailhide, captcha, wpmu
 Requires at least: 2.7
 Tested up to: 2.9.1
-Stable tag: 3.1.2
+Stable tag: 3.1.3
 
 Integrates reCAPTCHA anti-spam methods with WordPress including comment, registration, and email spam protection. WPMU Compatible.
 
@@ -49,6 +49,8 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 
 == ChangeLog ==
 
+= Version 3.1.3 =
+* Added a collision aversion prefix to the Plugin class. bbouton from github alerted me to a collision between WP-reCAPTCHA's plugin class and the JW Player Plugin's Plugin class.
 = Version 3.1.2 =
 * Fixed option migration. The plugin was actually written to be made to import the old options, but the hook that functionality was registered to does not fire when the wordpress interface updates a plugin, only when a plugin is updated manually. Now the plugin will import or register default options as long as the options don't already exist.
 * Fixed a case where recaptcha theme would not change. This happened because of the above problem, creating a situation in which the tab index field could be empty, and being empty this then caused a problem with the recaptcha options when they were output to the page. If you're running version 3.0 of the plugin, go ahead and add a number to the tab index (e.g. 5 for comments, 30 for registration), if not, this plugin should automatically fix it next time you change save the settings.

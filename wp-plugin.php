@@ -13,23 +13,23 @@ if (!class_exists('Environment')) {
     }
 }
 
-if (!class_exists('Plugin')) {
-    abstract class Plugin {
+if (!class_exists('WPPlugin')) {
+    abstract class WPPlugin {
         protected $environment; // what environment are we in
         protected $options_name; // the name of the options associated with this plugin
         
         protected $options;
         
-        function Plugin($options_name) {
+        function WPPlugin($options_name) {
             $args = func_get_args();
             call_user_func_array(array(&$this, "__construct"), $args);
         }
         
         function __construct($options_name) {
-            $this->environment = Plugin::determine_environment();
+            $this->environment = WPPlugin::determine_environment();
             $this->options_name = $options_name;
             
-            $this->options = Plugin::retrieve_options($this->options_name);
+            $this->options = WPPlugin::retrieve_options($this->options_name);
         }
         
         // sub-classes determine what actions and filters to hook
@@ -52,14 +52,14 @@ if (!class_exists('Plugin')) {
         
         // path finding
         static function plugins_directory() {
-            if (Plugin::determine_environment() == Environment::WordPressMU)
+            if (WPPlugin::determine_environment() == Environment::WordPressMU)
                 return WP_CONTENT_DIR . '/mu-plugins';
             else
                 return WP_CONTENT_DIR . '/plugins';
         }
         
         static function plugins_url() {
-           if (Plugin::determine_environment() == Environment::WordPressMU)
+           if (WPPlugin::determine_environment() == Environment::WordPressMU)
                return get_option('siteurl') . '/wp-content/mu-plugins';
            else
                return get_option('siteurl') . '/wp-content/plugins';
@@ -68,22 +68,22 @@ if (!class_exists('Plugin')) {
         static function path_to_plugin_directory() {
             $current_directory = basename(dirname(__FILE__));
             
-            return Plugin::plugins_directory() . "/${current_directory}";
+            return WPPlugin::plugins_directory() . "/${current_directory}";
         }
         
         static function url_to_plugin_directory() {
            $current_directory = basename(dirname(__FILE__));
            
-           return Plugin::plugins_url() . "/${current_directory}";
+           return WPPlugin::plugins_url() . "/${current_directory}";
         }
         
         static function path_to_plugin($file_path) {
             $file_name = basename($file_path); // /etc/blah/file.txt => file.txt
             
-            if (Plugin::determine_environment() == Environment::WordPressMU)
-                return Plugin::plugins_directory() . "/${file_name}";
+            if (WPPlugin::determine_environment() == Environment::WordPressMU)
+                return WPPlugin::plugins_directory() . "/${file_name}";
             else
-                return Plugin::path_to_plugin_directory() . "/${file_name}";
+                return WPPlugin::path_to_plugin_directory() . "/${file_name}";
         }
         
         // options
@@ -91,21 +91,21 @@ if (!class_exists('Plugin')) {
         
         // option retrieval
         static function retrieve_options($options_name) {
-            if (Plugin::determine_environment() == Environment::WordPressMU || Plugin::determine_environment() == Environment::WordPressMS)
+            if (WPPlugin::determine_environment() == Environment::WordPressMU || WPPlugin::determine_environment() == Environment::WordPressMS)
                 return get_site_option($options_name);
             else
                 return get_option($options_name);
         }
         
         static function remove_options($options_name) {
-            if (Plugin::determine_environment() == Environment::WordPressMU || Plugin::determine_environment() == Environment::WordPressMS)
+            if (WPPlugin::determine_environment() == Environment::WordPressMU || WPPlugin::determine_environment() == Environment::WordPressMS)
                 return delete_site_option($options_name);
             else
                 return delete_option($options_name);
         }
         
         static function add_options($options_name, $options) {
-            if (Plugin::determine_environment() == Environment::WordPressMU || Plugin::determine_environment() == Environment::WordPressMS)
+            if (WPPlugin::determine_environment() == Environment::WordPressMU || WPPlugin::determine_environment() == Environment::WordPressMS)
                 return add_site_option($options_name, $options);
             else
                 return add_option($options_name, $options);
