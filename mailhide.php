@@ -16,6 +16,8 @@ if (!class_exists('MailHide')) {
             // instantiate super class (sets: options, environment, options_name)
             parent::__construct($options_name);
             
+            $this->register_default_options();
+            
             // require the recaptcha library
             $this->require_library();
             
@@ -124,6 +126,9 @@ if (!class_exists('MailHide')) {
         }
         
         function register_default_options() {
+            if ($this->options)
+               return;
+           
             $option_defaults = array();
             
             $old_options = Plugin::retrieve_options("recaptcha");

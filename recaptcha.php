@@ -17,6 +17,8 @@ if (!class_exists('reCAPTCHA')) {
         function __construct($options_name) {
             parent::__construct($options_name);
             
+            $this->register_default_options();
+            
             // require the recaptcha library
             $this->require_library();
             
@@ -86,6 +88,9 @@ if (!class_exists('reCAPTCHA')) {
         
         // set the default options
         function register_default_options() {
+            if ($this->options)
+               return;
+           
             $option_defaults = array();
            
             $old_options = Plugin::retrieve_options("recaptcha");
@@ -236,11 +241,11 @@ REGISTRATION;
             $validated['minimum_bypass_level'] = $this->validate_dropdown($capabilities, 'minimum_bypass_level', $input['minimum_bypass_level']);
             $validated['comments_theme'] = $this->validate_dropdown($themes, 'comments_theme', $input['comments_theme']);
             
-            $validated['comments_tab_index'] = $input['comments_tab_index']; // use the intval filter
+            $validated['comments_tab_index'] = $input['comments_tab_index'] ? $input["comments_tab_index"] : 5; // use the intval filter
             
             $validated['show_in_registration'] = ($input['show_in_registration'] == 1 ? 1 : 0);
             $validated['registration_theme'] = $this->validate_dropdown($themes, 'registration_theme', $input['registration_theme']);
-            $validated['registration_tab_index'] = $input['registration_tab_index']; // use the intval filter
+            $validated['registration_tab_index'] = $input['registration_tab_index'] ? $input["registration_tab_index"] : 30; // use the intval filter
             
             $validated['recaptcha_language'] = $this->validate_dropdown($recaptcha_languages, 'recaptcha_language', $input['recaptcha_language']);
             $validated['xhtml_compliance'] = ($input['xhtml_compliance'] == 1 ? 1 : 0);
