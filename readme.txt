@@ -49,6 +49,10 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 
 == ChangeLog ==
 
+= Version 3.1 =
+* Fixed option migration. The plugin was actually written to be made to import the old options, but the hook that functionality was registered to does not fire when the wordpress interface updates a plugin, only when a plugin is updated manually. Now the plugin will import or register default options as long as the options don't already exist.
+* Fixed a case where recaptcha theme would not change. This happened because of the above problem, creating a situation in which the tab index field could be empty, and being empty this then caused a problem with the recaptcha options when they were output to the page. If you're running version 3.0 of the plugin, go ahead and add a number to the tab index (e.g. 5 for comments, 30 for registration), if not, this plugin should automatically fix it next time you change save the settings.
+* Modified the options page submit buttons to more explicitly show that they are specific to their own respective sections, that is, one button ONLY saves the changes for one reCAPTCHA, and the other ONLY saves the changes for MailHide.
 = Version 3.0 =
 * Rewrote the entire plugin in an object-oriented manner with separation of concerns in mind to increase maintainability and extensibility
 * Implemented the ability to import the options from the option set of older versions of the plugin, such as 2.9.8.2 and less

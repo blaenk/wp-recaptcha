@@ -129,7 +129,7 @@
          </tr>
       </table>
 
-      <p class="submit"><input type="submit" class="button-primary" title="<?php _e('Save reCAPTCHA Options') ?>" value="<?php _e('Save Changes') ?> &raquo;" /></p>
+      <p class="submit"><input type="submit" class="button-primary" title="<?php _e('Save reCAPTCHA Options') ?>" value="<?php _e('Save reCAPTCHA Changes') ?> &raquo;" /></p>
    </form>
    
    <?php do_settings_sections('recaptcha_options_page'); ?>
