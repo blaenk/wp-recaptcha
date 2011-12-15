@@ -276,17 +276,19 @@ COMMENT_FORM;
             else
                 $use_ssl = false;
 
+            $escaped_error = htmlentities($_GET['rerror'], ENT_QUOTES);
+
             // if it's for wordpress mu, show the errors
             if ($this->is_multi_blog()) {
                 $error = $errors->get_error_message('captcha');
                 echo '<label for="verification">Verification:</label>';
                 echo ($error ? '<p class="error">'.$error.'</p>' : '');
-                echo $format . $this->get_recaptcha_html($_GET['rerror'], $use_ssl);
+                echo $format . $this->get_recaptcha_html($escaped_error, $use_ssl);
             }
             
             // for regular wordpress
             else {
-                echo $format . $this->get_recaptcha_html($_GET['rerror'], $use_ssl);
+                echo $format . $this->get_recaptcha_html($escaped_error, $use_ssl);
             }
         }
         
@@ -395,7 +397,9 @@ COMMENT_FORM;
 
                 $use_ssl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on");
 
-                echo $recaptcha_js_opts . $this->get_recaptcha_html(isset($_GET['rerror']) ? $_GET['rerror'] : null, $use_ssl) . $comment_string;
+                $escaped_error = htmlentities($_GET['rerror'], ENT_QUOTES);
+
+                echo $recaptcha_js_opts . $this->get_recaptcha_html(isset($escaped_error) ? $escaped_error : null, $use_ssl) . $comment_string;
            }
         }
         
