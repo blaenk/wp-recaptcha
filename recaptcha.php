@@ -54,7 +54,6 @@ if (!class_exists('reCAPTCHA')) {
             // only register the hooks if the user wants recaptcha on the comments page
             if ($this->options['show_in_comments']) {
                 add_action('comment_form', array(&$this, 'show_recaptcha_in_comments'));
-                add_action('wp_footer', array(&$this, 'save_comment_script')); // preserve the comment that was entered
 
                 // recaptcha comment processing (look into doing all of this with AJAX, optionally)
                 add_action('wp_head', array(&$this, 'saved_comment'), 0);
@@ -377,6 +376,8 @@ COMMENT_FORM;
                 </script>
 OPTS;
 
+                add_action('wp_footer', array(&$this, 'save_comment_script')); // preserve the comment that was entered
+				
                 // todo: replace this with jquery: http://digwp.com/2009/06/including-jquery-in-wordpress-the-right-way/
                 // todo: use math to increment+1 the submit button based on what the tab_index option is
                 if ($this->options['xhtml_compliance']) {
