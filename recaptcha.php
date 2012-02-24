@@ -528,8 +528,10 @@ JS;
             if ($this->environment == Environment::WordPressMU && $this->is_authority())
                 add_submenu_page('wpmu-admin.php', 'WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, array(&$this, 'show_settings_page'));
 
+            /*  re-add when we figure out a way to add network-wide settings in ms
             if ($this->environment == Environment::WordPressMS && $this->is_authority())
                 add_submenu_page('ms-admin.php', 'WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, array(&$this, 'show_settings_page'));
+             */
             
             add_options_page('WP-reCAPTCHA', 'WP-reCAPTCHA', 'manage_options', __FILE__, array(&$this, 'show_settings_page'));
         }

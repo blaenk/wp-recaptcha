@@ -91,21 +91,21 @@ if (!class_exists('WPPlugin')) {
         
         // option retrieval
         static function retrieve_options($options_name) {
-            if (WPPlugin::determine_environment() == Environment::WordPressMU || WPPlugin::determine_environment() == Environment::WordPressMS)
+            if (WPPlugin::determine_environment() == Environment::WordPressMU)
                 return get_site_option($options_name);
             else
                 return get_option($options_name);
         }
         
         static function remove_options($options_name) {
-            if (WPPlugin::determine_environment() == Environment::WordPressMU || WPPlugin::determine_environment() == Environment::WordPressMS)
+            if (WPPlugin::determine_environment() == Environment::WordPressMU)
                 return delete_site_option($options_name);
             else
                 return delete_option($options_name);
         }
         
         static function add_options($options_name, $options) {
-            if (WPPlugin::determine_environment() == Environment::WordPressMU || WPPlugin::determine_environment() == Environment::WordPressMS)
+            if (WPPlugin::determine_environment() == Environment::WordPressMU)
                 return add_site_option($options_name, $options);
             else
                 return add_option($options_name, $options);
