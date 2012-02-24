@@ -1,14 +1,21 @@
 === Plugin Name ===
 Contributors: BlaenkDenum
-Donate link: http://www.blaenkdenum.com
-Tags: comments, registration, recaptcha, antispam, mailhide, captcha, wpmu
+Tags: comments, registration, recaptcha, antispam, mailhide, captcha
 Requires at least: 2.7
 Tested up to: 2.9.1
-Stable tag: 3.1.5
+Stable tag: 3.1.6
 
-Integrates reCAPTCHA anti-spam methods with WordPress including comment, registration, and email spam protection. WPMU Compatible.
+Integrates reCAPTCHA anti-spam methods with WordPress including comment, registration, and email spam protection.
 
 == Description ==
+
+= Notice =
+
+If anyone is interested in taking up development of this plugin, please contact me at blaenk@gmail.com. I would be glad to provide access to the plugin repository. Preferably someone who has experience with the WP and WP multisite APIs (primarily their authorization and options APIs).
+
+If you would like to simply contribute patches, you are welcome to do so at the [github repository](https://github.com/blaenk/wp-recaptcha).
+
+Otherwise, if anyone encounters issues with this plugin, you might want to give [this one](http://wordpress.org/extend/plugins/bwp-recaptcha/) a try.
 
 = What is reCAPTCHA? =
 
@@ -20,24 +27,12 @@ reCAPTCHA is probably the most popular and widely accepted CAPTCHA systems by bo
 
 It is accessible by everyone. If the user has trouble reading the CAPTCHA challenge, he or she has the option of requesting a new one. If this does not help, there is also an audio challenge which users may use.
 
-This plugin is [WordPress MU](http://mu.wordpress.org/) compatible.
-
-For more information please view the [plugin page](http://www.blaenkdenum.com/wp-recaptcha/ "WP-reCAPTCHA - Blaenk Denum").
-
 == Installation ==
 
 To install in regular WordPress and [WordPress MultiSite](http://codex.wordpress.org/Create_A_Network):
 
 1. Upload the `wp-recaptcha` folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the `Plugins` menu in WordPress
-1. Get the reCAPTCHA keys [here](http://recaptcha.net/api/getkey?domain=www.blaenkdenum.com&app=wordpress "reCAPTCHA API keys") and/or the MailHide keys [here](http://mailhide.recaptcha.net/apikey "MailHide keys")
-
-To install in WordPress MU (Forced Activation/Site-Wide):
-
-1. Upload the `wp-recaptcha` folder to the `/wp-content/mu-plugins` directory
-1. **Move** the `wp-recaptcha.php` file out of the `wp-recaptcha` folder so that it is in `/wp-content/mu-plugins`
-1. Now you should have `/wp-content/mu-plugins/wp-recaptcha.php` and `/wp-content/mu-plugins/wp-recaptcha/`
-1. Go to the administrator menu and then go to **Site Admin > reCAPTCHA**
 1. Get the reCAPTCHA keys [here](http://recaptcha.net/api/getkey?domain=www.blaenkdenum.com&app=wordpress "reCAPTCHA API keys") and/or the MailHide keys [here](http://mailhide.recaptcha.net/apikey "MailHide keys")
 
 == Requirements ==
@@ -49,6 +44,9 @@ To install in WordPress MU (Forced Activation/Site-Wide):
 
 == ChangeLog ==
 
+= Version 3.1.6 =
+* WordPress MS fixes. Should now work out of the box at the individual blog level. Thanks to [huyz](http://huyz.us/)
+* NOTICE: If anyone is interested in taking up development of this plugin, please contact me at blaenk@gmail.com.
 = Version 3.1.5 =
 * Thanks to [Ken Newman](https://github.com/WraithKenny) for these changes
 * Update author website
